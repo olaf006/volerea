@@ -2,13 +2,19 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import DeleteCharacterButton from "@/components/DeleteCharacterButton";
+import LiveMapDisplay from "@/components/LiveMapDisplay";
+import MapUploadForm from "@/components/MapUploadForm";
+import { setActiveMap, clearActiveMap, deleteMap } from "@/app/maps-actions";
 
 export default async function CampaignPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
   const { id } = await params;
+  const { error } = await searchParams;
   const supabase = await createClient();
 
   const {
@@ -38,6 +44,17 @@ export default async function CampaignPage({
 
   const myCharacter = characters?.find((c) => c.user_id === user?.id);
 
+  const { data: maps } = await supabase
+    .from("maps")
+    .select("id, name, image_url")
+    .eq("campaign_id", id);
+
+  const { data: campaignState } = await supabase
+    .from("campaign_state")
+    .select("active_map_id")
+    .eq("campaign_id", id)
+    .maybeSingle();
+
   return (
     <div className="min-h-screen bg-zinc-950 px-4 py-10">
       <div className="max-w-2xl mx-auto">
@@ -56,6 +73,86 @@ export default async function CampaignPage({
             {campaign.mode === "anfaenger" ? "Anfänger-Modus" : "Normal"}
           </span>
         </div>
+
+        {error && (
+          <p className="text-red-400 text-sm mb-4 rounded-md border border-red-900 bg-red-950/50 px-3 py-2">
+            {error}
+          </p>
+        )}
+
+        {/* Live-Karte: sehen alle, aktualisiert sich automatisch */}
+        <div className="mb-6">
+          <h2 className="text-lg font-medium text-zinc-100 mb-2">
+            Aktive Karte
+          </h2>
+          <LiveMapDisplay
+            campaignId={id}
+            maps={maps ?? []}
+            initialActiveMapId={campaignState?.active_map_id ?? null}
+          />
+        </div>
+
+        {isMaster && (
+          <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 mb-6 space-y-4">
+            <h2 className="text-lg font-medium text-zinc-100">
+              Karten verwalten
+            </h2>
+            <MapUploadForm campaignId={id} />
+
+            {maps && maps.length > 0 && (
+              <div className="space-y-2 pt-2">
+                {maps.map((m) => (
+                  <div
+                    key={m.id}
+                    className="flex items-center justify-between rounded-md border border-zinc-800 px-4 py-2"
+                  >
+                    <span className="text-sm text-zinc-200">{m.name}</span>
+                    <span className="flex items-center gap-2">
+                      {campaignState?.active_map_id === m.id ? (
+                        <span className="text-xs text-emerald-400">
+                          Live
+                        </span>
+                      ) : (
+                        <form action={setActiveMap}>
+                          <input type="hidden" name="campaign_id" value={id} />
+                          <input type="hidden" name="map_id" value={m.id} />
+                          <button
+                            type="submit"
+                            className="text-xs rounded-md border border-zinc-700 px-2 py-1 text-zinc-300 hover:bg-zinc-800"
+                          >
+                            Live schalten
+                          </button>
+                        </form>
+                      )}
+                      <form action={deleteMap}>
+                        <input type="hidden" name="campaign_id" value={id} />
+                        <input type="hidden" name="map_id" value={m.id} />
+                        <button
+                          type="submit"
+                          className="text-xs text-red-400 hover:text-red-300"
+                        >
+                          Löschen
+                        </button>
+                      </form>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {campaignState?.active_map_id && (
+              <form action={clearActiveMap}>
+                <input type="hidden" name="campaign_id" value={id} />
+                <button
+                  type="submit"
+                  className="text-xs text-zinc-500 hover:text-zinc-300"
+                >
+                  Karte ausblenden
+                </button>
+              </form>
+            )}
+          </div>
+        )}
 
         {campaign.description && (
           <p className="text-zinc-400 mb-6">{campaign.description}</p>
