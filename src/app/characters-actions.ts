@@ -71,6 +71,48 @@ export async function createCharacter(formData: FormData) {
   redirect(`/dashboard/campaigns/${campaignId}`);
 }
 
+export async function updateInventory(formData: FormData) {
+  const characterId = formData.get("character_id") as string;
+  const campaignId = formData.get("campaign_id") as string;
+  const inventoryJson = formData.get("inventory_json") as string;
+  const currencyJson = formData.get("currency_json") as string;
+
+  const supabase = await createClient();
+
+  const { data: character } = await supabase
+    .from("characters")
+    .select("details")
+    .eq("id", characterId)
+    .single();
+
+  const currentDetails = (character?.details as Record<string, unknown>) ?? {};
+
+  const { error } = await supabase
+    .from("characters")
+    .update({
+      details: {
+        ...currentDetails,
+        inventory: JSON.parse(inventoryJson),
+        currency: JSON.parse(currencyJson),
+      },
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", characterId);
+
+  if (error) {
+    redirect(
+      `/dashboard/campaigns/${campaignId}/character/${characterId}?error=${encodeURIComponent(
+        error.message
+      )}`
+    );
+  }
+
+  revalidatePath(
+    `/dashboard/campaigns/${campaignId}/character/${characterId}`
+  );
+  redirect(`/dashboard/campaigns/${campaignId}/character/${characterId}`);
+}
+
 export async function deleteCharacter(formData: FormData) {
   const characterId = formData.get("character_id") as string;
   const campaignId = formData.get("campaign_id") as string;

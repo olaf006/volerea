@@ -528,23 +528,130 @@ export interface Background {
   tool: string;
   featKey: string;
   equipment: string;
+  gold: number;
 }
 
 export const BACKGROUNDS: Background[] = [
-  { name: "Akolyth", abilities: ["intelligence", "wisdom", "charisma"], skills: ["Menschenkenntnis", "Religion"], tool: "Kalligraphie-Werkzeug", featKey: "magic_initiate", equipment: "Gebetsbuch, Räucherstäbchen, Talisman, Gewand, 8 GS" },
-  { name: "Handwerker", abilities: ["strength", "dexterity", "intelligence"], skills: ["Nachforschung", "Überzeugen"], tool: "Handwerkszeug nach Wahl", featKey: "crafter", equipment: "Handwerkszeug, 2 Kostüme, 32 GS" },
-  { name: "Scharlatan", abilities: ["dexterity", "constitution", "charisma"], skills: ["Täuschung", "Fingerfertigkeit"], tool: "Fälscherwerkzeug", featKey: "skilled", equipment: "Fälscherwerkzeug, feine Kleidung, 15 GS" },
-  { name: "Verbrecher", abilities: ["dexterity", "constitution", "intelligence"], skills: ["Fingerfertigkeit", "Heimlichkeit"], tool: "Diebeswerkzeug", featKey: "alert", equipment: "Diebeswerkzeug, Brecheisen, 2 Dolche, 16 GS" },
-  { name: "Unterhalter", abilities: ["strength", "dexterity", "charisma"], skills: ["Akrobatik", "Auftreten"], tool: "Verkleidungsset", featKey: "musician", equipment: "Musikinstrument, 2 Kostüme, 11 GS" },
-  { name: "Bauer", abilities: ["strength", "constitution", "wisdom"], skills: ["Mit Tieren umgehen", "Naturkunde"], tool: "Zimmermannswerkzeug", featKey: "tough", equipment: "Sichel, Ochsenkarren, Entdeckerausrüstung, 30 GS" },
-  { name: "Wächter", abilities: ["strength", "intelligence", "wisdom"], skills: ["Athletik", "Wahrnehmung"], tool: "Spielset", featKey: "alert", equipment: "Speer, leichte Armbrust, Entdeckerausrüstung, 12 GS" },
-  { name: "Wegweiser", abilities: ["dexterity", "constitution", "wisdom"], skills: ["Heimlichkeit", "Überlebenskunst"], tool: "Kartografenwerkzeug", featKey: "magic_initiate", equipment: "Steigeisen, Zelt, Entdeckerausrüstung, 3 GS" },
-  { name: "Einsiedler", abilities: ["constitution", "wisdom", "charisma"], skills: ["Heilkunde", "Religion"], tool: "Kräuterkunde-Set", featKey: "healer", equipment: "Kräuterkunde-Set, Decke, Lampe, 16 GS" },
-  { name: "Händler", abilities: ["constitution", "intelligence", "charisma"], skills: ["Mit Tieren umgehen", "Überzeugen"], tool: "Navigationswerkzeug", featKey: "lucky", equipment: "Navigationswerkzeug, Waage, Entdeckerausrüstung, 22 GS" },
-  { name: "Adliger", abilities: ["strength", "intelligence", "charisma"], skills: ["Geschichte", "Überzeugen"], tool: "Spielset", featKey: "skilled", equipment: "Feine Kleidung, Siegelring, 29 GS" },
-  { name: "Gelehrter", abilities: ["constitution", "intelligence", "wisdom"], skills: ["Arkane Kunde", "Geschichte"], tool: "Kalligraphie-Werkzeug", featKey: "magic_initiate", equipment: "Buch, Tintenfass, Pergament, 8 GS" },
-  { name: "Seefahrer", abilities: ["strength", "dexterity", "wisdom"], skills: ["Akrobatik", "Wahrnehmung"], tool: "Navigationswerkzeug", featKey: "tavern_brawler", equipment: "Dolch, Seil, Entdeckerausrüstung, 20 GS" },
-  { name: "Schreiber", abilities: ["dexterity", "intelligence", "wisdom"], skills: ["Nachforschung", "Wahrnehmung"], tool: "Kalligraphie-Werkzeug", featKey: "skilled", equipment: "Feder-Set, Lampe, Pergament, 23 GS" },
-  { name: "Soldat", abilities: ["strength", "dexterity", "constitution"], skills: ["Athletik", "Einschüchtern"], tool: "Spielset", featKey: "savage_attacker", equipment: "Speer, kurze Armbrust, Entdeckerausrüstung, 14 GS" },
-  { name: "Wayfarer", abilities: ["dexterity", "wisdom", "charisma"], skills: ["Menschenkenntnis", "Heimlichkeit"], tool: "Diebeswerkzeug", featKey: "lucky", equipment: "2 Dolche, Diebeswerkzeug, Reisekleidung, 16 GS" },
+  { name: "Akolyth", abilities: ["intelligence", "wisdom", "charisma"], skills: ["Menschenkenntnis", "Religion"], tool: "Kalligraphie-Werkzeug", featKey: "magic_initiate", equipment: "Gebetsbuch, Räucherstäbchen, Talisman, Gewand, 8 GS", gold: 8 },
+  { name: "Handwerker", abilities: ["strength", "dexterity", "intelligence"], skills: ["Nachforschung", "Überzeugen"], tool: "Handwerkszeug nach Wahl", featKey: "crafter", equipment: "Handwerkszeug, 2 Kostüme, 32 GS", gold: 32 },
+  { name: "Scharlatan", abilities: ["dexterity", "constitution", "charisma"], skills: ["Täuschung", "Fingerfertigkeit"], tool: "Fälscherwerkzeug", featKey: "skilled", equipment: "Fälscherwerkzeug, feine Kleidung, 15 GS", gold: 15 },
+  { name: "Verbrecher", abilities: ["dexterity", "constitution", "intelligence"], skills: ["Fingerfertigkeit", "Heimlichkeit"], tool: "Diebeswerkzeug", featKey: "alert", equipment: "Diebeswerkzeug, Brecheisen, 2 Dolche, 16 GS", gold: 16 },
+  { name: "Unterhalter", abilities: ["strength", "dexterity", "charisma"], skills: ["Akrobatik", "Auftreten"], tool: "Verkleidungsset", featKey: "musician", equipment: "Musikinstrument, 2 Kostüme, 11 GS", gold: 11 },
+  { name: "Bauer", abilities: ["strength", "constitution", "wisdom"], skills: ["Mit Tieren umgehen", "Naturkunde"], tool: "Zimmermannswerkzeug", featKey: "tough", equipment: "Sichel, Ochsenkarren, Entdeckerausrüstung, 30 GS", gold: 30 },
+  { name: "Wächter", abilities: ["strength", "intelligence", "wisdom"], skills: ["Athletik", "Wahrnehmung"], tool: "Spielset", featKey: "alert", equipment: "Speer, leichte Armbrust, Entdeckerausrüstung, 12 GS", gold: 12 },
+  { name: "Wegweiser", abilities: ["dexterity", "constitution", "wisdom"], skills: ["Heimlichkeit", "Überlebenskunst"], tool: "Kartografenwerkzeug", featKey: "magic_initiate", equipment: "Steigeisen, Zelt, Entdeckerausrüstung, 3 GS", gold: 3 },
+  { name: "Einsiedler", abilities: ["constitution", "wisdom", "charisma"], skills: ["Heilkunde", "Religion"], tool: "Kräuterkunde-Set", featKey: "healer", equipment: "Kräuterkunde-Set, Decke, Lampe, 16 GS", gold: 16 },
+  { name: "Händler", abilities: ["constitution", "intelligence", "charisma"], skills: ["Mit Tieren umgehen", "Überzeugen"], tool: "Navigationswerkzeug", featKey: "lucky", equipment: "Navigationswerkzeug, Waage, Entdeckerausrüstung, 22 GS", gold: 22 },
+  { name: "Adliger", abilities: ["strength", "intelligence", "charisma"], skills: ["Geschichte", "Überzeugen"], tool: "Spielset", featKey: "skilled", equipment: "Feine Kleidung, Siegelring, 29 GS", gold: 29 },
+  { name: "Gelehrter", abilities: ["constitution", "intelligence", "wisdom"], skills: ["Arkane Kunde", "Geschichte"], tool: "Kalligraphie-Werkzeug", featKey: "magic_initiate", equipment: "Buch, Tintenfass, Pergament, 8 GS", gold: 8 },
+  { name: "Seefahrer", abilities: ["strength", "dexterity", "wisdom"], skills: ["Akrobatik", "Wahrnehmung"], tool: "Navigationswerkzeug", featKey: "tavern_brawler", equipment: "Dolch, Seil, Entdeckerausrüstung, 20 GS", gold: 20 },
+  { name: "Schreiber", abilities: ["dexterity", "intelligence", "wisdom"], skills: ["Nachforschung", "Wahrnehmung"], tool: "Kalligraphie-Werkzeug", featKey: "skilled", equipment: "Feder-Set, Lampe, Pergament, 23 GS", gold: 23 },
+  { name: "Soldat", abilities: ["strength", "dexterity", "constitution"], skills: ["Athletik", "Einschüchtern"], tool: "Spielset", featKey: "savage_attacker", equipment: "Speer, kurze Armbrust, Entdeckerausrüstung, 14 GS", gold: 14 },
+  { name: "Wayfarer", abilities: ["dexterity", "wisdom", "charisma"], skills: ["Menschenkenntnis", "Heimlichkeit"], tool: "Diebeswerkzeug", featKey: "lucky", equipment: "2 Dolche, Diebeswerkzeug, Reisekleidung, 16 GS", gold: 16 },
 ];
+
+// ============================================================
+// INVENTAR
+// Gewichte (in Pfund, wie im offiziellen Regelwerk) für die gängigsten
+// Ausrüstungsgegenstände, damit die Traglast automatisch stimmt.
+// ============================================================
+
+export const ITEM_WEIGHTS: Record<string, number> = {
+  "großaxt": 7,
+  "wurfspeer": 2,
+  "handaxt": 2,
+  "kettenhemd": 20,
+  "schild": 6,
+  "holzschild": 6,
+  "langschwert": 3,
+  "lederrüstung": 10,
+  "langbogen": 2,
+  "kurzschwert": 2,
+  "kettenrüstung": 55,
+  "streitkolben": 4,
+  "kriegshammer": 2,
+  "rapier": 2,
+  "dolch": 1,
+  "diebeswerkzeug": 1,
+  "kurzbogen": 2,
+  "schuppenpanzer": 45,
+  "krummsäbel": 3,
+  "zauberbuch": 3,
+  "kampfstab": 4,
+  "leichte armbrust": 5,
+  "kurze armbrust": 5,
+  "arkaner fokus": 1,
+  "speer": 3,
+  "entdeckerausrüstung": 40,
+  "diplomatenausrüstung": 20,
+  "unterhalterausrüstung": 38,
+  "gelehrtenausrüstung": 11,
+  "zauberkomponentenbeutel": 2,
+  "musikinstrument": 3,
+  "wurfspeere": 2,
+  "handäxte": 2,
+  "kalligraphie-werkzeug": 5,
+  "fälscherwerkzeug": 5,
+  "zimmermannswerkzeug": 8,
+  "kartografenwerkzeug": 6,
+  "kräuterkunde-set": 3,
+  "navigationswerkzeug": 2,
+  "spielset": 0,
+  "verkleidungsset": 3,
+  "gebetsbuch": 1,
+  "räucherstäbchen": 0,
+  "talisman": 0,
+  "gewand": 4,
+  "kostüme": 4,
+  "feine kleidung": 6,
+  "brecheisen": 5,
+  "sichel": 2,
+  "ochsenkarren": 0,
+  "steigeisen": 0,
+  "zelt": 20,
+  "decke": 3,
+  "lampe": 1,
+  "waage": 3,
+  "siegelring": 0,
+  "buch": 5,
+  "tintenfass": 0,
+  "pergament": 0,
+  "seil": 10,
+  "feder-set": 0,
+  "reisekleidung": 4,
+  "naturwerkzeug": 5,
+};
+
+// Offizielle Traglast-Formel: Stärke-Attribut × 15 Pfund
+export function carryingCapacity(strengthScore: number) {
+  return strengthScore * 15;
+}
+
+function lookupWeight(name: string): number {
+  const lower = name.toLowerCase();
+  for (const key of Object.keys(ITEM_WEIGHTS)) {
+    if (lower.includes(key)) return ITEM_WEIGHTS[key];
+  }
+  return 1; // unbekannte Gegenstände: 1 Pfund als Schätzung
+}
+
+export interface InventoryItem {
+  name: string;
+  qty: number;
+  weight: number; // Gewicht pro Stück in Pfund
+}
+
+// Wandelt eine Komma-Liste wie "2 Dolche, Diebeswerkzeug, 16 GS" in
+// strukturierte Inventar-Einträge um (Gold wird herausgefiltert).
+export function parseEquipmentString(text: string): InventoryItem[] {
+  return text
+    .split(",")
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0 && !/^\d+\s*GS$/i.test(s))
+    .map((entry) => {
+      const match = entry.match(/^(\d+)\s+(.+)$/);
+      const qty = match ? parseInt(match[1], 10) : 1;
+      const name = match ? match[2] : entry;
+      return { name, qty, weight: lookupWeight(name) };
+    });
+}

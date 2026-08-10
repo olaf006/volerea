@@ -33,6 +33,8 @@ import {
   PRIMAL_ORDERS,
   SAVING_THROW_PROFICIENCIES,
   proficiencyBonus,
+  parseEquipmentString,
+  carryingCapacity,
 } from "@/lib/dnd-data";
 
 const STANDARD_ARRAY = [15, 14, 13, 12, 10, 8];
@@ -196,6 +198,16 @@ export default function CharacterForm({
   const profBonus = proficiencyBonus(1);
   const savingProficiencies = SAVING_THROW_PROFICIENCIES[charClass];
 
+  const inventory = useMemo(
+    () => [
+      ...parseEquipmentString(equipment.items),
+      ...parseEquipmentString(background.equipment),
+    ],
+    [equipment, background]
+  );
+  const totalWeight = inventory.reduce((sum, i) => sum + i.qty * i.weight, 0);
+  const capacity = carryingCapacity(finalScores.strength);
+
   const detailsJson = useMemo(
     () =>
       JSON.stringify({
@@ -204,7 +216,6 @@ export default function CharacterForm({
         originFeat: feat.name,
         originFeatDescription: feat.description,
         skills: Array.from(new Set([...background.skills, ...selectedSkills])),
-        equipment: `${equipment.label}: ${equipment.items}. Vom Hintergrund: ${background.equipment}`,
         cantrips: selectedCantrips,
         level1Spells: selectedLevel1,
         classFeatures: classFeatures.map((f) => f.name),
@@ -213,12 +224,13 @@ export default function CharacterForm({
         primalOrder: charClass === "Druide" ? primalOrder : undefined,
         proficiencyBonus: profBonus,
         savingThrowProficiencies: savingProficiencies.map((a) => ABILITY_GERMAN[a]),
+        inventory,
+        currency: { gold: background.gold, silver: 0, copper: 0 },
       }),
     [
       background,
       feat,
       selectedSkills,
-      equipment,
       selectedCantrips,
       selectedLevel1,
       classFeatures,
@@ -226,6 +238,9 @@ export default function CharacterForm({
       fightingStyle,
       divineOrder,
       primalOrder,
+      profBonus,
+      savingProficiencies,
+      inventory,
     ]
   );
 
@@ -680,6 +695,52 @@ export default function CharacterForm({
             </label>
           ))}
         </div>
+      </div>
+
+      {/* Inventar-Vorschau */}
+      <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 space-y-3">
+        <h2 className="text-lg font-medium text-zinc-100">
+          Inventar & Traglast
+        </h2>
+        <p className="text-xs text-zinc-500">
+          Automatisch aus deiner Ausrüstung und deinem Hintergrund
+          zusammengestellt, inklusive Gewicht. Nach dem Erstellen kannst du
+          im Charakterblatt weitere Gegenstände hinzufügen.
+        </p>
+        <div className="space-y-1">
+          {inventory.map((item, idx) => (
+            <div
+              key={idx}
+              className="flex items-center justify-between text-sm border-b border-zinc-800 py-1"
+            >
+              <span className="text-zinc-200">
+                {item.qty > 1 ? `${item.qty}× ` : ""}
+                {item.name}
+              </span>
+              <span className="text-zinc-500">
+                {item.qty * item.weight} lb
+              </span>
+            </div>
+          ))}
+        </div>
+        <div className="flex items-center justify-between text-sm pt-2">
+          <span className="text-zinc-300">
+            Startgold: <span className="text-zinc-100">{background.gold} GS</span>
+          </span>
+          <span
+            className={
+              totalWeight > capacity ? "text-red-400" : "text-zinc-300"
+            }
+          >
+            Gewicht: {totalWeight} / {capacity} lb Traglast
+          </span>
+        </div>
+        {totalWeight > capacity && (
+          <p className="text-red-400 text-xs">
+            Du trägst mehr, als deine Stärke erlaubt – das macht dich
+            langsamer. Erhöh Stärke oder wähl leichtere Ausrüstung.
+          </p>
+        )}
       </div>
 
       {/* Zauber - nur für Klassen, die ab Stufe 1 zaubern können */}
