@@ -1,18 +1,16 @@
 "use client";
 
-// Interaktives Charakterblatt-Formular.
+// Interaktives Charakterblatt-Formular nach den 2024-Regeln.
 //
-// Attribute: "Standard-Array" - sechs feste Werte (15,14,13,12,10,8) werden
-// auf die Eigenschaften verteilt. Wählt man einen Wert für eine Eigenschaft,
-// die ihn schon woanders hat, werden die beiden Werte einfach getauscht -
-// so ist immer jede Auswahl änderbar, nichts blockiert sich selbst.
-//
-// Kampfwerte (HP, Rüstungsklasse): werden automatisch aus Klasse,
-// Konstitution/Geschicklichkeit und gewählter Ausrüstung berechnet -
-// die Spieler müssen nichts selbst ausrechnen.
-//
-// Fertigkeiten, Ausrüstung, Zauber: offizielle Auswahllisten je nach
-// Klasse, mit kurzen Erklärungen, statt Freitext.
+// Reihenfolge (wie im offiziellen Regelwerk empfohlen):
+// 1. Klasse & Rasse wählen
+// 2. Hintergrund wählen -> gibt Attributsboni, 2 Fertigkeiten, 1 Werkzeug,
+//    Ausrüstung und ein Ursprungstalent
+// 3. Attribute per Standard-Array verteilen (Basis, ohne Hintergrund-Bonus)
+// 4. Kampfwerte werden automatisch berechnet (inkl. Hintergrund-Boni)
+// 5. Fertigkeiten der Klasse wählen
+// 6. Ausrüstung der Klasse wählen
+// 7. Zauber wählen (falls zauberkundige Klasse)
 
 import { useMemo, useState } from "react";
 import { createCharacter } from "@/app/characters-actions";
@@ -24,6 +22,10 @@ import {
   CLASS_SKILL_CHOICES,
   EQUIPMENT_PACKAGES,
   SPELLCASTING,
+  BACKGROUNDS,
+  ORIGIN_FEATS,
+  ABILITY_GERMAN,
+  AbilityKeyName,
   abilityModifier,
 } from "@/lib/dnd-data";
 
@@ -38,8 +40,6 @@ const ABILITIES = [
   { key: "charisma", label: "Charisma", help: "Überzeugen, Barde/Hexenmeister/Zauberer-Zauber" },
 ] as const;
 
-type AbilityKey = (typeof ABILITIES)[number]["key"];
-
 export default function CharacterForm({
   campaignId,
   isBeginner,
@@ -50,7 +50,7 @@ export default function CharacterForm({
   houseRules: string;
 }) {
   const [charClass, setCharClass] = useState<CharClass>("Krieger");
-  const [assignment, setAssignment] = useState<Record<AbilityKey, number>>({
+  const [assignment, setAssignment] = useState<Record<AbilityKeyName, number>>({
     strength: 15,
     dexterity: 14,
     constitution: 13,
@@ -58,6 +58,17 @@ export default function CharacterForm({
     wisdom: 10,
     charisma: 8,
   });
+
+  const [backgroundIdx, setBackgroundIdx] = useState(0);
+  const background = BACKGROUNDS[backgroundIdx];
+  const feat = ORIGIN_FEATS[background.featKey];
+
+  // ASI-Verteilung des Hintergrunds: entweder +2/+1 auf zwei der drei
+  // Attribute, oder +1 auf alle drei
+  const [asiMode, setAsiMode] = useState<"twoOne" | "allOne">("twoOne");
+  const [plusTwoAbility, setPlusTwoAbility] = useState<AbilityKeyName>(
+    background.abilities[0]
+  );
 
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [equipmentIndex, setEquipmentIndex] = useState(0);
@@ -70,9 +81,9 @@ export default function CharacterForm({
   const caster = SPELLCASTING[charClass];
 
   // Attribute per Tausch zuweisen: nie blockiert, immer änderbar
-  function handleAssign(ability: AbilityKey, newValue: number) {
+  function handleAssign(ability: AbilityKeyName, newValue: number) {
     setAssignment((prev) => {
-      const swapWith = (Object.keys(prev) as AbilityKey[]).find(
+      const swapWith = (Object.keys(prev) as AbilityKeyName[]).find(
         (k) => prev[k] === newValue && k !== ability
       );
       const updated = { ...prev };
@@ -82,10 +93,16 @@ export default function CharacterForm({
     });
   }
 
+  function selectBackground(idx: number) {
+    setBackgroundIdx(idx);
+    setPlusTwoAbility(BACKGROUNDS[idx].abilities[0]);
+    setAsiMode("twoOne");
+  }
+
   function toggleSkill(skill: string) {
     setSelectedSkills((prev) => {
       if (prev.includes(skill)) return prev.filter((s) => s !== skill);
-      if (prev.length >= skillChoice.count) return prev; // Limit erreicht
+      if (prev.length >= skillChoice.count) return prev;
       return [...prev, skill];
     });
   }
@@ -103,15 +120,56 @@ export default function CharacterForm({
     }
   }
 
-  const conMod = abilityModifier(assignment.constitution);
-  const dexMod = abilityModifier(assignment.dexterity);
-  const wisMod = abilityModifier(assignment.wisdom);
+  // Attributsboni aus dem Hintergrund berechnen
+  const bgBonus: Record<AbilityKeyName, number> = useMemo(() => {
+    const bonus: Record<AbilityKeyName, number> = {
+      strength: 0,
+      dexterity: 0,
+      constitution: 0,
+      intelligence: 0,
+      wisdom: 0,
+      charisma: 0,
+    };
+    if (asiMode === "allOne") {
+      background.abilities.forEach((a) => (bonus[a] = 1));
+    } else {
+      background.abilities.forEach((a) => {
+        bonus[a] = a === plusTwoAbility ? 2 : 1;
+      });
+      // die dritte, nicht gewählte Fähigkeit bekommt 0 statt 1
+      const untouched = background.abilities.find(
+        (a) => a !== plusTwoAbility
+      );
+      // eine der beiden "Rest"-Fähigkeiten muss 0 bekommen (2/1/0 statt 2/1/1)
+      if (untouched) {
+        const secondUntouched = background.abilities.filter(
+          (a) => a !== plusTwoAbility
+        )[1];
+        if (secondUntouched) bonus[secondUntouched] = 0;
+      }
+    }
+    return bonus;
+  }, [asiMode, plusTwoAbility, background]);
 
-  // HP nach offizieller Regel: max. Trefferwürfel + Konstitutionsbonus (Stufe 1)
-  const hp = Math.max(1, HIT_DICE[charClass] + conMod);
+  // Finale Attributswerte = Standard-Array-Basis + Hintergrund-Bonus
+  const finalScores: Record<AbilityKeyName, number> = useMemo(() => {
+    const result = {} as Record<AbilityKeyName, number>;
+    (Object.keys(assignment) as AbilityKeyName[]).forEach((k) => {
+      result[k] = Math.min(20, assignment[k] + bgBonus[k]);
+    });
+    return result;
+  }, [assignment, bgBonus]);
 
-  // Rüstungsklasse: Barbar & Mönch haben eine besondere "Unarmored Defense"-Regel,
-  // alle anderen richten sich nach Rüstungsart + Geschicklichkeit
+  const conMod = abilityModifier(finalScores.constitution);
+  const dexMod = abilityModifier(finalScores.dexterity);
+  const wisMod = abilityModifier(finalScores.wisdom);
+
+  const toughBonus = feat.key === "tough" ? 2 : 0; // Stufe 1: +2×Stufe
+
+  // HP nach offizieller Regel: max. Trefferwürfel + Konstitutionsbonus + Zäh-Talent
+  const hp = Math.max(1, HIT_DICE[charClass] + conMod + toughBonus);
+
+  // Rüstungsklasse: Barbar & Mönch haben "Unbewaffnete Verteidigung"
   const ac = useMemo(() => {
     if (charClass === "Barbar") return 10 + dexMod + conMod;
     if (charClass === "Mönch") return 10 + dexMod + wisMod;
@@ -120,21 +178,24 @@ export default function CharacterForm({
     else if (equipment.armorType === "light") value = equipment.baseAc + dexMod;
     else if (equipment.armorType === "medium")
       value = equipment.baseAc + Math.min(dexMod, 2);
-    else value = equipment.baseAc; // heavy: kein Dex-Bonus
+    else value = equipment.baseAc;
     if (equipment.shield) value += 2;
     return value;
   }, [charClass, equipment, dexMod, conMod, wisMod]);
 
-  // Alles, was in die "details" JSON-Spalte gespeichert wird
   const detailsJson = useMemo(
     () =>
       JSON.stringify({
-        skills: selectedSkills,
-        equipment: `${equipment.label}: ${equipment.items}`,
+        background: background.name,
+        backgroundTool: background.tool,
+        originFeat: feat.name,
+        originFeatDescription: feat.description,
+        skills: Array.from(new Set([...background.skills, ...selectedSkills])),
+        equipment: `${equipment.label}: ${equipment.items}. Vom Hintergrund: ${background.equipment}`,
         cantrips: selectedCantrips,
         level1Spells: selectedLevel1,
       }),
-    [selectedSkills, equipment, selectedCantrips, selectedLevel1]
+    [background, feat, selectedSkills, equipment, selectedCantrips, selectedLevel1]
   );
 
   return (
@@ -143,8 +204,8 @@ export default function CharacterForm({
       <input type="hidden" name="hp_max" value={hp} />
       <input type="hidden" name="armor_class" value={ac} />
       <input type="hidden" name="details_json" value={detailsJson} />
-      {ABILITIES.map(({ key }) => (
-        <input key={key} type="hidden" name={key} value={assignment[key]} />
+      {(Object.keys(finalScores) as AbilityKeyName[]).map((key) => (
+        <input key={key} type="hidden" name={key} value={finalScores[key]} />
       ))}
 
       {isBeginner && (
@@ -178,7 +239,9 @@ export default function CharacterForm({
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm text-zinc-300 mb-1">Rasse</label>
+            <label className="block text-sm text-zinc-300 mb-1">
+              Rasse / Spezies
+            </label>
             <select
               name="race"
               required
@@ -190,6 +253,12 @@ export default function CharacterForm({
                 </option>
               ))}
             </select>
+            {isBeginner && (
+              <p className="text-xs text-zinc-500 mt-1">
+                Nach den 2024-Regeln bringt die Spezies keine Attributsboni
+                mehr mit – das kommt jetzt vom Hintergrund.
+              </p>
+            )}
           </div>
           <div>
             <label className="block text-sm text-zinc-300 mb-1">Klasse</label>
@@ -213,13 +282,89 @@ export default function CharacterForm({
             </select>
           </div>
         </div>
+      </div>
 
+      {/* Hintergrund */}
+      <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 space-y-4">
+        <h2 className="text-lg font-medium text-zinc-100">Hintergrund</h2>
         {isBeginner && (
           <p className="text-xs text-zinc-500">
-            Die Klasse bestimmt, wie dein Charakter kämpft (z.B. Krieger =
-            stark im Nahkampf, Magier = Zauber statt Schwert).
+            Dein Hintergrund ist, was dein Charakter vor dem Abenteurerleben
+            gemacht hat. Er bringt Attributsboni, 2 feste Fertigkeiten, ein
+            Werkzeug, Ausrüstung und ein Talent mit.
           </p>
         )}
+
+        <select
+          value={backgroundIdx}
+          onChange={(e) => selectBackground(Number(e.target.value))}
+          className="w-full rounded-md bg-zinc-950 border border-zinc-700 px-3 py-2 text-zinc-100 focus:outline-none focus:border-zinc-400"
+        >
+          {BACKGROUNDS.map((bg, idx) => (
+            <option key={bg.name} value={idx}>
+              {bg.name}
+            </option>
+          ))}
+        </select>
+
+        <div className="rounded-md bg-zinc-950 border border-zinc-800 px-4 py-3 text-sm space-y-1">
+          <p className="text-zinc-300">
+            <span className="text-zinc-500">Feste Fertigkeiten: </span>
+            {background.skills.join(", ")}
+          </p>
+          <p className="text-zinc-300">
+            <span className="text-zinc-500">Werkzeug: </span>
+            {background.tool}
+          </p>
+          <p className="text-zinc-300">
+            <span className="text-zinc-500">Ausrüstung: </span>
+            {background.equipment}
+          </p>
+          <p className="text-zinc-300">
+            <span className="text-zinc-500">Ursprungstalent – {feat.name}: </span>
+            {feat.description}
+          </p>
+        </div>
+
+        <div>
+          <p className="text-sm text-zinc-300 mb-2">
+            Attributsboni verteilen (
+            {background.abilities.map((a) => ABILITY_GERMAN[a]).join(", ")})
+          </p>
+          <div className="flex flex-col gap-2">
+            <label className="flex items-center gap-2 text-sm text-zinc-300">
+              <input
+                type="radio"
+                checked={asiMode === "twoOne"}
+                onChange={() => setAsiMode("twoOne")}
+              />
+              +2 auf eine, +1 auf eine andere
+            </label>
+            {asiMode === "twoOne" && (
+              <select
+                value={plusTwoAbility}
+                onChange={(e) =>
+                  setPlusTwoAbility(e.target.value as AbilityKeyName)
+                }
+                className="ml-6 rounded-md bg-zinc-950 border border-zinc-700 px-3 py-2 text-zinc-100 text-sm w-fit"
+              >
+                {background.abilities.map((a) => (
+                  <option key={a} value={a}>
+                    +2 auf {ABILITY_GERMAN[a]}
+                  </option>
+                ))}
+              </select>
+            )}
+            <label className="flex items-center gap-2 text-sm text-zinc-300">
+              <input
+                type="radio"
+                checked={asiMode === "allOne"}
+                onChange={() => setAsiMode("allOne")}
+              />
+              +1 auf alle drei
+            </label>
+          </div>
+        </div>
       </div>
 
       {/* Attribute */}
@@ -228,9 +373,9 @@ export default function CharacterForm({
         {isBeginner && (
           <p className="text-xs text-zinc-500">
             Verteil diese 6 Werte auf deine Eigenschaften: 15, 14, 13, 12,
-            10, 8. Höhere Werte bei dem, was dein Charakter gut können soll.
-            Wählst du einen Wert doppelt, tauscht er einfach mit der anderen
-            Eigenschaft.
+            10, 8. Der Hintergrund-Bonus von oben wird automatisch
+            addiert. Wählst du einen Wert doppelt, tauscht er einfach mit
+            der anderen Eigenschaft.
           </p>
         )}
 
@@ -246,15 +391,21 @@ export default function CharacterForm({
               <select
                 value={assignment[key]}
                 onChange={(e) => handleAssign(key, Number(e.target.value))}
-                className="rounded-md bg-zinc-950 border border-zinc-700 px-3 py-2 text-zinc-100 focus:outline-none focus:border-zinc-400 w-28"
+                className="rounded-md bg-zinc-950 border border-zinc-700 px-3 py-2 text-zinc-100 focus:outline-none focus:border-zinc-400 w-24"
               >
                 {STANDARD_ARRAY.map((v) => (
                   <option key={v} value={v}>
-                    {v} ({abilityModifier(v) >= 0 ? "+" : ""}
-                    {abilityModifier(v)})
+                    {v}
                   </option>
                 ))}
               </select>
+              <span className="text-zinc-500 text-sm w-24">
+                {bgBonus[key] > 0 && (
+                  <span className="text-emerald-400">+{bgBonus[key]} → </span>
+                )}
+                {finalScores[key]} ({abilityModifier(finalScores[key]) >= 0 ? "+" : ""}
+                {abilityModifier(finalScores[key])})
+              </span>
             </div>
           ))}
         </div>
@@ -264,8 +415,9 @@ export default function CharacterForm({
       <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 space-y-3">
         <h2 className="text-lg font-medium text-zinc-100">Kampfwerte</h2>
         <p className="text-xs text-zinc-500">
-          Automatisch berechnet aus Klasse, Attributen und Ausrüstung – du
-          musst hier nichts eintragen.
+          Automatisch berechnet aus Klasse, Attributen (inkl.
+          Hintergrund-Bonus), Ausrüstung und Talent – du musst hier nichts
+          eintragen.
         </p>
         <div className="grid grid-cols-2 gap-4">
           <div className="rounded-md bg-zinc-950 border border-zinc-800 px-4 py-3">
@@ -273,6 +425,7 @@ export default function CharacterForm({
             <span className="text-xl text-zinc-100 font-medium">{hp}</span>
             <span className="text-xs text-zinc-600 block mt-1">
               Trefferwürfel (W{HIT_DICE[charClass]}) + Konstitution
+              {toughBonus > 0 && " + Zäh-Talent"}
             </span>
           </div>
           <div className="rounded-md bg-zinc-950 border border-zinc-800 px-4 py-3">
@@ -292,12 +445,14 @@ export default function CharacterForm({
       {/* Fertigkeiten */}
       <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 space-y-3">
         <h2 className="text-lg font-medium text-zinc-100">
-          Fertigkeiten ({selectedSkills.length}/{skillChoice.count})
+          Fertigkeiten der Klasse ({selectedSkills.length}/{skillChoice.count})
         </h2>
         <p className="text-xs text-zinc-500">
-          Wähl {skillChoice.count} Fertigkeiten, in denen dein{" "}
-          {charClass} laut Regelwerk geübt sein darf. Geübte Fertigkeiten
-          geben dir später einen Bonus auf passende Würfe.
+          Wähl {skillChoice.count} Fertigkeiten, in denen dein {charClass}{" "}
+          laut Regelwerk geübt sein darf. Vom Hintergrund bekommst du
+          zusätzlich automatisch{" "}
+          <span className="text-zinc-300">{background.skills.join(" und ")}</span>{" "}
+          dazu.
         </p>
         <div className="grid grid-cols-2 gap-2">
           {skillChoice.options.map((skill) => {
@@ -328,11 +483,12 @@ export default function CharacterForm({
       {/* Ausrüstung */}
       <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 space-y-3">
         <h2 className="text-lg font-medium text-zinc-100">
-          Startausrüstung
+          Startausrüstung (Klasse)
         </h2>
         <p className="text-xs text-zinc-500">
           Offizielle Ausrüstungspakete für {charClass}. Die Rüstungsklasse
-          oben passt sich automatisch an deine Wahl an.
+          oben passt sich automatisch an deine Wahl an. Dazu kommt die
+          Ausrüstung deines Hintergrunds.
         </p>
         <div className="space-y-2">
           {equipmentOptions.map((opt, idx) => (
@@ -472,13 +628,13 @@ export default function CharacterForm({
         </div>
       )}
 
-      {/* Hintergrund */}
+      {/* Hintergrund-Geschichte */}
       <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 space-y-4">
         <h2 className="text-lg font-medium text-zinc-100">
           Hintergrundgeschichte
         </h2>
         <textarea
-          name="background"
+          name="background_story"
           rows={3}
           placeholder="Wer ist dein Charakter, woher kommt er... (optional)"
           className="w-full rounded-md bg-zinc-950 border border-zinc-700 px-3 py-2 text-zinc-100 focus:outline-none focus:border-zinc-400"

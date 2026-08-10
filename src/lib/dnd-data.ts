@@ -300,3 +300,116 @@ export const SPELLCASTING: Partial<Record<CharClass, CasterInfo>> = {
 export function abilityModifier(score: number) {
   return Math.floor((score - 10) / 2);
 }
+
+// ============================================================
+// HINTERGRÜNDE (2024-Regeln)
+// In den überarbeiteten 2024-Regeln kommen die Attributsboni und ein
+// Starttalent vom Hintergrund, nicht mehr von der Rasse/Spezies.
+// Jeder Hintergrund listet 3 Attribute (davon +2 auf eins, +1 auf ein
+// anderes ODER +1 auf alle drei), 2 feste Fertigkeiten, 1 Werkzeug,
+// Startausrüstung und ein Ursprungstalent.
+// ============================================================
+
+export type AbilityKeyName =
+  | "strength"
+  | "dexterity"
+  | "constitution"
+  | "intelligence"
+  | "wisdom"
+  | "charisma";
+
+export const ABILITY_GERMAN: Record<AbilityKeyName, string> = {
+  strength: "Stärke",
+  dexterity: "Geschicklichkeit",
+  constitution: "Konstitution",
+  intelligence: "Intelligenz",
+  wisdom: "Weisheit",
+  charisma: "Charisma",
+};
+
+export interface OriginFeat {
+  key: string;
+  name: string;
+  description: string;
+}
+
+export const ORIGIN_FEATS: Record<string, OriginFeat> = {
+  alert: {
+    key: "alert",
+    name: "Alarmbereit",
+    description: "Du addierst deinen Übungsbonus auf Initiative-Würfe und bist schwerer zu überraschen.",
+  },
+  crafter: {
+    key: "crafter",
+    name: "Handwerker",
+    description: "Du stellst Gegenstände günstiger her, brauchst weniger Zeit dafür, und beherrschst 3 Handwerkszeuge.",
+  },
+  healer: {
+    key: "healer",
+    name: "Heiler",
+    description: "Mit einem Erste-Hilfe-Set kannst du Verbündete zusätzlich heilen, wenn du sie stabilisierst oder verarztest.",
+  },
+  lucky: {
+    key: "lucky",
+    name: "Glückspilz",
+    description: "Du hast Glückspunkte, mit denen du einen Wurf (deinen oder gegen dich) noch einmal würfeln kannst.",
+  },
+  magic_initiate: {
+    key: "magic_initiate",
+    name: "Arkaner Anfänger",
+    description: "Du lernst 2 Zaubertricks und einen Zauber 1. Grades einer anderen Klasse, den du einmal pro Rast ohne Zauberplatz wirken kannst.",
+  },
+  musician: {
+    key: "musician",
+    name: "Musikant",
+    description: "Du beherrschst ein Musikinstrument und kannst durch Musizieren erschöpften Verbündeten nach einer Rast Heldenmut geben.",
+  },
+  savage_attacker: {
+    key: "savage_attacker",
+    name: "Wilder Angreifer",
+    description: "Einmal pro Zug darfst du deinen Schadenswurf im Nahkampf zweimal würfeln und das bessere Ergebnis nehmen.",
+  },
+  skilled: {
+    key: "skilled",
+    name: "Vielseitig",
+    description: "Du wirst in 3 zusätzlichen Fertigkeiten oder Werkzeugen deiner Wahl geübt.",
+  },
+  tavern_brawler: {
+    key: "tavern_brawler",
+    name: "Kneipenschläger",
+    description: "Deine unbewaffneten Schläge machen mehr Schaden und du kannst Gegner damit zurückstoßen.",
+  },
+  tough: {
+    key: "tough",
+    name: "Zäh",
+    description: "Deine maximalen Lebenspunkte erhöhen sich sofort um das Doppelte deiner Stufe (also +2 auf Stufe 1) und um weitere 2 bei jeder Stufe danach.",
+  },
+};
+
+export interface Background {
+  name: string;
+  abilities: [AbilityKeyName, AbilityKeyName, AbilityKeyName];
+  skills: [string, string];
+  tool: string;
+  featKey: string;
+  equipment: string;
+}
+
+export const BACKGROUNDS: Background[] = [
+  { name: "Akolyth", abilities: ["intelligence", "wisdom", "charisma"], skills: ["Menschenkenntnis", "Religion"], tool: "Kalligraphie-Werkzeug", featKey: "magic_initiate", equipment: "Gebetsbuch, Räucherstäbchen, Talisman, Gewand, 8 GS" },
+  { name: "Handwerker", abilities: ["strength", "dexterity", "intelligence"], skills: ["Nachforschung", "Überzeugen"], tool: "Handwerkszeug nach Wahl", featKey: "crafter", equipment: "Handwerkszeug, 2 Kostüme, 32 GS" },
+  { name: "Scharlatan", abilities: ["dexterity", "constitution", "charisma"], skills: ["Täuschung", "Fingerfertigkeit"], tool: "Fälscherwerkzeug", featKey: "skilled", equipment: "Fälscherwerkzeug, feine Kleidung, 15 GS" },
+  { name: "Verbrecher", abilities: ["dexterity", "constitution", "intelligence"], skills: ["Fingerfertigkeit", "Heimlichkeit"], tool: "Diebeswerkzeug", featKey: "alert", equipment: "Diebeswerkzeug, Brecheisen, 2 Dolche, 16 GS" },
+  { name: "Unterhalter", abilities: ["strength", "dexterity", "charisma"], skills: ["Akrobatik", "Auftreten"], tool: "Verkleidungsset", featKey: "musician", equipment: "Musikinstrument, 2 Kostüme, 11 GS" },
+  { name: "Bauer", abilities: ["strength", "constitution", "wisdom"], skills: ["Mit Tieren umgehen", "Naturkunde"], tool: "Zimmermannswerkzeug", featKey: "tough", equipment: "Sichel, Ochsenkarren, Entdeckerausrüstung, 30 GS" },
+  { name: "Wächter", abilities: ["strength", "intelligence", "wisdom"], skills: ["Athletik", "Wahrnehmung"], tool: "Spielset", featKey: "alert", equipment: "Speer, leichte Armbrust, Entdeckerausrüstung, 12 GS" },
+  { name: "Wegweiser", abilities: ["dexterity", "constitution", "wisdom"], skills: ["Heimlichkeit", "Überlebenskunst"], tool: "Kartografenwerkzeug", featKey: "magic_initiate", equipment: "Steigeisen, Zelt, Entdeckerausrüstung, 3 GS" },
+  { name: "Einsiedler", abilities: ["constitution", "wisdom", "charisma"], skills: ["Heilkunde", "Religion"], tool: "Kräuterkunde-Set", featKey: "healer", equipment: "Kräuterkunde-Set, Decke, Lampe, 16 GS" },
+  { name: "Händler", abilities: ["constitution", "intelligence", "charisma"], skills: ["Mit Tieren umgehen", "Überzeugen"], tool: "Navigationswerkzeug", featKey: "lucky", equipment: "Navigationswerkzeug, Waage, Entdeckerausrüstung, 22 GS" },
+  { name: "Adliger", abilities: ["strength", "intelligence", "charisma"], skills: ["Geschichte", "Überzeugen"], tool: "Spielset", featKey: "skilled", equipment: "Feine Kleidung, Siegelring, 29 GS" },
+  { name: "Gelehrter", abilities: ["constitution", "intelligence", "wisdom"], skills: ["Arkane Kunde", "Geschichte"], tool: "Kalligraphie-Werkzeug", featKey: "magic_initiate", equipment: "Buch, Tintenfass, Pergament, 8 GS" },
+  { name: "Seefahrer", abilities: ["strength", "dexterity", "wisdom"], skills: ["Akrobatik", "Wahrnehmung"], tool: "Navigationswerkzeug", featKey: "tavern_brawler", equipment: "Dolch, Seil, Entdeckerausrüstung, 20 GS" },
+  { name: "Schreiber", abilities: ["dexterity", "intelligence", "wisdom"], skills: ["Nachforschung", "Wahrnehmung"], tool: "Kalligraphie-Werkzeug", featKey: "skilled", equipment: "Feder-Set, Lampe, Pergament, 23 GS" },
+  { name: "Soldat", abilities: ["strength", "dexterity", "constitution"], skills: ["Athletik", "Einschüchtern"], tool: "Spielset", featKey: "savage_attacker", equipment: "Speer, kurze Armbrust, Entdeckerausrüstung, 14 GS" },
+  { name: "Wayfarer", abilities: ["dexterity", "wisdom", "charisma"], skills: ["Menschenkenntnis", "Heimlichkeit"], tool: "Diebeswerkzeug", featKey: "lucky", equipment: "2 Dolche, Diebeswerkzeug, Reisekleidung, 16 GS" },
+];

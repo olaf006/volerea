@@ -23,7 +23,7 @@ export async function createCharacter(formData: FormData) {
   const hpMax = Number(formData.get("hp_max"));
   const armorClass = Number(formData.get("armor_class"));
 
-  const background = formData.get("background") as string;
+  const backgroundStory = formData.get("background_story") as string;
 
   // Fertigkeiten, Ausrüstung und Zauber kommen als JSON aus dem Formular
   let extraDetails: Record<string, unknown> = {};
@@ -56,7 +56,7 @@ export async function createCharacter(formData: FormData) {
     hp_current: hpMax,
     hp_max: hpMax,
     armor_class: armorClass,
-    details: { background, ...extraDetails },
+    details: { backgroundStory, ...extraDetails },
   });
 
   if (error) {
