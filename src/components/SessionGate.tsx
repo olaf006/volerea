@@ -1,11 +1,14 @@
 "use client";
 
 // Wartebildschirm für Spieler, bevor der Meister die Sitzung startet.
-// Schaltet automatisch um, sobald session_active auf true wechselt -
-// kein Neuladen der Seite nötig.
+// Schaltet automatisch um, sobald session_active auf true wechselt - mit
+// einem Intro-Video als Übergang, kein Neuladen der Seite nötig.
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import IntroVideo from "@/components/IntroVideo";
+
+type Phase = "lobby" | "intro" | "live";
 
 export default function SessionGate({
   campaignId,
@@ -18,7 +21,10 @@ export default function SessionGate({
   campaignName: string;
   children: React.ReactNode;
 }) {
-  const [active, setActive] = useState(initialActive);
+  // War die Sitzung beim Laden der Seite schon aktiv (z.B. Neuladen mitten
+  // in der Sitzung), zeigen wir kein Intro - das gibt's nur beim echten
+  // Start-Moment.
+  const [phase, setPhase] = useState<Phase>(initialActive ? "live" : "lobby");
 
   useEffect(() => {
     const supabase = createClient();
@@ -35,7 +41,11 @@ export default function SessionGate({
         },
         (payload) => {
           const row = payload.new as { session_active: boolean };
-          setActive(Boolean(row?.session_active));
+          setPhase((current) => {
+            if (row?.session_active && current === "lobby") return "intro";
+            if (!row?.session_active) return "lobby";
+            return current;
+          });
         }
       )
       .subscribe();
@@ -45,7 +55,7 @@ export default function SessionGate({
     };
   }, [campaignId]);
 
-  if (!active) {
+  if (phase === "lobby") {
     return (
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center px-4">
         <div className="text-center max-w-sm">
@@ -61,6 +71,10 @@ export default function SessionGate({
         </div>
       </div>
     );
+  }
+
+  if (phase === "intro") {
+    return <IntroVideo onFinished={() => setPhase("live")} />;
   }
 
   return <>{children}</>;

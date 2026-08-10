@@ -6,15 +6,19 @@ import DiceRoller from "@/components/DiceRoller";
 import LiveDiceFeed from "@/components/LiveDiceFeed";
 import SessionGate from "@/components/SessionGate";
 import PlayerListPopup from "@/components/PlayerListPopup";
+import MasterIntroWrapper from "@/components/MasterIntroWrapper";
 import { endSession, startSession } from "@/app/session-actions";
 import { updateMasterNotes } from "@/app/master-notes-actions";
 
 export default async function PlayPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ intro?: string }>;
 }) {
   const { id } = await params;
+  const { intro } = await searchParams;
   const supabase = await createClient();
 
   const {
@@ -95,7 +99,8 @@ export default async function PlayPage({
         }) ?? [];
 
     return (
-      <div className="min-h-screen bg-zinc-950 flex flex-col">
+      <MasterIntroWrapper showIntro={intro === "1"}>
+        <div className="min-h-screen bg-zinc-950 flex flex-col">
         <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
           <Link
             href={`/dashboard/campaigns/${id}`}
@@ -201,6 +206,7 @@ export default async function PlayPage({
           </div>
         </div>
       </div>
+      </MasterIntroWrapper>
     );
   }
 

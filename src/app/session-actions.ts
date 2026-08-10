@@ -52,7 +52,7 @@ export async function startSession(formData: FormData) {
   );
 
   revalidatePath(`/dashboard/campaigns/${campaignId}`);
-  redirect(`/dashboard/campaigns/${campaignId}/play`);
+  redirect(`/dashboard/campaigns/${campaignId}/play?intro=1`);
 }
 
 export async function endSession(formData: FormData) {
