@@ -105,9 +105,12 @@ export default async function CampaignPage({
           )}
 
           {!isMaster && !myCharacter && (
-            <p className="text-zinc-400 text-sm">
-              Das Charaktererstellen bauen wir als Nächstes.
-            </p>
+            <Link
+              href={`/dashboard/campaigns/${id}/character/new`}
+              className="inline-block rounded-md bg-zinc-100 text-zinc-900 font-medium px-4 py-2 hover:bg-white transition text-sm"
+            >
+              Charakter erstellen
+            </Link>
           )}
         </div>
       </div>
