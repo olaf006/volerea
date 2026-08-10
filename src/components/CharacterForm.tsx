@@ -35,6 +35,8 @@ import {
   proficiencyBonus,
   parseEquipmentString,
   carryingCapacity,
+  weaponDisplay,
+  WEAPON_DAMAGE,
 } from "@/lib/dnd-data";
 
 const STANDARD_ARRAY = [15, 14, 13, 12, 10, 8];
@@ -191,8 +193,16 @@ export default function CharacterForm({
       value = equipment.baseAc + Math.min(dexMod, 2);
     else value = equipment.baseAc;
     if (equipment.shield) value += 2;
+    // Kampfstil "Verteidigung": +1 RK, solange Rüstung getragen wird
+    if (
+      charClass === "Krieger" &&
+      fightingStyle === "Verteidigung" &&
+      equipment.armorType !== "none"
+    ) {
+      value += 1;
+    }
     return value;
-  }, [charClass, equipment, dexMod, conMod, wisMod]);
+  }, [charClass, equipment, dexMod, conMod, wisMod, fightingStyle]);
 
   const classFeatures = CLASS_FEATURES[charClass];
   const profBonus = proficiencyBonus(1);
@@ -207,6 +217,18 @@ export default function CharacterForm({
   );
   const totalWeight = inventory.reduce((sum, i) => sum + i.qty * i.weight, 0);
   const capacity = carryingCapacity(finalScores.strength);
+
+  // Wie viele einhändige Nahkampfwaffen in der Ausrüstung sind (für den
+  // Kampfstil "Duellieren", der nur gilt, wenn man keine Zweitwaffe führt)
+  const oneHandedWeaponCount = useMemo(() => {
+    return inventory.reduce((count, item) => {
+      const lower = item.name.toLowerCase();
+      const isOneHanded = Object.keys(WEAPON_DAMAGE).some(
+        (key) => lower.includes(key) && WEAPON_DAMAGE[key].category === "melee-one"
+      );
+      return isOneHanded ? count + item.qty : count;
+    }, 0);
+  }, [inventory]);
 
   const detailsJson = useMemo(
     () =>
@@ -692,6 +714,21 @@ export default function CharacterForm({
                 {opt.label}
               </span>
               <span className="text-xs text-zinc-500">{opt.items}</span>
+              <span className="text-xs text-zinc-600 flex flex-wrap gap-x-3">
+                {parseEquipmentString(opt.items)
+                  .filter((i) => i.damage)
+                  .map((i) => (
+                    <span key={i.name}>
+                      {i.name}:{" "}
+                      {weaponDisplay(
+                        i.name,
+                        charClass,
+                        charClass === "Krieger" ? fightingStyle : null,
+                        oneHandedWeaponCount
+                      )}
+                    </span>
+                  ))}
+              </span>
             </label>
           ))}
         </div>
@@ -716,6 +753,19 @@ export default function CharacterForm({
               <span className="text-zinc-200">
                 {item.qty > 1 ? `${item.qty}× ` : ""}
                 {item.name}
+                {item.damage && (
+                  <span className="text-zinc-500">
+                    {" "}
+                    (
+                    {weaponDisplay(
+                      item.name,
+                      charClass,
+                      charClass === "Krieger" ? fightingStyle : null,
+                      oneHandedWeaponCount
+                    )}
+                    )
+                  </span>
+                )}
               </span>
               <span className="text-zinc-500">
                 {item.qty * item.weight} lb

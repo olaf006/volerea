@@ -98,6 +98,9 @@ export default function InventoryManager({
             <span className="text-zinc-200">
               {item.qty > 1 ? `${item.qty}× ` : ""}
               {item.name}
+              {item.damage && (
+                <span className="text-zinc-500"> ({item.damage})</span>
+              )}
             </span>
             <span className="flex items-center gap-3">
               <span className="text-zinc-500">{item.qty * item.weight} lb</span>

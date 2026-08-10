@@ -161,6 +161,9 @@ export default async function CharacterDetailPage({
                 <div key={idx} className="text-sm text-zinc-300">
                   {item.qty > 1 ? `${item.qty}× ` : ""}
                   {item.name}
+                  {item.damage && (
+                    <span className="text-zinc-500"> ({item.damage})</span>
+                  )}
                 </div>
               ))}
             </div>

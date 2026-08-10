@@ -667,10 +667,85 @@ function lookupWeight(name: string): number {
   return 1; // unbekannte Gegenstände: 1 Pfund als Schätzung
 }
 
+// Schadenswürfel, Schadensart und Waffenkategorie der gängigsten Waffen,
+// nach offizieller Waffentabelle. Die Kategorie bestimmt, welcher
+// Kampfstil-Bonus (falls gewählt) zur Waffe passt.
+export type WeaponCategory = "melee-one" | "melee-two" | "ranged";
+
+export interface WeaponInfo {
+  dice: string;
+  category: WeaponCategory;
+}
+
+export const WEAPON_DAMAGE: Record<string, WeaponInfo> = {
+  "großaxt": { dice: "1W12 Hieb", category: "melee-two" },
+  "wurfspeer": { dice: "1W6 Stich", category: "melee-one" },
+  "wurfspeere": { dice: "1W6 Stich", category: "melee-one" },
+  "handaxt": { dice: "1W6 Hieb", category: "melee-one" },
+  "handäxte": { dice: "1W6 Hieb", category: "melee-one" },
+  "langschwert": { dice: "1W8 Hieb", category: "melee-one" },
+  "kurzschwert": { dice: "1W6 Stich", category: "melee-one" },
+  "streitkolben": { dice: "1W6 Wucht", category: "melee-one" },
+  "kriegshammer": { dice: "1W8 Wucht (1W10 zweihändig)", category: "melee-one" },
+  "rapier": { dice: "1W8 Stich", category: "melee-one" },
+  "dolch": { dice: "1W4 Stich", category: "melee-one" },
+  "dolche": { dice: "1W4 Stich", category: "melee-one" },
+  "kurzbogen": { dice: "1W6 Stich", category: "ranged" },
+  "langbogen": { dice: "1W8 Stich", category: "ranged" },
+  "krummsäbel": { dice: "1W6 Hieb", category: "melee-one" },
+  "kampfstab": { dice: "1W6 Wucht (1W8 zweihändig)", category: "melee-one" },
+  "leichte armbrust": { dice: "1W8 Stich", category: "ranged" },
+  "kurze armbrust": { dice: "1W6 Stich", category: "ranged" },
+  "speer": { dice: "1W6 Stich (1W8 zweihändig)", category: "melee-one" },
+};
+
+// Ermittelt Schadenswürfel + evtl. Klassen-/Kampfstil-Bonus für eine Waffe.
+// oneHandedWeaponCount: wie viele einhändige Waffen die Ausrüstung enthält
+// (Duellieren gilt nur, wenn du KEINE zweite Waffe in der anderen Hand hast)
+export function weaponDisplay(
+  name: string,
+  charClass: CharClass,
+  fightingStyle: string | null,
+  oneHandedWeaponCount: number
+): string | null {
+  const lower = name.toLowerCase();
+  let info: WeaponInfo | null = null;
+  for (const key of Object.keys(WEAPON_DAMAGE)) {
+    if (lower.includes(key)) {
+      info = WEAPON_DAMAGE[key];
+      break;
+    }
+  }
+  if (!info) return null;
+
+  let bonus = "";
+  if (fightingStyle === "Duellieren" && info.category === "melee-one" && oneHandedWeaponCount <= 1) {
+    bonus = " · +2 Schaden (Duellieren)";
+  } else if (fightingStyle === "Bogenschütze" && info.category === "ranged") {
+    bonus = " · +2 Trefferwurf (Bogenschütze)";
+  } else if (fightingStyle === "Zweihandkampf" && info.category === "melee-two") {
+    bonus = " · 1er/2er beim Schaden neu würfeln (Zweihandkampf)";
+  } else if (charClass === "Barbar" && (info.category === "melee-one" || info.category === "melee-two")) {
+    bonus = " · +2 Schaden, solange du wütend bist (Wut)";
+  } else if (charClass === "Schurke" && (info.category === "melee-one" || info.category === "ranged")) {
+    bonus = " · +1W6 Schaden 1×/Zug bei Vorteil (Hinterhältiger Angriff)";
+  }
+  return info.dice + bonus;
+}
+
 export interface InventoryItem {
   name: string;
   qty: number;
   weight: number; // Gewicht pro Stück in Pfund
+  damage?: string; // Schadenswürfel, falls es eine Waffe ist
+}
+
+function lookupBaseDamage(name: string): string | null {
+  const lower = name.toLowerCase();
+  for (const key of Object.keys(WEAPON_DAMAGE)) {
+    if (lower.includes(key)) return WEAPON_DAMAGE[key].dice;
+  }
+  return null;
 }
 
 // Wandelt eine Komma-Liste wie "2 Dolche, Diebeswerkzeug, 16 GS" in
@@ -684,6 +759,12 @@ export function parseEquipmentString(text: string): InventoryItem[] {
       const match = entry.match(/^(\d+)\s+(.+)$/);
       const qty = match ? parseInt(match[1], 10) : 1;
       const name = match ? match[2] : entry;
-      return { name, qty, weight: lookupWeight(name) };
+      const damage = lookupBaseDamage(name);
+      return {
+        name,
+        qty,
+        weight: lookupWeight(name),
+        ...(damage ? { damage } : {}),
+      };
     });
 }
