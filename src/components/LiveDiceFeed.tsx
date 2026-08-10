@@ -17,11 +17,11 @@ interface Roll {
 export default function LiveDiceFeed({
   campaignId,
   initialRolls,
-  usernames,
+  labels,
 }: {
   campaignId: string;
   initialRolls: Roll[];
-  usernames: Record<string, string>;
+  labels: Record<string, string>;
 }) {
   const [rolls, setRolls] = useState<Roll[]>(initialRolls);
 
@@ -61,7 +61,7 @@ export default function LiveDiceFeed({
           className="flex items-center justify-between text-sm rounded-md bg-zinc-950 border border-zinc-800 px-3 py-1.5"
         >
           <span className="text-zinc-300">
-            {usernames[r.user_id] ?? "Jemand"} würfelt {r.dice}
+            {labels[r.user_id] ?? "Jemand"} würfelt {r.dice}
           </span>
           <span className="text-zinc-100 font-medium">{r.result}</span>
         </div>

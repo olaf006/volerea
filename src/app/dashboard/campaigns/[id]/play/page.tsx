@@ -5,7 +5,6 @@ import LiveMapDisplay from "@/components/LiveMapDisplay";
 import DiceRoller from "@/components/DiceRoller";
 import LiveDiceFeed from "@/components/LiveDiceFeed";
 import SessionGate from "@/components/SessionGate";
-import { endSession } from "@/app/session-actions";
 
 export default async function PlayPage({
   params,
@@ -37,7 +36,11 @@ export default async function PlayPage({
 
   if (!membership) notFound(); // kein Mitglied dieser Gruppe
 
-  const isMaster = membership.role === "master";
+  // Der Live-Bildschirm ist der Spieler-Spieltisch. Der Meister hat sein
+  // eigenes, kompakteres Kontrollzentrum direkt auf der Kampagnen-Seite.
+  if (membership.role === "master") {
+    redirect(`/dashboard/campaigns/${id}`);
+  }
 
   const { data: maps } = await supabase
     .from("maps")
@@ -50,15 +53,16 @@ export default async function PlayPage({
     .eq("campaign_id", id)
     .maybeSingle();
 
-  const { data: members } = await supabase
-    .from("group_members")
-    .select("user_id, profiles(username)")
-    .eq("group_id", campaign.group_id);
+  // Charakternamen statt Benutzernamen für die Würfel-Anzeige: jeder
+  // Spieler hat höchstens einen Charakter pro Kampagne.
+  const { data: characters } = await supabase
+    .from("characters")
+    .select("id, user_id, name")
+    .eq("campaign_id", id);
 
-  const usernames: Record<string, string> = {};
-  members?.forEach((m) => {
-    const p = m.profiles as unknown as { username: string } | null;
-    if (p) usernames[m.user_id] = p.username;
+  const labels: Record<string, string> = {};
+  characters?.forEach((c) => {
+    labels[c.user_id] = c.name;
   });
 
   const { data: rolls } = await supabase
@@ -68,12 +72,7 @@ export default async function PlayPage({
     .order("created_at", { ascending: false })
     .limit(15);
 
-  const { data: myCharacter } = await supabase
-    .from("characters")
-    .select("id")
-    .eq("campaign_id", id)
-    .eq("user_id", user.id)
-    .maybeSingle();
+  const myCharacter = characters?.find((c) => c.user_id === user.id);
 
   const content = (
     <div className="min-h-screen bg-zinc-950 flex flex-col">
@@ -88,19 +87,7 @@ export default async function PlayPage({
         <span className="text-zinc-100 font-medium text-sm">
           {campaign.name}
         </span>
-        {isMaster ? (
-          <form action={endSession}>
-            <input type="hidden" name="campaign_id" value={id} />
-            <button
-              type="submit"
-              className="text-xs text-red-400 hover:text-red-300"
-            >
-              Sitzung beenden
-            </button>
-          </form>
-        ) : (
-          <span className="w-16" />
-        )}
+        <span className="w-16" />
       </div>
 
       {/* Hauptbereich: Karte groß, Werkzeuge daneben/darunter */}
@@ -128,28 +115,22 @@ export default async function PlayPage({
             <LiveDiceFeed
               campaignId={id}
               initialRolls={rolls ?? []}
-              usernames={usernames}
+              labels={labels}
             />
           </div>
 
-          <Link
-            href={
-              myCharacter
-                ? `/dashboard/campaigns/${id}/character/${myCharacter.id}`
-                : `/dashboard/campaigns/${id}`
-            }
-            className="rounded-md border border-zinc-700 text-center text-zinc-200 px-4 py-2 hover:bg-zinc-800 transition text-sm"
-          >
-            Mein Charakter & Inventar
-          </Link>
+          {myCharacter && (
+            <Link
+              href={`/dashboard/campaigns/${id}/character/${myCharacter.id}`}
+              className="rounded-md border border-zinc-700 text-center text-zinc-200 px-4 py-2 hover:bg-zinc-800 transition text-sm"
+            >
+              Mein Charakter & Inventar
+            </Link>
+          )}
         </div>
       </div>
     </div>
   );
-
-  if (isMaster) {
-    return content;
-  }
 
   return (
     <SessionGate
