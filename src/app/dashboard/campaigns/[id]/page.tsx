@@ -4,11 +4,8 @@ import { notFound } from "next/navigation";
 import DeleteCharacterButton from "@/components/DeleteCharacterButton";
 import LiveMapDisplay from "@/components/LiveMapDisplay";
 import MapUploadForm from "@/components/MapUploadForm";
-import DiceRoller from "@/components/DiceRoller";
-import LiveDiceFeed from "@/components/LiveDiceFeed";
 import { setActiveMap, clearActiveMap, deleteMap } from "@/app/maps-actions";
 import { startSession, endSession } from "@/app/session-actions";
-import { updateMasterNotes } from "@/app/master-notes-actions";
 
 export default async function CampaignPage({
   params,
@@ -27,7 +24,7 @@ export default async function CampaignPage({
 
   const { data: campaign } = await supabase
     .from("campaigns")
-    .select("id, name, description, mode, house_rules, group_id, master_notes")
+    .select("id, name, description, mode, house_rules, group_id")
     .eq("id", id)
     .single();
 
@@ -59,31 +56,6 @@ export default async function CampaignPage({
     .eq("campaign_id", id)
     .maybeSingle();
 
-  // Nur für den Meister: Würfel-Feed mit Charakternamen, Spielerliste, Notizen
-  let rolls: { id: string; user_id: string; dice: string; result: number; created_at: string }[] = [];
-  let members: { user_id: string; role: string; profiles: unknown }[] = [];
-  const diceLabels: Record<string, string> = {};
-
-  if (isMaster) {
-    const { data: rollsData } = await supabase
-      .from("dice_rolls")
-      .select("id, user_id, dice, result, created_at")
-      .eq("campaign_id", id)
-      .order("created_at", { ascending: false })
-      .limit(15);
-    rolls = rollsData ?? [];
-
-    const { data: membersData } = await supabase
-      .from("group_members")
-      .select("user_id, role, profiles(username)")
-      .eq("group_id", campaign.group_id);
-    members = membersData ?? [];
-
-    characters?.forEach((c) => {
-      diceLabels[c.user_id] = c.name;
-    });
-  }
-
   return (
     <div className="min-h-screen bg-zinc-950 px-4 py-10">
       <div className="max-w-2xl mx-auto">
@@ -104,27 +76,35 @@ export default async function CampaignPage({
         </div>
 
         {isMaster ? (
-          campaignState?.session_active ? (
-            <form action={endSession} className="mb-6">
-              <input type="hidden" name="campaign_id" value={id} />
-              <button
-                type="submit"
-                className="text-xs text-red-400 hover:text-red-300"
-              >
-                Sitzung beenden
-              </button>
-            </form>
-          ) : (
-            <form action={startSession} className="mb-6">
-              <input type="hidden" name="campaign_id" value={id} />
-              <button
-                type="submit"
-                className="rounded-md bg-zinc-100 text-zinc-900 font-medium px-4 py-2 hover:bg-white transition text-sm"
-              >
-                Kampagne starten
-              </button>
-            </form>
-          )
+          <div className="flex items-center gap-3 mb-6">
+            <Link
+              href={`/dashboard/campaigns/${id}/play`}
+              className="rounded-md bg-zinc-100 text-zinc-900 font-medium px-4 py-2 hover:bg-white transition text-sm"
+            >
+              Zum Live-Bildschirm
+            </Link>
+            {campaignState?.session_active ? (
+              <form action={endSession}>
+                <input type="hidden" name="campaign_id" value={id} />
+                <button
+                  type="submit"
+                  className="text-xs text-red-400 hover:text-red-300"
+                >
+                  Sitzung beenden
+                </button>
+              </form>
+            ) : (
+              <form action={startSession}>
+                <input type="hidden" name="campaign_id" value={id} />
+                <button
+                  type="submit"
+                  className="text-xs rounded-md border border-zinc-700 text-zinc-300 px-3 py-1.5 hover:bg-zinc-800"
+                >
+                  Kampagne starten
+                </button>
+              </form>
+            )}
+          </div>
         ) : (
           <div className="mb-6">
             <Link
@@ -157,143 +137,65 @@ export default async function CampaignPage({
         </div>
 
         {isMaster && (
-          <>
-            <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 mb-6 space-y-4">
-              <h2 className="text-lg font-medium text-zinc-100">
-                Karten verwalten
-              </h2>
-              <MapUploadForm campaignId={id} />
+          <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 mb-6 space-y-4">
+            <h2 className="text-lg font-medium text-zinc-100">
+              Karten verwalten
+            </h2>
+            <MapUploadForm campaignId={id} />
 
-              {maps && maps.length > 0 && (
-                <div className="space-y-2 pt-2">
-                  {maps.map((m) => (
-                    <div
-                      key={m.id}
-                      className="flex items-center justify-between rounded-md border border-zinc-800 px-4 py-2"
-                    >
-                      <span className="text-sm text-zinc-200">{m.name}</span>
-                      <span className="flex items-center gap-2">
-                        {campaignState?.active_map_id === m.id ? (
-                          <span className="text-xs text-emerald-400">
-                            Live
-                          </span>
-                        ) : (
-                          <form action={setActiveMap}>
-                            <input type="hidden" name="campaign_id" value={id} />
-                            <input type="hidden" name="map_id" value={m.id} />
-                            <button
-                              type="submit"
-                              className="text-xs rounded-md border border-zinc-700 px-2 py-1 text-zinc-300 hover:bg-zinc-800"
-                            >
-                              Live schalten
-                            </button>
-                          </form>
-                        )}
-                        <form action={deleteMap}>
+            {maps && maps.length > 0 && (
+              <div className="space-y-2 pt-2">
+                {maps.map((m) => (
+                  <div
+                    key={m.id}
+                    className="flex items-center justify-between rounded-md border border-zinc-800 px-4 py-2"
+                  >
+                    <span className="text-sm text-zinc-200">{m.name}</span>
+                    <span className="flex items-center gap-2">
+                      {campaignState?.active_map_id === m.id ? (
+                        <span className="text-xs text-emerald-400">
+                          Live
+                        </span>
+                      ) : (
+                        <form action={setActiveMap}>
                           <input type="hidden" name="campaign_id" value={id} />
                           <input type="hidden" name="map_id" value={m.id} />
                           <button
                             type="submit"
-                            className="text-xs text-red-400 hover:text-red-300"
+                            className="text-xs rounded-md border border-zinc-700 px-2 py-1 text-zinc-300 hover:bg-zinc-800"
                           >
-                            Löschen
+                            Live schalten
                           </button>
                         </form>
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {campaignState?.active_map_id && (
-                <form action={clearActiveMap}>
-                  <input type="hidden" name="campaign_id" value={id} />
-                  <button
-                    type="submit"
-                    className="text-xs text-zinc-500 hover:text-zinc-300"
-                  >
-                    Karte ausblenden
-                  </button>
-                </form>
-              )}
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-              <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
-                <h2 className="text-sm font-medium text-zinc-100 mb-3">
-                  Würfeln
-                </h2>
-                <DiceRoller campaignId={id} />
+                      )}
+                      <form action={deleteMap}>
+                        <input type="hidden" name="campaign_id" value={id} />
+                        <input type="hidden" name="map_id" value={m.id} />
+                        <button
+                          type="submit"
+                          className="text-xs text-red-400 hover:text-red-300"
+                        >
+                          Löschen
+                        </button>
+                      </form>
+                    </span>
+                  </div>
+                ))}
               </div>
-              <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
-                <h2 className="text-sm font-medium text-zinc-100 mb-3">
-                  Letzte Würfe (alle)
-                </h2>
-                <LiveDiceFeed
-                  campaignId={id}
-                  initialRolls={rolls}
-                  labels={diceLabels}
-                />
-              </div>
-            </div>
+            )}
 
-            <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 mb-6">
-              <h2 className="text-lg font-medium text-zinc-100 mb-3">
-                Spielerliste
-              </h2>
-              <ul className="space-y-2">
-                {members
-                  .filter((m) => m.role === "player")
-                  .map((m) => {
-                    const p = m.profiles as unknown as { username: string } | null;
-                    const char = characters?.find((c) => c.user_id === m.user_id);
-                    return (
-                      <li
-                        key={m.user_id}
-                        className="flex items-center justify-between text-sm rounded-md border border-zinc-800 px-3 py-2"
-                      >
-                        <span className="text-zinc-200">{p?.username}</span>
-                        <span className="text-zinc-500">
-                          {char
-                            ? `${char.name} (${char.race} ${char.class}, Stufe ${char.level})`
-                            : "Noch kein Charakter"}
-                        </span>
-                      </li>
-                    );
-                  })}
-                {members.filter((m) => m.role === "player").length === 0 && (
-                  <p className="text-zinc-500 text-sm">
-                    Noch keine Spieler in der Gruppe.
-                  </p>
-                )}
-              </ul>
-            </div>
-
-            <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 mb-6">
-              <h2 className="text-lg font-medium text-zinc-100 mb-1">
-                Meine Notizen
-              </h2>
-              <p className="text-xs text-zinc-500 mb-3">
-                Nur du siehst diese Notizen, nicht deine Spieler.
-              </p>
-              <form action={updateMasterNotes} className="space-y-2">
+            {campaignState?.active_map_id && (
+              <form action={clearActiveMap}>
                 <input type="hidden" name="campaign_id" value={id} />
-                <textarea
-                  name="notes"
-                  rows={4}
-                  defaultValue={campaign.master_notes ?? ""}
-                  placeholder="Geheime Pläne, NSC-Notizen, was auch immer..."
-                  className="w-full rounded-md bg-zinc-950 border border-zinc-700 px-3 py-2 text-zinc-100 focus:outline-none focus:border-zinc-400"
-                />
                 <button
                   type="submit"
-                  className="rounded-md border border-zinc-700 text-zinc-200 px-4 py-2 hover:bg-zinc-800 transition text-sm"
+                  className="text-xs text-zinc-500 hover:text-zinc-300"
                 >
-                  Notizen speichern
+                  Karte ausblenden
                 </button>
               </form>
-            </div>
-          </>
+            )}
+          </div>
         )}
 
         {campaign.description && (
