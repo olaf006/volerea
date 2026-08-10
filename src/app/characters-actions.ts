@@ -70,3 +70,26 @@ export async function createCharacter(formData: FormData) {
   revalidatePath(`/dashboard/campaigns/${campaignId}`);
   redirect(`/dashboard/campaigns/${campaignId}`);
 }
+
+export async function deleteCharacter(formData: FormData) {
+  const characterId = formData.get("character_id") as string;
+  const campaignId = formData.get("campaign_id") as string;
+
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from("characters")
+    .delete()
+    .eq("id", characterId);
+
+  if (error) {
+    redirect(
+      `/dashboard/campaigns/${campaignId}?error=${encodeURIComponent(
+        error.message
+      )}`
+    );
+  }
+
+  revalidatePath(`/dashboard/campaigns/${campaignId}`);
+  redirect(`/dashboard/campaigns/${campaignId}`);
+}

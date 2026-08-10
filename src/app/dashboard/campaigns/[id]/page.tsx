@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import DeleteCharacterButton from "@/components/DeleteCharacterButton";
 
 export default async function CampaignPage({
   params,
@@ -95,8 +96,17 @@ export default async function CampaignPage({
                         ({c.race} {c.class}, Stufe {c.level})
                       </span>
                     </span>
-                    <span className="text-xs text-zinc-500">
-                      {p?.username}
+                    <span className="flex items-center gap-3">
+                      <span className="text-xs text-zinc-500">
+                        {p?.username}
+                      </span>
+                      {(c.user_id === user?.id || isMaster) && (
+                        <DeleteCharacterButton
+                          characterId={c.id}
+                          campaignId={id}
+                          characterName={c.name}
+                        />
+                      )}
                     </span>
                   </li>
                 );
