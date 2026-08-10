@@ -1,18 +1,21 @@
 "use server";
 
+// Speichert die kategorisierten Notizen des Meisters. Bewusst OHNE
+// redirect() - das hatte vorher den Nutzer von der Live-Ansicht zurück
+// zur Kampagnen-Seite geschickt. Jetzt bleibt man einfach da, wo man ist.
+
 import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 export async function updateMasterNotes(formData: FormData) {
   const campaignId = formData.get("campaign_id") as string;
-  const notes = formData.get("notes") as string;
+  const categoriesJson = formData.get("categories_json") as string;
 
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  if (!user) return;
 
   const { data: campaign } = await supabase
     .from("campaigns")
@@ -27,19 +30,20 @@ export async function updateMasterNotes(formData: FormData) {
     .eq("user_id", user.id)
     .maybeSingle();
 
-  if (membership?.role !== "master") {
-    redirect(
-      `/dashboard/campaigns/${campaignId}?error=${encodeURIComponent(
-        "Nur der Meister hat eigene Notizen."
-      )}`
-    );
+  if (membership?.role !== "master") return;
+
+  let categories: unknown[] = [];
+  try {
+    categories = JSON.parse(categoriesJson);
+  } catch {
+    return;
   }
 
   await supabase
     .from("campaigns")
-    .update({ master_notes: notes })
+    .update({ notes_categories: categories })
     .eq("id", campaignId);
 
   revalidatePath(`/dashboard/campaigns/${campaignId}`);
-  redirect(`/dashboard/campaigns/${campaignId}`);
+  revalidatePath(`/dashboard/campaigns/${campaignId}/play`);
 }

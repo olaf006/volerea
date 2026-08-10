@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import DeleteCharacterButton from "@/components/DeleteCharacterButton";
 import LiveMapDisplay from "@/components/LiveMapDisplay";
 import MapUploadForm from "@/components/MapUploadForm";
+import MasterNotesEditor from "@/components/MasterNotesEditor";
 import { setActiveMap, clearActiveMap, deleteMap } from "@/app/maps-actions";
 import { startSession, endSession } from "@/app/session-actions";
 
@@ -24,7 +25,7 @@ export default async function CampaignPage({
 
   const { data: campaign } = await supabase
     .from("campaigns")
-    .select("id, name, description, mode, house_rules, group_id")
+    .select("id, name, description, mode, house_rules, group_id, notes_categories")
     .eq("id", id)
     .single();
 
@@ -195,6 +196,28 @@ export default async function CampaignPage({
                 </button>
               </form>
             )}
+          </div>
+        )}
+
+        {isMaster && (
+          <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 mb-6">
+            <h2 className="text-lg font-medium text-zinc-100 mb-1">
+              Meine Notizen
+            </h2>
+            <p className="text-xs text-zinc-500 mb-3">
+              Nur du siehst das. Kannst du schon vor dem Start anlegen und
+              später live weiter bearbeiten.
+            </p>
+            <MasterNotesEditor
+              campaignId={id}
+              initialCategories={
+                (campaign.notes_categories as {
+                  id: string;
+                  title: string;
+                  content: string;
+                }[]) ?? []
+              }
+            />
           </div>
         )}
 

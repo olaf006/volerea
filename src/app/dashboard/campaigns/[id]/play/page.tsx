@@ -2,13 +2,14 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import LiveMapDisplay from "@/components/LiveMapDisplay";
+import LiveMapWithTokens from "@/components/LiveMapWithTokens";
 import DiceRoller from "@/components/DiceRoller";
 import LiveDiceFeed from "@/components/LiveDiceFeed";
 import SessionGate from "@/components/SessionGate";
 import PlayerListPopup from "@/components/PlayerListPopup";
 import MasterIntroWrapper from "@/components/MasterIntroWrapper";
+import MasterNotesEditor from "@/components/MasterNotesEditor";
 import { endSession, startSession } from "@/app/session-actions";
-import { updateMasterNotes } from "@/app/master-notes-actions";
 
 export default async function PlayPage({
   params,
@@ -28,7 +29,7 @@ export default async function PlayPage({
 
   const { data: campaign } = await supabase
     .from("campaigns")
-    .select("id, name, group_id, master_notes")
+    .select("id, name, group_id, notes_categories")
     .eq("id", id)
     .single();
 
@@ -137,10 +138,12 @@ export default async function PlayPage({
         <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr_300px] lg:grid-rows-[1fr_auto_120px] gap-4 p-4 flex-1">
           {/* Karte: oben, mittig */}
           <div className="lg:col-start-2 lg:row-start-1 min-h-[30vh]">
-            <LiveMapDisplay
+            <LiveMapWithTokens
               campaignId={id}
               maps={maps ?? []}
               initialActiveMapId={campaignState?.active_map_id ?? null}
+              isMaster
+              myUserId={user.id}
             />
           </div>
 
@@ -165,26 +168,21 @@ export default async function PlayPage({
           </div>
 
           {/* Notizen: links */}
-          <div className="lg:col-start-1 lg:row-start-1 lg:row-span-2 rounded-lg border border-zinc-800 bg-zinc-900 p-4 flex flex-col">
+          <div className="lg:col-start-1 lg:row-start-1 lg:row-span-2 rounded-lg border border-zinc-800 bg-zinc-900 p-4 flex flex-col min-h-0">
             <h2 className="text-sm font-medium text-zinc-100 mb-1">
               Meine Notizen
             </h2>
             <p className="text-xs text-zinc-500 mb-3">Nur du siehst das.</p>
-            <form action={updateMasterNotes} className="flex-1 flex flex-col gap-2">
-              <input type="hidden" name="campaign_id" value={id} />
-              <textarea
-                name="notes"
-                defaultValue={campaign.master_notes ?? ""}
-                placeholder="Geheime Pläne, NSC-Notizen..."
-                className="flex-1 w-full rounded-md bg-zinc-950 border border-zinc-700 px-3 py-2 text-zinc-100 text-sm resize-none focus:outline-none focus:border-zinc-400"
-              />
-              <button
-                type="submit"
-                className="rounded-md border border-zinc-700 text-zinc-200 px-3 py-1.5 hover:bg-zinc-800 transition text-xs"
-              >
-                Speichern
-              </button>
-            </form>
+            <MasterNotesEditor
+              campaignId={id}
+              initialCategories={
+                (campaign.notes_categories as {
+                  id: string;
+                  title: string;
+                  content: string;
+                }[]) ?? []
+              }
+            />
           </div>
 
           {/* Spielerliste: rechts, volle Höhe */}
@@ -198,10 +196,10 @@ export default async function PlayPage({
           {/* Unten links: bewusst frei für später */}
           <div className="hidden lg:block lg:col-start-1 lg:row-start-3" />
 
-          {/* Unten rechts (Mitte): Markierungspinsel - folgt später */}
+          {/* Unten rechts (Mitte): noch frei für weitere Werkzeuge */}
           <div className="lg:col-start-2 lg:row-start-3 rounded-lg border border-dashed border-zinc-800 bg-zinc-900/50 p-4 flex items-center justify-center">
             <p className="text-zinc-600 text-xs text-center">
-              Markierungspinsel für die Karte folgt hier bald.
+              Platz für weitere Werkzeuge.
             </p>
           </div>
         </div>
@@ -242,10 +240,13 @@ export default async function PlayPage({
 
       <div className="flex-1 flex flex-col lg:flex-row gap-4 p-4">
         <div className="flex-1 min-h-[40vh]">
-          <LiveMapDisplay
+          <LiveMapWithTokens
             campaignId={id}
             maps={maps ?? []}
             initialActiveMapId={campaignState?.active_map_id ?? null}
+            isMaster={false}
+            myUserId={user.id}
+            myCharacterLabel={myCharacter?.name}
           />
         </div>
 
