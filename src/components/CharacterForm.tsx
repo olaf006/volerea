@@ -27,6 +27,10 @@ import {
   ABILITY_GERMAN,
   AbilityKeyName,
   abilityModifier,
+  CLASS_FEATURES,
+  FIGHTING_STYLES,
+  DIVINE_ORDERS,
+  PRIMAL_ORDERS,
 } from "@/lib/dnd-data";
 
 const STANDARD_ARRAY = [15, 14, 13, 12, 10, 8];
@@ -74,6 +78,9 @@ export default function CharacterForm({
   const [equipmentIndex, setEquipmentIndex] = useState(0);
   const [selectedCantrips, setSelectedCantrips] = useState<string[]>([]);
   const [selectedLevel1, setSelectedLevel1] = useState<string[]>([]);
+  const [fightingStyle, setFightingStyle] = useState(FIGHTING_STYLES[0].name);
+  const [divineOrder, setDivineOrder] = useState(DIVINE_ORDERS[0].name);
+  const [primalOrder, setPrimalOrder] = useState(PRIMAL_ORDERS[0].name);
 
   const skillChoice = CLASS_SKILL_CHOICES[charClass];
   const equipmentOptions = EQUIPMENT_PACKAGES[charClass];
@@ -183,6 +190,8 @@ export default function CharacterForm({
     return value;
   }, [charClass, equipment, dexMod, conMod, wisMod]);
 
+  const classFeatures = CLASS_FEATURES[charClass];
+
   const detailsJson = useMemo(
     () =>
       JSON.stringify({
@@ -194,8 +203,24 @@ export default function CharacterForm({
         equipment: `${equipment.label}: ${equipment.items}. Vom Hintergrund: ${background.equipment}`,
         cantrips: selectedCantrips,
         level1Spells: selectedLevel1,
+        classFeatures: classFeatures.map((f) => f.name),
+        fightingStyle: charClass === "Krieger" ? fightingStyle : undefined,
+        divineOrder: charClass === "Kleriker" ? divineOrder : undefined,
+        primalOrder: charClass === "Druide" ? primalOrder : undefined,
       }),
-    [background, feat, selectedSkills, equipment, selectedCantrips, selectedLevel1]
+    [
+      background,
+      feat,
+      selectedSkills,
+      equipment,
+      selectedCantrips,
+      selectedLevel1,
+      classFeatures,
+      charClass,
+      fightingStyle,
+      divineOrder,
+      primalOrder,
+    ]
   );
 
   return (
@@ -442,6 +467,108 @@ export default function CharacterForm({
         </div>
       </div>
 
+      {/* Klassen-Merkmale */}
+      <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 space-y-3">
+        <h2 className="text-lg font-medium text-zinc-100">
+          Klassen-Merkmale ({charClass})
+        </h2>
+        <p className="text-xs text-zinc-500">
+          Das bringt deine Klasse automatisch ab Stufe 1 mit.
+        </p>
+        <div className="space-y-2">
+          {classFeatures.map((f) => (
+            <div key={f.name} className="rounded-md bg-zinc-950 border border-zinc-800 px-3 py-2">
+              <span className="text-zinc-100 text-sm font-medium">{f.name}</span>
+              <p className="text-zinc-500 text-xs mt-0.5">{f.description}</p>
+            </div>
+          ))}
+        </div>
+
+        {charClass === "Krieger" && (
+          <div>
+            <p className="text-sm text-zinc-300 mb-2">Kampfstil wählen</p>
+            <div className="grid grid-cols-2 gap-2">
+              {FIGHTING_STYLES.map((style) => (
+                <label
+                  key={style.name}
+                  className={`flex flex-col gap-1 rounded-md border px-3 py-2 text-sm cursor-pointer ${
+                    fightingStyle === style.name
+                      ? "border-zinc-300 bg-zinc-800"
+                      : "border-zinc-800"
+                  }`}
+                >
+                  <span className="flex items-center gap-2 text-zinc-100 font-medium">
+                    <input
+                      type="radio"
+                      checked={fightingStyle === style.name}
+                      onChange={() => setFightingStyle(style.name)}
+                    />
+                    {style.name}
+                  </span>
+                  <span className="text-xs text-zinc-500">{style.description}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {charClass === "Kleriker" && (
+          <div>
+            <p className="text-sm text-zinc-300 mb-2">Göttlicher Orden wählen</p>
+            <div className="grid grid-cols-2 gap-2">
+              {DIVINE_ORDERS.map((order) => (
+                <label
+                  key={order.name}
+                  className={`flex flex-col gap-1 rounded-md border px-3 py-2 text-sm cursor-pointer ${
+                    divineOrder === order.name
+                      ? "border-zinc-300 bg-zinc-800"
+                      : "border-zinc-800"
+                  }`}
+                >
+                  <span className="flex items-center gap-2 text-zinc-100 font-medium">
+                    <input
+                      type="radio"
+                      checked={divineOrder === order.name}
+                      onChange={() => setDivineOrder(order.name)}
+                    />
+                    {order.name}
+                  </span>
+                  <span className="text-xs text-zinc-500">{order.description}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {charClass === "Druide" && (
+          <div>
+            <p className="text-sm text-zinc-300 mb-2">Urwüchsiger Orden wählen</p>
+            <div className="grid grid-cols-2 gap-2">
+              {PRIMAL_ORDERS.map((order) => (
+                <label
+                  key={order.name}
+                  className={`flex flex-col gap-1 rounded-md border px-3 py-2 text-sm cursor-pointer ${
+                    primalOrder === order.name
+                      ? "border-zinc-300 bg-zinc-800"
+                      : "border-zinc-800"
+                  }`}
+                >
+                  <span className="flex items-center gap-2 text-zinc-100 font-medium">
+                    <input
+                      type="radio"
+                      checked={primalOrder === order.name}
+                      onChange={() => setPrimalOrder(order.name)}
+                    />
+                    {order.name}
+                  </span>
+                  <span className="text-xs text-zinc-500">{order.description}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Fertigkeiten */}
       <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 space-y-3">
         <h2 className="text-lg font-medium text-zinc-100">
@@ -622,8 +749,7 @@ export default function CharacterForm({
         <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
           <h2 className="text-lg font-medium text-zinc-100 mb-1">Zauber</h2>
           <p className="text-xs text-zinc-500">
-            {charClass} beherrscht auf Stufe 1 noch keine Zauber
-            (Waldläufer und Paladin bekommen ihre ersten Zauber ab Stufe 2).
+            {charClass} beherrscht auf Stufe 1 noch keine Zauber.
           </p>
         </div>
       )}

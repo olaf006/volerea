@@ -295,11 +295,121 @@ export const SPELLCASTING: Partial<Record<CharClass, CasterInfo>> = {
       { name: "Schild", description: "Reaktion, erhöht kurzzeitig deine Rüstungsklasse. Verbraucht einen Zauberplatz." },
     ],
   },
+  Paladin: {
+    ability: "Charisma",
+    cantripsKnown: 0,
+    level1Known: 2,
+    cantrips: [],
+    level1: [
+      { name: "Segen", description: "Bis zu 3 Verbündete erhalten Bonus auf Angriffs- und Rettungswürfe. Verbraucht einen Zauberplatz, davon hast du am Anfang 2." },
+      { name: "Göttliche Gunst", description: "Deine Waffenangriffe machen zusätzlichen Strahlungsschaden. Verbraucht einen Zauberplatz." },
+      { name: "Sengender Blitz", description: "Dein nächster Waffentreffer macht zusätzlichen Feuerschaden. Verbraucht einen Zauberplatz." },
+      { name: "Schutz vor Gutem und Bösem", description: "Schützt ein Ziel vor bestimmten Kreaturentypen. Verbraucht einen Zauberplatz." },
+    ],
+  },
+  Waldläufer: {
+    ability: "Weisheit",
+    cantripsKnown: 0,
+    level1Known: 2,
+    cantrips: [],
+    level1: [
+      { name: "Zeichen des Jägers", description: "Markiert ein Ziel, gegen das du mehr Schaden machst. Gehört automatisch zu deinen vorbereiteten Zaubern und ist einige Male pro Tag ohne Zauberplatz nutzbar." },
+      { name: "Tiersprache", description: "Du kannst dich einfach mit Tieren verständigen. Verbraucht einen Zauberplatz, davon hast du am Anfang 2." },
+      { name: "Alarm", description: "Legt eine magische Warnung um einen Bereich. Verbraucht einen Zauberplatz." },
+      { name: "Wunden heilen", description: "Heilt einen berührten Verbündeten. Verbraucht einen Zauberplatz." },
+    ],
+  },
 };
 
 export function abilityModifier(score: number) {
   return Math.floor((score - 10) / 2);
 }
+
+// ============================================================
+// KLASSEN-MERKMALE (Stufe 1, 2024-Regeln)
+// Die Fähigkeiten, die jede Klasse ab Stufe 1 automatisch mitbringt.
+// Bei manchen Klassen gibt es eine Wahl (z.B. Kampfstil beim Krieger),
+// die im Formular als Auswahl angezeigt wird.
+// ============================================================
+
+export interface ClassFeature {
+  name: string;
+  description: string;
+}
+
+export const CLASS_FEATURES: Record<CharClass, ClassFeature[]> = {
+  Barbar: [
+    { name: "Wut", description: "Bonusaktion: Du erhältst zusätzlichen Nahkampfschaden und Resistenz gegen Wuchtschlag-, Hieb- und Stichschaden. Auf Stufe 1 zweimal pro lange Rast nutzbar." },
+    { name: "Unbewaffnete Verteidigung", description: "Ohne Rüstung ist deine Rüstungsklasse 10 + Geschicklichkeit + Konstitution." },
+    { name: "Waffenmeisterschaft", description: "Du wählst 2 Waffentypen, mit denen du einen besonderen Kampfeffekt nutzen kannst (z.B. Ziel zu Boden zwingen)." },
+  ],
+  Barde: [
+    { name: "Zauberkunde", description: "Du wirkst Zauber über Charisma, mit einem Musikinstrument als Fokus." },
+    { name: "Bardische Inspiration", description: "Bonusaktion: Ein Verbündeter in der Nähe erhält einen W6, den er einmal auf einen Wurf seiner Wahl addieren darf." },
+  ],
+  Druide: [
+    { name: "Zauberkunde", description: "Du wirkst Zauber über Weisheit, mit einem druidischen Fokus (z.B. Mistelzweig)." },
+    { name: "Druidisch", description: "Du kennst die Geheimsprache der Druiden." },
+    { name: "Urwüchsiger Orden", description: "Wähle: Magier (deine Zaubertricks machen mehr Schaden) oder Wächter (du übst dich in Rüstung und Kampfwaffen)." },
+  ],
+  Hexenmeister: [
+    { name: "Paktmagie", description: "Du wirkst Zauber über Charisma. Deine Zauberplätze erneuern sich schon nach einer kurzen Rast, nicht erst nach einer langen." },
+  ],
+  Kleriker: [
+    { name: "Zauberkunde", description: "Du wirkst Zauber über Weisheit, mit einem heiligen Symbol als Fokus." },
+    { name: "Göttlicher Orden", description: "Wähle: Beschützer (du kämpfst wirkungsvoller im Nahkampf) oder Gedanke (deine Heilzauber heilen mehr)." },
+  ],
+  Krieger: [
+    { name: "Kampfstil", description: "Du wählst eine dauerhafte Spezialisierung, die deinen Kampfstil verbessert." },
+    { name: "Zweiter Atem", description: "Bonusaktion: Einmal pro kurze Rast heilst du dich um 1W10 + deine Kriegerstufe." },
+    { name: "Waffenmeisterschaft", description: "Du wählst 3 Waffentypen, mit denen du einen besonderen Kampfeffekt nutzen kannst." },
+  ],
+  Magier: [
+    { name: "Zauberkunde", description: "Du wirkst Zauber über Intelligenz, mit deinem Zauberbuch." },
+    { name: "Ritualzauber", description: "Zauber mit der Ritual-Eigenschaft kannst du ohne Zauberplatz wirken, wenn du dir extra Zeit lässt." },
+    { name: "Arkane Wiederherstellung", description: "Einmal täglich nach einer kurzen Rast bekommst du einen Teil deiner Zauberplätze zurück." },
+  ],
+  Mönch: [
+    { name: "Kampfkunst", description: "Deine unbewaffneten Schläge nutzen einen Kampfkunst-Würfel statt normalem Schaden und du darfst als Bonusaktion einen weiteren Schlag austeilen." },
+    { name: "Unbewaffnete Verteidigung", description: "Ohne Rüstung ist deine Rüstungsklasse 10 + Geschicklichkeit + Weisheit." },
+  ],
+  Paladin: [
+    { name: "Zauberkunde", description: "Du wirkst Zauber über Charisma (seit den 2024-Regeln schon ab Stufe 1, vorher erst ab Stufe 2)." },
+    { name: "Handauflegen", description: "Du hast einen Heilpool von 5 × deiner Stufe Lebenspunkten, den du per Berührung auf Verbündete verteilen kannst." },
+    { name: "Waffenmeisterschaft", description: "Du wählst 2 Waffentypen, mit denen du einen besonderen Kampfeffekt nutzen kannst." },
+  ],
+  Schurke: [
+    { name: "Expertise", description: "Bei 2 deiner geübten Fertigkeiten zählt dein Übungsbonus doppelt." },
+    { name: "Hinterhältiger Angriff", description: "Einmal pro Zug machst du 1W6 zusätzlichen Schaden, wenn du im Vorteil bist oder ein Verbündeter neben deinem Ziel steht." },
+    { name: "Rotwelsch", description: "Du kennst die Geheimsprache der Diebe, um verdeckt zu kommunizieren." },
+  ],
+  Waldläufer: [
+    { name: "Zauberkunde", description: "Du wirkst Zauber über Weisheit (seit den 2024-Regeln schon ab Stufe 1, vorher erst ab Stufe 2)." },
+    { name: "Günstlingsfeind", description: "Zeichen des Jägers gehört zu deinen vorbereiteten Zaubern und du kannst es zusätzlich einige Male pro Tag ohne Zauberplatz wirken." },
+    { name: "Waffenmeisterschaft", description: "Du wählst 2 Waffentypen, mit denen du einen besonderen Kampfeffekt nutzen kannst." },
+  ],
+  Zauberer: [
+    { name: "Angeborene Zauberkraft", description: "Du wirkst Zauber über Charisma, rein aus dir selbst heraus, ohne Zauberbuch oder Fokus." },
+    { name: "Zauberursprung", description: "Die Quelle deiner Magie (z.B. Drachenblut) gibt dir eine zusätzliche kleine Fähigkeit." },
+  ],
+};
+
+export const FIGHTING_STYLES = [
+  { name: "Verteidigung", description: "+1 auf deine Rüstungsklasse, solange du Rüstung trägst." },
+  { name: "Duellieren", description: "+2 Schaden mit einer einhändigen Waffe, wenn du keine andere Waffe in der zweiten Hand hältst." },
+  { name: "Bogenschütze", description: "+2 auf Trefferwürfe mit Fernkampfwaffen." },
+  { name: "Zweihandkampf", description: "Bei zweihändigen Waffen darfst du eine 1 oder 2 auf dem Schadenswürfel neu würfeln." },
+];
+
+export const DIVINE_ORDERS = [
+  { name: "Beschützer", description: "Du kämpfst wirkungsvoller im Nahkampf und kannst Waffen mit Weisheit statt Stärke/Geschicklichkeit einsetzen." },
+  { name: "Gedanke", description: "Deine Heilzauber heilen zusätzlich um deinen Weisheitsmodifikator." },
+];
+
+export const PRIMAL_ORDERS = [
+  { name: "Magier", description: "Deine Zaubertricks machen bei bestimmten Zielen mehr Schaden." },
+  { name: "Wächter", description: "Du übst dich zusätzlich in mittlerer Rüstung und Kampfwaffen." },
+];
 
 // ============================================================
 // HINTERGRÜNDE (2024-Regeln)
