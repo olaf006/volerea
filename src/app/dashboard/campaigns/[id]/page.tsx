@@ -5,6 +5,7 @@ import DeleteCharacterButton from "@/components/DeleteCharacterButton";
 import LiveMapDisplay from "@/components/LiveMapDisplay";
 import MapUploadForm from "@/components/MapUploadForm";
 import { setActiveMap, clearActiveMap, deleteMap } from "@/app/maps-actions";
+import { startSession, endSession } from "@/app/session-actions";
 
 export default async function CampaignPage({
   params,
@@ -51,7 +52,7 @@ export default async function CampaignPage({
 
   const { data: campaignState } = await supabase
     .from("campaign_state")
-    .select("active_map_id")
+    .select("active_map_id, session_active")
     .eq("campaign_id", id)
     .maybeSingle();
 
@@ -73,6 +74,47 @@ export default async function CampaignPage({
             {campaign.mode === "anfaenger" ? "Anfänger-Modus" : "Normal"}
           </span>
         </div>
+
+        {isMaster ? (
+          campaignState?.session_active ? (
+            <div className="flex items-center gap-3 mb-6">
+              <Link
+                href={`/dashboard/campaigns/${id}/play`}
+                className="rounded-md bg-zinc-100 text-zinc-900 font-medium px-4 py-2 hover:bg-white transition text-sm"
+              >
+                Zum Live-Bildschirm
+              </Link>
+              <form action={endSession}>
+                <input type="hidden" name="campaign_id" value={id} />
+                <button
+                  type="submit"
+                  className="text-xs text-red-400 hover:text-red-300"
+                >
+                  Sitzung beenden
+                </button>
+              </form>
+            </div>
+          ) : (
+            <form action={startSession} className="mb-6">
+              <input type="hidden" name="campaign_id" value={id} />
+              <button
+                type="submit"
+                className="rounded-md bg-zinc-100 text-zinc-900 font-medium px-4 py-2 hover:bg-white transition text-sm"
+              >
+                Kampagne starten
+              </button>
+            </form>
+          )
+        ) : (
+          <div className="mb-6">
+            <Link
+              href={`/dashboard/campaigns/${id}/play`}
+              className="rounded-md bg-zinc-100 text-zinc-900 font-medium px-4 py-2 hover:bg-white transition text-sm inline-block"
+            >
+              Jetzt spielen
+            </Link>
+          </div>
+        )}
 
         {error && (
           <p className="text-red-400 text-sm mb-4 rounded-md border border-red-900 bg-red-950/50 px-3 py-2">

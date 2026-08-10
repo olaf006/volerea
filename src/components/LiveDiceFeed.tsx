@@ -1,0 +1,71 @@
+"use client";
+
+// Live-Würfel-Feed: zeigt die letzten Würfe der ganzen Gruppe, aktualisiert
+// sich automatisch über Supabase Realtime.
+
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+
+interface Roll {
+  id: string;
+  user_id: string;
+  dice: string;
+  result: number;
+  created_at: string;
+}
+
+export default function LiveDiceFeed({
+  campaignId,
+  initialRolls,
+  usernames,
+}: {
+  campaignId: string;
+  initialRolls: Roll[];
+  usernames: Record<string, string>;
+}) {
+  const [rolls, setRolls] = useState<Roll[]>(initialRolls);
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    const channel = supabase
+      .channel(`dice_rolls:${campaignId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "dice_rolls",
+          filter: `campaign_id=eq.${campaignId}`,
+        },
+        (payload) => {
+          const newRoll = payload.new as Roll;
+          setRolls((prev) => [newRoll, ...prev].slice(0, 15));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [campaignId]);
+
+  return (
+    <div className="space-y-1">
+      {rolls.length === 0 && (
+        <p className="text-zinc-500 text-sm">Noch niemand hat gewürfelt.</p>
+      )}
+      {rolls.map((r) => (
+        <div
+          key={r.id}
+          className="flex items-center justify-between text-sm rounded-md bg-zinc-950 border border-zinc-800 px-3 py-1.5"
+        >
+          <span className="text-zinc-300">
+            {usernames[r.user_id] ?? "Jemand"} würfelt {r.dice}
+          </span>
+          <span className="text-zinc-100 font-medium">{r.result}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
