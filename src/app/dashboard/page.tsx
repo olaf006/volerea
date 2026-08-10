@@ -1,7 +1,14 @@
 import { createClient } from "@/lib/supabase/server";
 import { logout } from "@/app/auth-actions";
+import { createGroup, joinGroup } from "@/app/groups-actions";
+import Link from "next/link";
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -12,6 +19,12 @@ export default async function DashboardPage() {
     .select("username")
     .eq("id", user?.id)
     .single();
+
+  // Alle Gruppen holen, in denen der Nutzer Mitglied ist, inkl. seiner Rolle
+  const { data: memberships } = await supabase
+    .from("group_members")
+    .select("role, groups(id, name, invite_code)")
+    .eq("user_id", user?.id);
 
   return (
     <div className="min-h-screen bg-zinc-950 px-4 py-10">
@@ -33,10 +46,91 @@ export default async function DashboardPage() {
           </form>
         </div>
 
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
-          <p className="text-zinc-300">
-            Hier kommt als nächstes deine Gruppen-Übersicht hin.
+        {error && (
+          <p className="text-red-400 text-sm mb-4 rounded-md border border-red-900 bg-red-950/50 px-3 py-2">
+            {error}
           </p>
+        )}
+
+        {/* Deine Gruppen */}
+        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 mb-6">
+          <h2 className="text-lg font-medium text-zinc-100 mb-4">
+            Deine Gruppen
+          </h2>
+
+          {!memberships || memberships.length === 0 ? (
+            <p className="text-zinc-400 text-sm">
+              Du bist noch in keiner Gruppe. Erstell eine neue oder tritt mit
+              einem Einladungscode bei.
+            </p>
+          ) : (
+            <ul className="space-y-2">
+              {memberships.map((m) => {
+                const group = m.groups as unknown as {
+                  id: string;
+                  name: string;
+                  invite_code: string;
+                };
+                return (
+                  <li key={group.id}>
+                    <Link
+                      href={`/dashboard/groups/${group.id}`}
+                      className="flex items-center justify-between rounded-md border border-zinc-800 px-4 py-3 hover:bg-zinc-800/50 transition"
+                    >
+                      <span className="text-zinc-100">{group.name}</span>
+                      <span className="text-xs uppercase tracking-wide text-zinc-500">
+                        {m.role === "master" ? "Meister" : "Spieler"}
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+
+        {/* Neue Gruppe erstellen */}
+        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 mb-6">
+          <h2 className="text-lg font-medium text-zinc-100 mb-4">
+            Neue Gruppe erstellen
+          </h2>
+          <form action={createGroup} className="flex gap-2">
+            <input
+              type="text"
+              name="name"
+              required
+              placeholder="z.B. Freitagsrunde"
+              className="flex-1 rounded-md bg-zinc-950 border border-zinc-700 px-3 py-2 text-zinc-100 focus:outline-none focus:border-zinc-400"
+            />
+            <button
+              type="submit"
+              className="rounded-md bg-zinc-100 text-zinc-900 font-medium px-4 py-2 hover:bg-white transition"
+            >
+              Erstellen
+            </button>
+          </form>
+        </div>
+
+        {/* Gruppe beitreten */}
+        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
+          <h2 className="text-lg font-medium text-zinc-100 mb-4">
+            Gruppe beitreten
+          </h2>
+          <form action={joinGroup} className="flex gap-2">
+            <input
+              type="text"
+              name="invite_code"
+              required
+              placeholder="Einladungscode"
+              className="flex-1 rounded-md bg-zinc-950 border border-zinc-700 px-3 py-2 text-zinc-100 focus:outline-none focus:border-zinc-400"
+            />
+            <button
+              type="submit"
+              className="rounded-md border border-zinc-700 text-zinc-200 font-medium px-4 py-2 hover:bg-zinc-800 transition"
+            >
+              Beitreten
+            </button>
+          </form>
         </div>
       </div>
     </div>
