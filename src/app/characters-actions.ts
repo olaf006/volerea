@@ -19,13 +19,19 @@ export async function createCharacter(formData: FormData) {
   const wisdom = Number(formData.get("wisdom"));
   const charisma = Number(formData.get("charisma"));
 
+  // HP und Rüstungsklasse werden im Formular automatisch berechnet
   const hpMax = Number(formData.get("hp_max"));
   const armorClass = Number(formData.get("armor_class"));
 
   const background = formData.get("background") as string;
-  const skills = formData.get("skills") as string;
-  const equipment = formData.get("equipment") as string;
-  const spells = formData.get("spells") as string;
+
+  // Fertigkeiten, Ausrüstung und Zauber kommen als JSON aus dem Formular
+  let extraDetails: Record<string, unknown> = {};
+  try {
+    extraDetails = JSON.parse((formData.get("details_json") as string) ?? "{}");
+  } catch {
+    extraDetails = {};
+  }
 
   const supabase = await createClient();
   const {
@@ -50,7 +56,7 @@ export async function createCharacter(formData: FormData) {
     hp_current: hpMax,
     hp_max: hpMax,
     armor_class: armorClass,
-    details: { background, skills, equipment, spells },
+    details: { background, ...extraDetails },
   });
 
   if (error) {
