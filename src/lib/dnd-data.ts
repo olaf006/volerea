@@ -209,17 +209,24 @@ export const SPELLCASTING: Partial<Record<CharClass, CasterInfo>> = {
     cantripsKnown: 3,
     level1Known: 4,
     cantrips: [
-      { name: "Feuerpfeil", description: "Fernkampf-Angriff, macht Feuerschaden. Kein Ressourcenverbrauch, beliebig oft nutzbar." },
-      { name: "Trugbild", description: "Erzeugt eine kleine Illusion. Unbegrenzt nutzbar, kein Zauberplatz nötig." },
-      { name: "Licht", description: "Lässt ein Objekt leuchten wie eine Fackel. Unbegrenzt nutzbar." },
+      { name: "Feuerpfeil", description: "Fernkampf-Angriff, macht Feuerschaden. Unbegrenzt nutzbar." },
       { name: "Frostspeer", description: "Nahkampf-Berührungsangriff mit Kälteschaden, verlangsamt das Ziel. Unbegrenzt nutzbar." },
+      { name: "Säurespritze", description: "Fernkampf-Angriff mit Säureschaden. Unbegrenzt nutzbar." },
+      { name: "Kleine Illusion", description: "Erzeugt ein kleines Bild oder Geräusch. Unbegrenzt nutzbar." },
+      { name: "Gaukelei", description: "Kleine, harmlose magische Tricks. Unbegrenzt nutzbar." },
+      { name: "Zauberhand", description: "Lässt eine schwebende Geisterhand kleine Aufgaben erledigen. Unbegrenzt nutzbar." },
+      { name: "Licht", description: "Lässt ein Objekt leuchten wie eine Fackel. Unbegrenzt nutzbar." },
       { name: "Nachricht", description: "Flüstert eine kurze Botschaft an jemanden in der Nähe. Unbegrenzt nutzbar." },
     ],
     level1: [
-      { name: "Magisches Geschoss", description: "Trifft automatisch, macht Kraftschaden. Verbraucht einen Zauberplatz pro Wirken, davon hast du am Anfang 2." },
+      { name: "Magisches Geschoss", description: "Trifft automatisch, macht Kraftschaden. Verbraucht einen Zauberplatz, davon hast du am Anfang 2." },
       { name: "Schild", description: "Reaktion, erhöht kurzzeitig deine Rüstungsklasse. Verbraucht einen Zauberplatz." },
       { name: "Person bezaubern", description: "Versucht, eine Person dir gegenüber freundlich zu stimmen. Verbraucht einen Zauberplatz." },
       { name: "Schlaf", description: "Versetzt schwache Gegner in der Nähe in Schlaf. Verbraucht einen Zauberplatz." },
+      { name: "Brennende Hände", description: "Ein Feuerkegel trifft alle vor dir. Verbraucht einen Zauberplatz." },
+      { name: "Magierrüstung", description: "Erhöht deine Rüstungsklasse für Stunden, auch ohne Rüstung. Verbraucht einen Zauberplatz." },
+      { name: "Vertrauten rufen", description: "Beschwört einen kleinen Geistvertrauten, der dir zur Hand geht. Verbraucht einen Zauberplatz." },
+      { name: "Nebel entfachen", description: "Erzeugt eine Nebelwolke zur Tarnung. Verbraucht einen Zauberplatz." },
     ],
   },
   Kleriker: {
@@ -229,13 +236,18 @@ export const SPELLCASTING: Partial<Record<CharClass, CasterInfo>> = {
     cantrips: [
       { name: "Licht", description: "Lässt ein Objekt leuchten. Unbegrenzt nutzbar." },
       { name: "Führung", description: "Gibt einem Verbündeten einen kleinen Bonus auf einen Wurf. Unbegrenzt nutzbar." },
+      { name: "Heiliges Feuer", description: "Fernkampf-Angriff mit Strahlungsschaden. Unbegrenzt nutzbar." },
       { name: "Schaden abwenden", description: "Reaktion, verringert erlittenen Schaden. Unbegrenzt nutzbar." },
       { name: "Trickserei", description: "Kleine, harmlose magische Effekte. Unbegrenzt nutzbar." },
+      { name: "Wortlos formen", description: "Formt Gegenstände aus Ton, Stein oder Erde. Unbegrenzt nutzbar." },
     ],
     level1: [
       { name: "Wunden heilen", description: "Heilt einen berührten Verbündeten. Verbraucht einen Zauberplatz, davon hast du am Anfang 2." },
       { name: "Segen", description: "Bis zu 3 Verbündete erhalten Bonus auf Angriffs- und Rettungswürfe. Verbraucht einen Zauberplatz." },
       { name: "Person bewachen", description: "Schützt eine Person magisch. Verbraucht einen Zauberplatz." },
+      { name: "Heilendes Wort", description: "Heilt aus der Ferne, ohne Berührung nötig. Verbraucht einen Zauberplatz." },
+      { name: "Fluch entfernen", description: "Hebt einen Fluch oder eine magische Bindung auf. Verbraucht einen Zauberplatz." },
+      { name: "Wunden verursachen", description: "Nahkampf-Berührungsangriff mit nekrotischem Schaden. Verbraucht einen Zauberplatz." },
     ],
   },
   Druide: {
@@ -245,11 +257,17 @@ export const SPELLCASTING: Partial<Record<CharClass, CasterInfo>> = {
     cantrips: [
       { name: "Giftig", description: "Fügt einem Ziel in Reichweite Giftschaden zu. Unbegrenzt nutzbar." },
       { name: "Wachsen lassen", description: "Kleine Naturmagie zur Manipulation von Pflanzen. Unbegrenzt nutzbar." },
+      { name: "Führung", description: "Gibt einem Verbündeten einen kleinen Bonus auf einen Wurf. Unbegrenzt nutzbar." },
+      { name: "Frostspeer", description: "Nahkampf-Berührungsangriff mit Kälteschaden. Unbegrenzt nutzbar." },
+      { name: "Wortlos formen", description: "Formt Ton, Stein oder Erde. Unbegrenzt nutzbar." },
     ],
     level1: [
       { name: "Wunden heilen", description: "Heilt einen berührten Verbündeten. Verbraucht einen Zauberplatz, davon hast du am Anfang 2." },
       { name: "Donnerwoge", description: "Stößt Kreaturen um dich herum zurück. Verbraucht einen Zauberplatz." },
       { name: "Nebel entfachen", description: "Erzeugt eine Nebelwolke zur Tarnung. Verbraucht einen Zauberplatz." },
+      { name: "Tiersprache", description: "Du kannst dich mit Tieren verständigen. Verbraucht einen Zauberplatz." },
+      { name: "Verstricken", description: "Ranken fesseln Gegner in einem Bereich. Verbraucht einen Zauberplatz." },
+      { name: "Federfall", description: "Bis zu 5 fallende Kreaturen sinken sanft zu Boden. Verbraucht einen Zauberplatz." },
     ],
   },
   Barde: {
@@ -259,12 +277,16 @@ export const SPELLCASTING: Partial<Record<CharClass, CasterInfo>> = {
     cantrips: [
       { name: "Spott", description: "Schwächt einen Gegner psychisch mit Spottschaden. Unbegrenzt nutzbar." },
       { name: "Licht", description: "Lässt ein Objekt leuchten. Unbegrenzt nutzbar." },
+      { name: "Zauberhand", description: "Eine schwebende Geisterhand erledigt kleine Aufgaben. Unbegrenzt nutzbar." },
+      { name: "Kleine Illusion", description: "Erzeugt ein kleines Bild oder Geräusch. Unbegrenzt nutzbar." },
     ],
     level1: [
       { name: "Person bezaubern", description: "Versucht, eine Person freundlich zu stimmen. Verbraucht einen Zauberplatz, davon hast du am Anfang 2." },
       { name: "Heilendes Wort", description: "Heilt aus der Ferne, ohne Berührung. Verbraucht einen Zauberplatz." },
       { name: "Schlaf", description: "Versetzt schwache Gegner in Schlaf. Verbraucht einen Zauberplatz." },
       { name: "Tarnung", description: "Macht ein Ziel unsichtbar, bis es angreift. Verbraucht einen Zauberplatz." },
+      { name: "Furcht einflößen", description: "Ein Gegner erhält Nachteil, solange er dich sehen kann. Verbraucht einen Zauberplatz." },
+      { name: "Freundschaft", description: "Ein Tier oder eine Person wird dir gegenüber freundlich. Verbraucht einen Zauberplatz." },
     ],
   },
   Hexenmeister: {
@@ -274,10 +296,14 @@ export const SPELLCASTING: Partial<Record<CharClass, CasterInfo>> = {
     cantrips: [
       { name: "Augenlicht rauben", description: "Fernkampfzauber, macht nekrotischen Schaden. Unbegrenzt nutzbar." },
       { name: "Nachricht", description: "Flüstert eine kurze Botschaft. Unbegrenzt nutzbar." },
+      { name: "Kleine Illusion", description: "Erzeugt ein kleines Bild oder Geräusch. Unbegrenzt nutzbar." },
+      { name: "Gaukelei", description: "Kleine magische Tricks. Unbegrenzt nutzbar." },
     ],
     level1: [
       { name: "Höllischer Tadel", description: "Reaktion, wenn dich jemand trifft, fügst du Feuerschaden zu. Verbraucht einen Zauberplatz." },
       { name: "Person bezaubern", description: "Versucht, eine Person freundlich zu stimmen. Verbraucht einen Zauberplatz." },
+      { name: "Trugbilder", description: "Erschafft täuschend echte Doppelgänger von dir. Verbraucht einen Zauberplatz." },
+      { name: "Unsichtbarer Diener", description: "Beschwört einen unsichtbaren, dienenden Geist. Verbraucht einen Zauberplatz." },
     ],
   },
   Zauberer: {
@@ -289,10 +315,14 @@ export const SPELLCASTING: Partial<Record<CharClass, CasterInfo>> = {
       { name: "Frostspeer", description: "Nahkampf-Berührungsangriff mit Kälteschaden. Unbegrenzt nutzbar." },
       { name: "Licht", description: "Lässt ein Objekt leuchten. Unbegrenzt nutzbar." },
       { name: "Trickserei", description: "Kleine magische Effekte. Unbegrenzt nutzbar." },
+      { name: "Zauberhand", description: "Eine schwebende Geisterhand erledigt kleine Aufgaben. Unbegrenzt nutzbar." },
+      { name: "Säurespritze", description: "Fernkampf-Angriff mit Säureschaden. Unbegrenzt nutzbar." },
     ],
     level1: [
       { name: "Magisches Geschoss", description: "Trifft automatisch, macht Kraftschaden. Verbraucht einen Zauberplatz, davon hast du am Anfang 2." },
       { name: "Schild", description: "Reaktion, erhöht kurzzeitig deine Rüstungsklasse. Verbraucht einen Zauberplatz." },
+      { name: "Person bezaubern", description: "Versucht, eine Person freundlich zu stimmen. Verbraucht einen Zauberplatz." },
+      { name: "Brennende Hände", description: "Ein Feuerkegel trifft alle vor dir. Verbraucht einen Zauberplatz." },
     ],
   },
   Paladin: {
@@ -305,6 +335,7 @@ export const SPELLCASTING: Partial<Record<CharClass, CasterInfo>> = {
       { name: "Göttliche Gunst", description: "Deine Waffenangriffe machen zusätzlichen Strahlungsschaden. Verbraucht einen Zauberplatz." },
       { name: "Sengender Blitz", description: "Dein nächster Waffentreffer macht zusätzlichen Feuerschaden. Verbraucht einen Zauberplatz." },
       { name: "Schutz vor Gutem und Bösem", description: "Schützt ein Ziel vor bestimmten Kreaturentypen. Verbraucht einen Zauberplatz." },
+      { name: "Wunden heilen", description: "Heilt einen berührten Verbündeten. Verbraucht einen Zauberplatz." },
     ],
   },
   Waldläufer: {
@@ -317,6 +348,7 @@ export const SPELLCASTING: Partial<Record<CharClass, CasterInfo>> = {
       { name: "Tiersprache", description: "Du kannst dich einfach mit Tieren verständigen. Verbraucht einen Zauberplatz, davon hast du am Anfang 2." },
       { name: "Alarm", description: "Legt eine magische Warnung um einen Bereich. Verbraucht einen Zauberplatz." },
       { name: "Wunden heilen", description: "Heilt einen berührten Verbündeten. Verbraucht einen Zauberplatz." },
+      { name: "Nebel entfachen", description: "Erzeugt eine Nebelwolke zur Tarnung. Verbraucht einen Zauberplatz." },
     ],
   },
 };
