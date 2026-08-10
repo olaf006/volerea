@@ -51,27 +51,26 @@ export async function joinGroup(formData: FormData) {
 
   if (!user) redirect("/login");
 
-  const { data: group, error } = await supabase
-    .from("groups")
-    .select("id")
-    .eq("invite_code", inviteCode)
-    .single();
+  const { data: groupId, error } = await supabase.rpc(
+    "find_group_by_invite_code",
+    { code: inviteCode }
+  );
 
-  if (error || !group) {
-    redirect(`/dashboard?error=${encodeURIComponent("Kein Gruppe mit diesem Code gefunden.")}`);
+  if (error || !groupId) {
+    redirect(`/dashboard?error=${encodeURIComponent("Keine Gruppe mit diesem Code gefunden.")}`);
   }
 
   const { error: memberError } = await supabase.from("group_members").insert({
-    group_id: group!.id,
+    group_id: groupId,
     user_id: user.id,
     role: "player",
   });
 
   if (memberError) {
     // Falls schon Mitglied (primary key conflict), einfach zur Gruppe weiterleiten
-    redirect(`/dashboard/groups/${group!.id}`);
+    redirect(`/dashboard/groups/${groupId}`);
   }
 
   revalidatePath("/dashboard");
-  redirect(`/dashboard/groups/${group!.id}`);
+  redirect(`/dashboard/groups/${groupId}`);
 }
