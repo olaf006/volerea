@@ -31,6 +31,8 @@ import {
   FIGHTING_STYLES,
   DIVINE_ORDERS,
   PRIMAL_ORDERS,
+  SAVING_THROW_PROFICIENCIES,
+  proficiencyBonus,
 } from "@/lib/dnd-data";
 
 const STANDARD_ARRAY = [15, 14, 13, 12, 10, 8];
@@ -191,6 +193,8 @@ export default function CharacterForm({
   }, [charClass, equipment, dexMod, conMod, wisMod]);
 
   const classFeatures = CLASS_FEATURES[charClass];
+  const profBonus = proficiencyBonus(1);
+  const savingProficiencies = SAVING_THROW_PROFICIENCIES[charClass];
 
   const detailsJson = useMemo(
     () =>
@@ -207,6 +211,8 @@ export default function CharacterForm({
         fightingStyle: charClass === "Krieger" ? fightingStyle : undefined,
         divineOrder: charClass === "Kleriker" ? divineOrder : undefined,
         primalOrder: charClass === "Druide" ? primalOrder : undefined,
+        proficiencyBonus: profBonus,
+        savingThrowProficiencies: savingProficiencies.map((a) => ABILITY_GERMAN[a]),
       }),
     [
       background,
@@ -464,6 +470,41 @@ export default function CharacterForm({
                 : `${equipment.label}`}
             </span>
           </div>
+        </div>
+      </div>
+
+      {/* Rettungswürfe */}
+      <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 space-y-3">
+        <h2 className="text-lg font-medium text-zinc-100">Rettungswürfe</h2>
+        <p className="text-xs text-zinc-500">
+          Dein Übungsbonus (auf Stufe 1: +{profBonus}) zählt bei{" "}
+          {savingProficiencies.map((a) => ABILITY_GERMAN[a]).join(" und ")}{" "}
+          automatisch mit dazu.
+        </p>
+        <div className="grid grid-cols-3 gap-2">
+          {ABILITIES.map(({ key, label }) => {
+            const isProficient = savingProficiencies.includes(key);
+            const mod = abilityModifier(finalScores[key]) + (isProficient ? profBonus : 0);
+            return (
+              <div
+                key={key}
+                className={`rounded-md border px-3 py-2 text-center ${
+                  isProficient
+                    ? "border-emerald-800 bg-emerald-950/30"
+                    : "border-zinc-800 bg-zinc-950"
+                }`}
+              >
+                <span className="text-xs text-zinc-500 block">{label}</span>
+                <span className="text-zinc-100 font-medium">
+                  {mod >= 0 ? "+" : ""}
+                  {mod}
+                </span>
+                {isProficient && (
+                  <span className="text-xs text-emerald-400 block">geübt</span>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 

@@ -325,6 +325,31 @@ export function abilityModifier(score: number) {
   return Math.floor((score - 10) / 2);
 }
 
+// Übungsbonus nach Stufe (auf Stufe 1-4 immer +2)
+export function proficiencyBonus(level: number) {
+  return 2 + Math.floor((level - 1) / 4);
+}
+
+// Rettungswurf-Übungen pro Klasse: bei diesen beiden Attributen darfst du
+// deinen Übungsbonus zum Rettungswurf addieren (offizielle Klassentabellen)
+export const SAVING_THROW_PROFICIENCIES: Record<
+  CharClass,
+  [AbilityKeyName, AbilityKeyName]
+> = {
+  Barbar: ["strength", "constitution"],
+  Barde: ["dexterity", "charisma"],
+  Druide: ["intelligence", "wisdom"],
+  Hexenmeister: ["wisdom", "charisma"],
+  Kleriker: ["wisdom", "charisma"],
+  Krieger: ["strength", "constitution"],
+  Magier: ["intelligence", "wisdom"],
+  Mönch: ["strength", "dexterity"],
+  Paladin: ["wisdom", "charisma"],
+  Schurke: ["dexterity", "intelligence"],
+  Waldläufer: ["strength", "dexterity"],
+  Zauberer: ["constitution", "charisma"],
+};
+
 // ============================================================
 // KLASSEN-MERKMALE (Stufe 1, 2024-Regeln)
 // Die Fähigkeiten, die jede Klasse ab Stufe 1 automatisch mitbringt.
