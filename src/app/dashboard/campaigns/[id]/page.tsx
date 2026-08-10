@@ -188,12 +188,16 @@ export default async function CampaignPage({
                     className="flex items-center justify-between rounded-md border border-zinc-800 px-4 py-3"
                   >
                     <span className="text-zinc-100">
-                      <Link
-                        href={`/dashboard/campaigns/${id}/character/${c.id}`}
-                        className="hover:underline"
-                      >
-                        {c.name}
-                      </Link>{" "}
+                      {c.user_id === user?.id || isMaster ? (
+                        <Link
+                          href={`/dashboard/campaigns/${id}/character/${c.id}`}
+                          className="hover:underline"
+                        >
+                          {c.name}
+                        </Link>
+                      ) : (
+                        c.name
+                      )}{" "}
                       <span className="text-zinc-500 text-sm">
                         ({c.race} {c.class}, Stufe {c.level})
                       </span>

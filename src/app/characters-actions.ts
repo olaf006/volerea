@@ -1,10 +1,44 @@
 "use server";
 
-// Server Action zum Erstellen eines Charakters durch einen Spieler.
+// Server Actions rund um Charaktere: erstellen, Inventar bearbeiten, löschen.
+// Jede Aktion prüft serverseitig Besitz bzw. Meister-Rolle - das darf sich
+// nicht nur auf die Oberfläche verlassen.
 
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+
+async function getCurrentUser() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+  return { supabase, user };
+}
+
+async function isMasterOfCampaign(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  campaignId: string,
+  userId: string
+) {
+  const { data: campaign } = await supabase
+    .from("campaigns")
+    .select("group_id")
+    .eq("id", campaignId)
+    .single();
+
+  if (!campaign) return false;
+
+  const { data: membership } = await supabase
+    .from("group_members")
+    .select("role")
+    .eq("group_id", campaign.group_id)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  return membership?.role === "master";
+}
 
 export async function createCharacter(formData: FormData) {
   const campaignId = formData.get("campaign_id") as string;
@@ -33,12 +67,7 @@ export async function createCharacter(formData: FormData) {
     extraDetails = {};
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) redirect("/login");
+  const { supabase, user } = await getCurrentUser();
 
   const { error } = await supabase.from("characters").insert({
     campaign_id: campaignId,
@@ -77,15 +106,32 @@ export async function updateInventory(formData: FormData) {
   const inventoryJson = formData.get("inventory_json") as string;
   const currencyJson = formData.get("currency_json") as string;
 
-  const supabase = await createClient();
+  const { supabase, user } = await getCurrentUser();
 
   const { data: character } = await supabase
     .from("characters")
-    .select("details")
+    .select("details, user_id")
     .eq("id", characterId)
     .single();
 
-  const currentDetails = (character?.details as Record<string, unknown>) ?? {};
+  if (!character) {
+    redirect(
+      `/dashboard/campaigns/${campaignId}?error=${encodeURIComponent(
+        "Charakter nicht gefunden."
+      )}`
+    );
+  }
+
+  // NUR der Besitzer des Charakters darf sein Inventar bearbeiten
+  if (character!.user_id !== user.id) {
+    redirect(
+      `/dashboard/campaigns/${campaignId}/character/${characterId}?error=${encodeURIComponent(
+        "Nur der Spieler dieses Charakters darf das Inventar bearbeiten."
+      )}`
+    );
+  }
+
+  const currentDetails = (character!.details as Record<string, unknown>) ?? {};
 
   const { error } = await supabase
     .from("characters")
@@ -117,7 +163,32 @@ export async function deleteCharacter(formData: FormData) {
   const characterId = formData.get("character_id") as string;
   const campaignId = formData.get("campaign_id") as string;
 
-  const supabase = await createClient();
+  const { supabase, user } = await getCurrentUser();
+
+  const { data: character } = await supabase
+    .from("characters")
+    .select("user_id")
+    .eq("id", characterId)
+    .single();
+
+  if (!character) {
+    redirect(
+      `/dashboard/campaigns/${campaignId}?error=${encodeURIComponent(
+        "Charakter nicht gefunden."
+      )}`
+    );
+  }
+
+  const isOwner = character!.user_id === user.id;
+  const isMaster = isOwner ? true : await isMasterOfCampaign(supabase, campaignId, user.id);
+
+  if (!isOwner && !isMaster) {
+    redirect(
+      `/dashboard/campaigns/${campaignId}?error=${encodeURIComponent(
+        "Nur der Besitzer oder der Meister darf diesen Charakter löschen."
+      )}`
+    );
+  }
 
   const { error } = await supabase
     .from("characters")

@@ -37,6 +37,33 @@ export default async function CharacterDetailPage({
 
   if (!character || character.campaign_id !== id) notFound();
 
+  const isOwner = character.user_id === user.id;
+
+  // Nur der Besitzer oder der Meister der Gruppe darf das Charakterblatt
+  // im Detail sehen - andere Spieler nicht, auch nicht über direkten Link.
+  if (!isOwner) {
+    const { data: campaign } = await supabase
+      .from("campaigns")
+      .select("group_id")
+      .eq("id", id)
+      .single();
+
+    const { data: membership } = await supabase
+      .from("group_members")
+      .select("role")
+      .eq("group_id", campaign?.group_id)
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (membership?.role !== "master") {
+      redirect(
+        `/dashboard/campaigns/${id}?error=${encodeURIComponent(
+          "Du darfst nur dein eigenes Charakterblatt öffnen."
+        )}`
+      );
+    }
+  }
+
   const details = (character.details ?? {}) as Record<string, unknown>;
   const inventory = (details.inventory as InventoryItem[]) ?? [];
   const currency = (details.currency as {
@@ -44,8 +71,6 @@ export default async function CharacterDetailPage({
     silver: number;
     copper: number;
   }) ?? { gold: 0, silver: 0, copper: 0 };
-
-  const isOwner = character.user_id === user.id;
 
   return (
     <div className="min-h-screen bg-zinc-950 px-4 py-10">
