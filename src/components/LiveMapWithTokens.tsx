@@ -6,7 +6,7 @@
 // verschieben. Alle Positionsänderungen sind sofort bei allen sichtbar.
 
 import { useEffect, useRef, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { createClient, createAuthedRealtimeClient } from "@/lib/supabase/client";
 import { createToken, deleteToken } from "@/app/tokens-actions";
 
 interface MapInfo {
@@ -23,6 +23,7 @@ interface Token {
   image_url: string | null;
   pos_x: number;
   pos_y: number;
+  placed: boolean;
 }
 
 function colorForToken(id: string) {
@@ -57,25 +58,36 @@ export default function LiveMapWithTokens({
 
   // Aktive Karte live verfolgen (wie LiveMapDisplay)
   useEffect(() => {
-    const supabase = createClient();
-    const channel = supabase
-      .channel(`campaign_state_tokens:${campaignId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "campaign_state",
-          filter: `campaign_id=eq.${campaignId}`,
-        },
-        (payload) => {
-          const row = payload.new as { active_map_id: string | null };
-          setActiveMapId(row?.active_map_id ?? null);
-        }
-      )
-      .subscribe();
+    let active = true;
+    let cleanup: (() => void) | null = null;
+
+    (async () => {
+      const supabase = await createAuthedRealtimeClient();
+      if (!active) return;
+
+      const channel = supabase
+        .channel(`campaign_state_tokens:${campaignId}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "campaign_state",
+            filter: `campaign_id=eq.${campaignId}`,
+          },
+          (payload) => {
+            const row = payload.new as { active_map_id: string | null };
+            setActiveMapId(row?.active_map_id ?? null);
+          }
+        )
+        .subscribe();
+
+      cleanup = () => supabase.removeChannel(channel);
+    })();
+
     return () => {
-      supabase.removeChannel(channel);
+      active = false;
+      cleanup?.();
     };
   }, [campaignId]);
 
@@ -85,48 +97,54 @@ export default function LiveMapWithTokens({
       setTokens([]);
       return;
     }
-    const supabase = createClient();
-    let cancelled = false;
+    let active = true;
+    let cleanup: (() => void) | null = null;
 
-    supabase
-      .from("map_tokens")
-      .select("id, map_id, owner_user_id, label, image_url, pos_x, pos_y")
-      .eq("map_id", activeMapId)
-      .then(({ data }) => {
-        if (!cancelled) setTokens(data ?? []);
-      });
+    (async () => {
+      const supabase = createClient();
+      const { data } = await supabase
+        .from("map_tokens")
+        .select("id, map_id, owner_user_id, label, image_url, pos_x, pos_y, placed")
+        .eq("map_id", activeMapId);
+      if (active) setTokens(data ?? []);
 
-    const channel = supabase
-      .channel(`map_tokens:${activeMapId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "map_tokens",
-          filter: `map_id=eq.${activeMapId}`,
-        },
-        (payload) => {
-          if (payload.eventType === "INSERT") {
-            setTokens((prev) => [...prev, payload.new as Token]);
-          } else if (payload.eventType === "UPDATE") {
-            setTokens((prev) =>
-              prev.map((t) =>
-                t.id === (payload.new as Token).id ? (payload.new as Token) : t
-              )
-            );
-          } else if (payload.eventType === "DELETE") {
-            setTokens((prev) =>
-              prev.filter((t) => t.id !== (payload.old as Token).id)
-            );
+      const realtimeSupabase = await createAuthedRealtimeClient();
+      if (!active) return;
+
+      const channel = realtimeSupabase
+        .channel(`map_tokens:${activeMapId}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "map_tokens",
+            filter: `map_id=eq.${activeMapId}`,
+          },
+          (payload) => {
+            if (payload.eventType === "INSERT") {
+              setTokens((prev) => [...prev, payload.new as Token]);
+            } else if (payload.eventType === "UPDATE") {
+              setTokens((prev) =>
+                prev.map((t) =>
+                  t.id === (payload.new as Token).id ? (payload.new as Token) : t
+                )
+              );
+            } else if (payload.eventType === "DELETE") {
+              setTokens((prev) =>
+                prev.filter((t) => t.id !== (payload.old as Token).id)
+              );
+            }
           }
-        }
-      )
-      .subscribe();
+        )
+        .subscribe();
+
+      cleanup = () => realtimeSupabase.removeChannel(channel);
+    })();
 
     return () => {
-      cancelled = true;
-      supabase.removeChannel(channel);
+      active = false;
+      cleanup?.();
     };
   }, [activeMapId]);
 
@@ -148,11 +166,40 @@ export default function LiveMapWithTokens({
       label: myCharacterLabel,
       pos_x: 50,
       pos_y: 50,
+      placed: true,
     });
   }, [activeMapId, tokens, isMaster, myUserId, myCharacterLabel, campaignId]);
 
   function canDrag(token: Token) {
     return isMaster || token.owner_user_id === myUserId;
+  }
+
+  const placedTokens = tokens.filter((t) => t.placed);
+  const unplacedTokens = tokens.filter((t) => !t.placed);
+
+  function handleDragStartFromList(e: React.DragEvent, tokenId: string) {
+    e.dataTransfer.setData("text/plain", tokenId);
+  }
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    const tokenId = e.dataTransfer.getData("text/plain");
+    if (!tokenId || !containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = Math.min(100, Math.max(0, ((e.clientX - rect.left) / rect.width) * 100));
+    const y = Math.min(100, Math.max(0, ((e.clientY - rect.top) / rect.height) * 100));
+
+    setTokens((prev) =>
+      prev.map((t) =>
+        t.id === tokenId ? { ...t, placed: true, pos_x: x, pos_y: y } : t
+      )
+    );
+
+    const supabase = createClient();
+    supabase
+      .from("map_tokens")
+      .update({ placed: true, pos_x: x, pos_y: y })
+      .eq("id", tokenId);
   }
 
   function handlePointerMove(e: React.PointerEvent) {
@@ -194,6 +241,8 @@ export default function LiveMapWithTokens({
         className="relative rounded-lg border border-zinc-800 bg-zinc-900 overflow-hidden select-none touch-none"
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={handleDrop}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -203,7 +252,7 @@ export default function LiveMapWithTokens({
           draggable={false}
         />
 
-        {tokens.map((token) => {
+        {placedTokens.map((token) => {
           const draggable = canDrag(token);
           return (
             <div
@@ -244,7 +293,7 @@ export default function LiveMapWithTokens({
       <div className="px-1 py-2 text-sm text-zinc-400">{activeMap.name}</div>
 
       {isMaster && (
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-3 space-y-2">
+        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-3 space-y-3">
           <form action={createToken} className="flex flex-wrap gap-2 items-center">
             <input type="hidden" name="campaign_id" value={campaignId} />
             <input type="hidden" name="map_id" value={activeMapId ?? ""} />
@@ -265,12 +314,53 @@ export default function LiveMapWithTokens({
               type="submit"
               className="text-xs rounded-md bg-zinc-100 text-zinc-900 px-3 py-1.5 font-medium hover:bg-white transition"
             >
-              Pin hinzufügen
+              Pin anlegen
             </button>
           </form>
 
+          {unplacedTokens.length > 0 && (
+            <div>
+              <p className="text-xs text-zinc-500 mb-1">
+                Auf die Karte ziehen, um zu platzieren:
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {unplacedTokens.map((t) => (
+                  <div
+                    key={t.id}
+                    draggable
+                    onDragStart={(e) => handleDragStartFromList(e, t.id)}
+                    style={{
+                      backgroundColor: t.image_url ? undefined : colorForToken(t.id),
+                    }}
+                    className="flex items-center gap-2 rounded-md border border-zinc-700 bg-zinc-950 px-2 py-1.5 cursor-grab active:cursor-grabbing"
+                  >
+                    <span
+                      style={{
+                        backgroundColor: t.image_url ? undefined : colorForToken(t.id),
+                      }}
+                      className="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center text-[10px] font-semibold text-zinc-900 flex-shrink-0"
+                    >
+                      {t.image_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={t.image_url}
+                          alt={t.label}
+                          className="w-full h-full object-cover"
+                          draggable={false}
+                        />
+                      ) : (
+                        t.label.slice(0, 2).toUpperCase()
+                      )}
+                    </span>
+                    <span className="text-xs text-zinc-200">{t.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {tokens.length > 0 && (
-            <div className="flex flex-wrap gap-1 pt-1">
+            <div className="flex flex-wrap gap-1 pt-1 border-t border-zinc-800">
               {tokens.map((t) => (
                 <form key={t.id} action={deleteToken}>
                   <input type="hidden" name="campaign_id" value={campaignId} />

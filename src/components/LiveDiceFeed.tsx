@@ -4,7 +4,7 @@
 // sich automatisch über Supabase Realtime.
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { createAuthedRealtimeClient } from "@/lib/supabase/client";
 
 interface Roll {
   id: string;
@@ -26,27 +26,36 @@ export default function LiveDiceFeed({
   const [rolls, setRolls] = useState<Roll[]>(initialRolls);
 
   useEffect(() => {
-    const supabase = createClient();
+    let active = true;
+    let cleanup: (() => void) | null = null;
 
-    const channel = supabase
-      .channel(`dice_rolls:${campaignId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "dice_rolls",
-          filter: `campaign_id=eq.${campaignId}`,
-        },
-        (payload) => {
-          const newRoll = payload.new as Roll;
-          setRolls((prev) => [newRoll, ...prev].slice(0, 15));
-        }
-      )
-      .subscribe();
+    (async () => {
+      const supabase = await createAuthedRealtimeClient();
+      if (!active) return;
+
+      const channel = supabase
+        .channel(`dice_rolls:${campaignId}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "dice_rolls",
+            filter: `campaign_id=eq.${campaignId}`,
+          },
+          (payload) => {
+            const newRoll = payload.new as Roll;
+            setRolls((prev) => [newRoll, ...prev].slice(0, 15));
+          }
+        )
+        .subscribe();
+
+      cleanup = () => supabase.removeChannel(channel);
+    })();
 
     return () => {
-      supabase.removeChannel(channel);
+      active = false;
+      cleanup?.();
     };
   }, [campaignId]);
 

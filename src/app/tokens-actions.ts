@@ -40,6 +40,7 @@ export async function createToken(formData: FormData) {
     image_url: imageUrl,
     pos_x: 50,
     pos_y: 50,
+    placed: false,
   });
 
   revalidatePath(`/dashboard/campaigns/${campaignId}/play`);

@@ -5,7 +5,7 @@
 // wählt - über Supabase Realtime (kein Neuladen der Seite nötig).
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { createAuthedRealtimeClient } from "@/lib/supabase/client";
 
 interface MapInfo {
   id: string;
@@ -25,27 +25,36 @@ export default function LiveMapDisplay({
   const [activeMapId, setActiveMapId] = useState(initialActiveMapId);
 
   useEffect(() => {
-    const supabase = createClient();
+    let active = true;
+    let cleanup: (() => void) | null = null;
 
-    const channel = supabase
-      .channel(`campaign_state:${campaignId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "campaign_state",
-          filter: `campaign_id=eq.${campaignId}`,
-        },
-        (payload) => {
-          const newRow = payload.new as { active_map_id: string | null };
-          setActiveMapId(newRow?.active_map_id ?? null);
-        }
-      )
-      .subscribe();
+    (async () => {
+      const supabase = await createAuthedRealtimeClient();
+      if (!active) return;
+
+      const channel = supabase
+        .channel(`campaign_state:${campaignId}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "campaign_state",
+            filter: `campaign_id=eq.${campaignId}`,
+          },
+          (payload) => {
+            const newRow = payload.new as { active_map_id: string | null };
+            setActiveMapId(newRow?.active_map_id ?? null);
+          }
+        )
+        .subscribe();
+
+      cleanup = () => supabase.removeChannel(channel);
+    })();
 
     return () => {
-      supabase.removeChannel(channel);
+      active = false;
+      cleanup?.();
     };
   }, [campaignId]);
 

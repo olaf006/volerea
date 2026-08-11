@@ -5,7 +5,7 @@
 // einem Intro-Video als Übergang, kein Neuladen der Seite nötig.
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { createAuthedRealtimeClient } from "@/lib/supabase/client";
 import IntroVideo from "@/components/IntroVideo";
 
 type Phase = "lobby" | "intro" | "live";
@@ -27,31 +27,40 @@ export default function SessionGate({
   const [phase, setPhase] = useState<Phase>(initialActive ? "live" : "lobby");
 
   useEffect(() => {
-    const supabase = createClient();
+    let active = true;
+    let cleanup: (() => void) | null = null;
 
-    const channel = supabase
-      .channel(`session_gate:${campaignId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "campaign_state",
-          filter: `campaign_id=eq.${campaignId}`,
-        },
-        (payload) => {
-          const row = payload.new as { session_active: boolean };
-          setPhase((current) => {
-            if (row?.session_active && current === "lobby") return "intro";
-            if (!row?.session_active) return "lobby";
-            return current;
-          });
-        }
-      )
-      .subscribe();
+    (async () => {
+      const supabase = await createAuthedRealtimeClient();
+      if (!active) return;
+
+      const channel = supabase
+        .channel(`session_gate:${campaignId}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "campaign_state",
+            filter: `campaign_id=eq.${campaignId}`,
+          },
+          (payload) => {
+            const row = payload.new as { session_active: boolean };
+            setPhase((current) => {
+              if (row?.session_active && current === "lobby") return "intro";
+              if (!row?.session_active) return "lobby";
+              return current;
+            });
+          }
+        )
+        .subscribe();
+
+      cleanup = () => supabase.removeChannel(channel);
+    })();
 
     return () => {
-      supabase.removeChannel(channel);
+      active = false;
+      cleanup?.();
     };
   }, [campaignId]);
 
