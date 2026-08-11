@@ -43,7 +43,7 @@ export default function LiveDiceFeed({
             table: "dice_rolls",
             filter: `campaign_id=eq.${campaignId}`,
           },
-          (payload) => {
+          (payload: any) => {
             const newRoll = payload.new as Roll;
             setRolls((prev) => [newRoll, ...prev].slice(0, 15));
           }

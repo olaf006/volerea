@@ -44,7 +44,7 @@ export default function SessionGate({
             table: "campaign_state",
             filter: `campaign_id=eq.${campaignId}`,
           },
-          (payload) => {
+          (payload: any) => {
             const row = payload.new as { session_active: boolean };
             setPhase((current) => {
               if (row?.session_active && current === "lobby") return "intro";

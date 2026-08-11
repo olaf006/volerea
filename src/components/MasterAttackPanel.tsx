@@ -53,8 +53,8 @@ export default function MasterAttackPanel({
         .eq("placed", true);
       if (!active) return;
 
-      const npcList = (data ?? []).filter((t) => t.owner_user_id === null);
-      const playerList = (data ?? []).filter((t) => t.owner_user_id !== null);
+      const npcList = (data ?? []).filter((t: any) => t.owner_user_id === null);
+      const playerList = (data ?? []).filter((t: any) => t.owner_user_id !== null);
       setNpcs(npcList);
       setPlayers(playerList as PlayerToken[]);
       if (npcList.length > 0) setAttackerId((prev) => prev || npcList[0].id);
@@ -70,7 +70,7 @@ export default function MasterAttackPanel({
             table: "map_tokens",
             filter: `map_id=eq.${activeMapId}`,
           },
-          (payload) => {
+          (payload: any) => {
             if (!active) return;
             if (payload.eventType === "DELETE") {
               const oldId = (payload.old as { id: string }).id;

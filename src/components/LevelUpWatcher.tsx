@@ -61,7 +61,7 @@ export default function LevelUpWatcher({
             table: "characters",
             filter: `id=eq.${characterId}`,
           },
-          (payload) => {
+          (payload: any) => {
             setCharacter(payload.new as CharacterState);
           }
         )

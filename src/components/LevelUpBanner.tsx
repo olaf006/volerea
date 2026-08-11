@@ -33,7 +33,7 @@ export default function LevelUpBanner({ campaignId }: { campaignId: string }) {
             table: "level_up_events",
             filter: `campaign_id=eq.${campaignId}`,
           },
-          (payload) => {
+          (payload: any) => {
             setEvent(payload.new as Event);
             setTimeout(() => setEvent(null), 5000);
           }

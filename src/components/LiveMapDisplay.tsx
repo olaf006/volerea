@@ -42,7 +42,7 @@ export default function LiveMapDisplay({
             table: "campaign_state",
             filter: `campaign_id=eq.${campaignId}`,
           },
-          (payload) => {
+          (payload: any) => {
             const newRow = payload.new as { active_map_id: string | null };
             setActiveMapId(newRow?.active_map_id ?? null);
           }

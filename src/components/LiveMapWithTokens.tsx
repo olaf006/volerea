@@ -149,7 +149,7 @@ export default function LiveMapWithTokens({
             table: "campaign_state",
             filter: `campaign_id=eq.${campaignId}`,
           },
-          (payload) => {
+          (payload: any) => {
             const row = payload.new as { active_map_id: string | null };
             setActiveMapId(row?.active_map_id ?? null);
           }
@@ -187,7 +187,7 @@ export default function LiveMapWithTokens({
       setTokens(currentTokens);
 
       if (!isMaster && myCharacterLabel) {
-        const alreadyExists = currentTokens.some((t) => t.owner_user_id === myUserId);
+        const alreadyExists = currentTokens.some((t: any) => t.owner_user_id === myUserId);
         if (!alreadyExists) {
           const { data: inserted, error: insertError } = await supabase
             .from("map_tokens")
@@ -229,7 +229,7 @@ export default function LiveMapWithTokens({
             table: "map_tokens",
             filter: `map_id=eq.${activeMapId}`,
           },
-          (payload) => {
+          (payload: any) => {
             if (payload.eventType === "INSERT") {
               const newToken = payload.new as Token;
               if (!newToken.placed) return;
@@ -333,7 +333,7 @@ export default function LiveMapWithTokens({
           .from("map_tokens")
           .update({ pos_x: token.pos_x, pos_y: token.pos_y })
           .eq("id", token.id)
-          .then(({ error }) => {
+          .then(({ error }: any) => {
             if (error) console.error("Pin-Position konnte nicht gespeichert werden:", error.message);
           });
       } else if (token) {

@@ -51,7 +51,7 @@ export default function NpcManagerPanel({
             table: "map_tokens",
             filter: `map_id=eq.${activeMapId}`,
           },
-          (payload) => {
+          (payload: any) => {
             if (!active) return;
             if (payload.eventType === "DELETE") {
               setTokens((prev) =>

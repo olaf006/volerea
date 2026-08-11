@@ -52,7 +52,7 @@ export default function InitiativeTracker({
             table: "combat_state",
             filter: `campaign_id=eq.${campaignId}`,
           },
-          (payload) => {
+          (payload: any) => {
             setState(payload.new as CombatState);
           }
         )

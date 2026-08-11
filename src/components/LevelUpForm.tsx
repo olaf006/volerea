@@ -1,13 +1,13 @@
 "use client";
 
-// Stufenaufstieg: HP-Zuwachs automatisch (Durchschnittswert des
-// Trefferwürfels + Konstitution - das ist eine offizielle Alternative
-// zum Würfeln, fair und ohne Zufall). Bei Stufe 4/8/12/16/19 gibt's eine
+// Stufenaufstieg: Lebenspunkte werden ECHT gewürfelt (serverseitig, damit
+// nicht manipuliert werden kann) - so wie es die Regeln vorsehen, nicht
+// über einen Durchschnittswert. Bei Stufe 4/8/12/16/19 gibt's eine
 // Attributssteigerung. Zauberklassen dürfen optional einen neuen Zauber
 // aus der bekannten Liste dazulernen.
 
 import { useMemo, useState } from "react";
-import { levelUpCharacter } from "@/app/characters-actions";
+import { levelUpCharacter, rollHitDie } from "@/app/characters-actions";
 import {
   HIT_DICE,
   CharClass,
@@ -50,9 +50,18 @@ export default function LevelUpForm({
   const isAsiLevel = ASI_LEVELS.includes(newLevel);
 
   const hitDie = HIT_DICE[charClass];
-  const avgRoll = Math.floor(hitDie / 2) + 1; // offizielle Durchschnitts-Alternative
   const conMod = abilityModifier(currentAbilities.constitution);
-  const hpGain = Math.max(1, avgRoll + conMod);
+
+  const [hpRoll, setHpRoll] = useState<number | null>(null);
+  const [rolling, setRolling] = useState(false);
+  const hpGain = hpRoll !== null ? Math.max(1, hpRoll + conMod) : null;
+
+  async function rollForHp() {
+    setRolling(true);
+    const result = await rollHitDie(hitDie);
+    setHpRoll(result);
+    setRolling(false);
+  }
 
   const newProfBonus = proficiencyBonus(newLevel);
 
@@ -84,6 +93,7 @@ export default function LevelUpForm({
   }, [currentAbilities, isAsiLevel, asiMode, plusTwoAbility, plusOneA, plusOneB]);
 
   function handleSubmit(formData: FormData) {
+    if (hpGain === null) return;
     formData.set("character_id", characterId);
     formData.set("campaign_id", campaignId);
     formData.set("new_level", String(newLevel));
@@ -108,11 +118,22 @@ export default function LevelUpForm({
       </div>
 
       <div className="rounded-md bg-zinc-950 border border-zinc-800 px-4 py-3">
-        <span className="text-xs text-zinc-500 block">Lebenspunkte</span>
-        <span className="text-zinc-100 font-medium">
-          +{hpGain} (Ø {avgRoll} auf W{hitDie}, {conMod >= 0 ? "+" : ""}
-          {conMod} Konstitution)
-        </span>
+        <span className="text-xs text-zinc-500 block mb-2">Lebenspunkte</span>
+        {hpGain === null ? (
+          <button
+            type="button"
+            onClick={rollForHp}
+            disabled={rolling}
+            className="w-full rounded-md border border-zinc-700 text-zinc-100 py-2 hover:bg-zinc-800 transition disabled:opacity-50"
+          >
+            {rolling ? "…" : `Trefferwürfel würfeln (W${hitDie})`}
+          </button>
+        ) : (
+          <span className="text-zinc-100 font-medium">
+            +{hpGain} (gewürfelt: {hpRoll} auf W{hitDie}, {conMod >= 0 ? "+" : ""}
+            {conMod} Konstitution)
+          </span>
+        )}
       </div>
 
       <div className="rounded-md bg-zinc-950 border border-zinc-800 px-4 py-3">
@@ -229,10 +250,16 @@ export default function LevelUpForm({
 
       <button
         type="submit"
-        className="w-full rounded-md bg-zinc-100 text-zinc-900 font-medium py-2.5 hover:bg-white transition"
+        disabled={hpGain === null}
+        className="w-full rounded-md bg-zinc-100 text-zinc-900 font-medium py-2.5 hover:bg-white transition disabled:opacity-40 disabled:cursor-not-allowed"
       >
         Stufe {newLevel} bestätigen
       </button>
+      {hpGain === null && (
+        <p className="text-amber-400 text-xs text-center">
+          Erst den Trefferwürfel würfeln, um fortzufahren.
+        </p>
+      )}
     </form>
   );
 }

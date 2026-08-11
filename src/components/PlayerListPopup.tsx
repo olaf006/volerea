@@ -48,8 +48,13 @@ export default function PlayerListPopup({
   players: PlayerRow[];
   campaignId: string;
 }) {
-  const [selected, setSelected] = useState<PlayerRow | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [xpInput, setXpInput] = useState("");
+
+  // Live aus den aktuellen players ableiten statt einen alten Schnappschuss
+  // zu behalten - so zeigt das Fenster sofort neue Werte (z.B. XP), sobald
+  // frische Daten reinkommen, statt beim Klick-Zeitpunkt stehen zu bleiben.
+  const selected = players.find((p) => p.userId === selectedUserId) ?? null;
 
   return (
     <>
@@ -60,7 +65,7 @@ export default function PlayerListPopup({
         {players.map((p) => (
           <button
             key={p.userId}
-            onClick={() => setSelected(p)}
+            onClick={() => setSelectedUserId(p.userId)}
             className="w-full flex items-center justify-between rounded-md border border-zinc-800 px-3 py-2 text-sm hover:bg-zinc-800/50 transition text-left"
           >
             <span className="text-zinc-200">{p.username}</span>
@@ -76,7 +81,7 @@ export default function PlayerListPopup({
       {selected && (
         <div
           className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50"
-          onClick={() => setSelected(null)}
+          onClick={() => setSelectedUserId(null)}
         >
           <div
             className="bg-zinc-900 border border-zinc-800 rounded-lg max-w-md w-full max-h-[85vh] overflow-y-auto p-6"
@@ -95,7 +100,7 @@ export default function PlayerListPopup({
                 )}
               </div>
               <button
-                onClick={() => setSelected(null)}
+                onClick={() => setSelectedUserId(null)}
                 className="text-zinc-500 hover:text-zinc-300 text-sm"
               >
                 Schließen

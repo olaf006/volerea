@@ -277,6 +277,12 @@ export async function addXp(formData: FormData) {
   revalidatePath(`/dashboard/campaigns/${campaignId}/play`);
 }
 
+// Trefferwürfel für den Stufenaufstieg würfeln - serverseitig, damit
+// nicht am Ergebnis manipuliert werden kann.
+export async function rollHitDie(sides: number): Promise<number> {
+  return Math.floor(Math.random() * sides) + 1;
+}
+
 export async function deleteCharacter(formData: FormData) {
   const characterId = formData.get("character_id") as string;
   const campaignId = formData.get("campaign_id") as string;
