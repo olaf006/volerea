@@ -153,6 +153,44 @@ export async function resolveAttack(formData: FormData) {
   });
 }
 
+// Meister greift mit einem NPC einen Spieler an: gleiche Logik wie beim
+// Spieler-Angriff, nur umgekehrt - Schaden geht vom Charakter-HP ab.
+export async function resolveMasterAttack(formData: FormData) {
+  const campaignId = formData.get("campaign_id") as string;
+  const attackerLabel = formData.get("attacker_label") as string;
+  const diceNotation = formData.get("dice_notation") as string;
+  const targetCharacterId = formData.get("target_character_id") as string;
+  const targetLabel = formData.get("target_label") as string;
+
+  const match = diceNotation.match(/(\d+)\s*W\s*(\d+)/i);
+  if (!match) return;
+  const count = parseInt(match[1], 10);
+  const sides = parseInt(match[2], 10);
+
+  let damage = 0;
+  for (let i = 0; i < count; i++) {
+    damage += Math.floor(Math.random() * sides) + 1;
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  await supabase.rpc("apply_damage_to_character", {
+    char_id: targetCharacterId,
+    amount: damage,
+  });
+
+  await supabase.from("dice_rolls").insert({
+    campaign_id: campaignId,
+    user_id: user.id,
+    dice: `${attackerLabel} → ${targetLabel}`,
+    result: damage,
+  });
+}
+
 // HP eines Spieler-Charakters anpassen - Besitzer selbst oder der Meister
 export async function updateCharacterHp(formData: FormData) {
   const characterId = formData.get("character_id") as string;

@@ -12,6 +12,7 @@ import MasterIntroWrapper from "@/components/MasterIntroWrapper";
 import MasterNotesEditor from "@/components/MasterNotesEditor";
 import InitiativeTracker from "@/components/InitiativeTracker";
 import AttackPanel from "@/components/AttackPanel";
+import MasterAttackPanel from "@/components/MasterAttackPanel";
 import NpcManagerPanel from "@/components/NpcManagerPanel";
 import { endSession, startSession } from "@/app/session-actions";
 import { InventoryItem } from "@/lib/dnd-data";
@@ -118,6 +119,11 @@ export default async function PlayPage({
           };
         }) ?? [];
 
+    const characterLookup: Record<string, { id: string; name: string }> = {};
+    characters?.forEach((c) => {
+      characterLookup[c.user_id] = { id: c.id, name: c.name };
+    });
+
     return (
       <MasterIntroWrapper showIntro={intro === "1"}>
         <div className="h-screen bg-zinc-950 flex flex-col overflow-hidden">
@@ -173,6 +179,13 @@ export default async function PlayPage({
               <NpcManagerPanel
                 campaignId={id}
                 activeMapId={campaignState?.active_map_id ?? null}
+              />
+            }
+            attackContent={
+              <MasterAttackPanel
+                campaignId={id}
+                activeMapId={campaignState?.active_map_id ?? null}
+                characterLookup={characterLookup}
               />
             }
             notesContent={

@@ -7,14 +7,15 @@
 
 import { useRef, useState } from "react";
 
-type Tool = "notes" | "npc" | "players" | "initiative" | "dice" | "map";
+type Tool = "notes" | "npc" | "players" | "initiative" | "dice" | "map" | "attack";
 
 const TOOLS: { key: Tool; label: string; icon: string }[] = [
   { key: "map", label: "Karte wechseln", icon: "🗺️" },
   { key: "npc", label: "NPC erstellen", icon: "👹" },
+  { key: "attack", label: "NPC greift an", icon: "⚔️" },
   { key: "notes", label: "Meine Notizen", icon: "📝" },
   { key: "players", label: "Spieler", icon: "👥" },
-  { key: "initiative", label: "Initiative", icon: "⚔️" },
+  { key: "initiative", label: "Initiative", icon: "🎯" },
   { key: "dice", label: "Würfeln", icon: "🎲" },
 ];
 
@@ -28,6 +29,7 @@ interface OpenWindow {
 export default function MasterToolMenu({
   mapContent,
   npcContent,
+  attackContent,
   notesContent,
   playersContent,
   initiativeContent,
@@ -35,6 +37,7 @@ export default function MasterToolMenu({
 }: {
   mapContent: React.ReactNode;
   npcContent: React.ReactNode;
+  attackContent: React.ReactNode;
   notesContent: React.ReactNode;
   playersContent: React.ReactNode;
   initiativeContent: React.ReactNode;
@@ -48,6 +51,7 @@ export default function MasterToolMenu({
   const content: Record<Tool, React.ReactNode> = {
     map: mapContent,
     npc: npcContent,
+    attack: attackContent,
     notes: notesContent,
     players: playersContent,
     initiative: initiativeContent,
