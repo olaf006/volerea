@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import InventoryManager from "@/components/InventoryManager";
+import HpEditor from "@/components/HpEditor";
 import { abilityModifier, InventoryItem } from "@/lib/dnd-data";
 
 const ABILITY_LABELS: { key: string; label: string }[] = [
@@ -95,10 +96,13 @@ export default async function CharacterDetailPage({
         <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 mb-6">
           <div className="grid grid-cols-2 gap-4">
             <div className="rounded-md bg-zinc-950 border border-zinc-800 px-4 py-3">
-              <span className="text-xs text-zinc-500 block">Lebenspunkte</span>
-              <span className="text-xl text-zinc-100 font-medium">
-                {String(character.hp_current)} / {String(character.hp_max)}
-              </span>
+              <span className="text-xs text-zinc-500 block mb-1">Lebenspunkte</span>
+              <HpEditor
+                characterId={character.id}
+                campaignId={id}
+                hpCurrent={character.hp_current}
+                hpMax={character.hp_max}
+              />
             </div>
             <div className="rounded-md bg-zinc-950 border border-zinc-800 px-4 py-3">
               <span className="text-xs text-zinc-500 block">

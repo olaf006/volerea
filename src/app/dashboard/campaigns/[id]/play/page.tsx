@@ -9,6 +9,7 @@ import SessionGate from "@/components/SessionGate";
 import PlayerListPopup from "@/components/PlayerListPopup";
 import MasterIntroWrapper from "@/components/MasterIntroWrapper";
 import MasterNotesEditor from "@/components/MasterNotesEditor";
+import InitiativeTracker from "@/components/InitiativeTracker";
 import { endSession, startSession } from "@/app/session-actions";
 
 export default async function PlayPage({
@@ -71,6 +72,12 @@ export default async function PlayPage({
     .select("user_id")
     .eq("group_id", campaign.group_id)
     .eq("role", "master")
+    .maybeSingle();
+
+  const { data: combatState } = await supabase
+    .from("combat_state")
+    .select("turn_order, current_index, active")
+    .eq("campaign_id", id)
     .maybeSingle();
 
   // ============================================================
@@ -212,8 +219,18 @@ export default async function PlayPage({
             <PlayerListPopup players={players} />
           </div>
 
-          {/* Unten links: bewusst frei für später */}
-          <div className="hidden lg:block lg:col-start-1 lg:row-start-4" />
+          {/* Unten links: Initiative-Tracker */}
+          <div className="hidden lg:flex lg:col-start-1 lg:row-start-4 rounded-lg border border-zinc-800 bg-zinc-900 p-4 flex-col">
+            <h2 className="text-sm font-medium text-zinc-100 mb-3">
+              Initiative
+            </h2>
+            <InitiativeTracker
+              campaignId={id}
+              activeMapId={campaignState?.active_map_id ?? null}
+              isMaster
+              initialState={combatState ?? null}
+            />
+          </div>
 
           {/* Unten rechts (Mitte): noch frei für weitere Werkzeuge */}
           <div className="lg:col-start-2 lg:row-start-4 rounded-lg border border-dashed border-zinc-800 bg-zinc-900/50 p-4 flex items-center justify-center">
@@ -277,6 +294,18 @@ export default async function PlayPage({
         </div>
 
         <div className="lg:w-80 flex flex-col gap-4">
+          <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+            <h2 className="text-sm font-medium text-zinc-100 mb-3">
+              Initiative
+            </h2>
+            <InitiativeTracker
+              campaignId={id}
+              activeMapId={campaignState?.active_map_id ?? null}
+              isMaster={false}
+              initialState={combatState ?? null}
+            />
+          </div>
+
           <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
             <h2 className="text-sm font-medium text-zinc-100 mb-3">
               Würfeln
