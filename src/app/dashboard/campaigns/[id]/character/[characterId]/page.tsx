@@ -3,7 +3,8 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import InventoryManager from "@/components/InventoryManager";
 import HpEditor from "@/components/HpEditor";
-import { abilityModifier, InventoryItem } from "@/lib/dnd-data";
+import LevelUpSection from "@/components/LevelUpSection";
+import { abilityModifier, InventoryItem, CharClass, AbilityKeyName } from "@/lib/dnd-data";
 
 const ABILITY_LABELS: { key: string; label: string }[] = [
   { key: "strength", label: "Stärke" },
@@ -91,6 +92,27 @@ export default async function CharacterDetailPage({
             {character.race} {character.class}, Stufe {character.level}
           </span>
         </div>
+
+        {isOwner && (
+          <LevelUpSection
+            campaignId={id}
+            characterId={character.id}
+            charClass={character.class as CharClass}
+            currentLevel={character.level}
+            currentAbilities={{
+              strength: character.strength,
+              dexterity: character.dexterity,
+              constitution: character.constitution,
+              intelligence: character.intelligence,
+              wisdom: character.wisdom,
+              charisma: character.charisma,
+            } as Record<AbilityKeyName, number>}
+            currentDetails={{
+              cantrips: details.cantrips as string[] | undefined,
+              level1Spells: details.level1Spells as string[] | undefined,
+            }}
+          />
+        )}
 
         {/* Kampfwerte */}
         <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 mb-6">

@@ -176,6 +176,86 @@ export async function updateInventory(formData: FormData) {
   redirect(`/dashboard/campaigns/${campaignId}/character/${characterId}`);
 }
 
+export async function levelUpCharacter(formData: FormData) {
+  const characterId = formData.get("character_id") as string;
+  const campaignId = formData.get("campaign_id") as string;
+  const newLevel = Number(formData.get("new_level"));
+  const hpGain = Number(formData.get("hp_gain"));
+  const newProficiencyBonus = Number(formData.get("proficiency_bonus"));
+
+  const abilitiesJson = formData.get("abilities_json") as string; // aktualisierte Werte nach ASI
+  const detailsJson = formData.get("details_json") as string; // neue Zauber/Fertigkeiten ergänzt
+
+  const { supabase, user } = await getCurrentUser();
+
+  const { data: character } = await supabase
+    .from("characters")
+    .select("user_id, hp_max, hp_current, details")
+    .eq("id", characterId)
+    .single();
+
+  if (!character) {
+    redirect(
+      `/dashboard/campaigns/${campaignId}?error=${encodeURIComponent(
+        "Charakter nicht gefunden."
+      )}`
+    );
+  }
+
+  const isOwner = character!.user_id === user.id;
+  const isMaster = isOwner ? true : await isMasterOfCampaign(supabase, campaignId, user.id);
+  if (!isOwner && !isMaster) {
+    redirect(
+      `/dashboard/campaigns/${campaignId}?error=${encodeURIComponent(
+        "Nur der Besitzer oder der Meister darf diesen Charakter hochstufen."
+      )}`
+    );
+  }
+
+  let abilities: Record<string, number> = {};
+  try {
+    abilities = JSON.parse(abilitiesJson || "{}");
+  } catch {
+    abilities = {};
+  }
+
+  let newDetails: Record<string, unknown> = {};
+  try {
+    newDetails = JSON.parse(detailsJson || "{}");
+  } catch {
+    newDetails = {};
+  }
+
+  const currentDetails = (character!.details as Record<string, unknown>) ?? {};
+
+  const { error } = await supabase
+    .from("characters")
+    .update({
+      level: newLevel,
+      hp_max: character!.hp_max + hpGain,
+      hp_current: character!.hp_current + hpGain,
+      ...abilities,
+      details: {
+        ...currentDetails,
+        ...newDetails,
+        proficiencyBonus: newProficiencyBonus,
+      },
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", characterId);
+
+  if (error) {
+    redirect(
+      `/dashboard/campaigns/${campaignId}/character/${characterId}?error=${encodeURIComponent(
+        error.message
+      )}`
+    );
+  }
+
+  revalidatePath(`/dashboard/campaigns/${campaignId}/character/${characterId}`);
+  redirect(`/dashboard/campaigns/${campaignId}/character/${characterId}`);
+}
+
 export async function deleteCharacter(formData: FormData) {
   const characterId = formData.get("character_id") as string;
   const campaignId = formData.get("campaign_id") as string;

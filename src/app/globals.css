@@ -10,36 +10,12 @@
   --color-foreground: var(--foreground);
   --font-sans: ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, monospace;
-
-  /* Warmes Fantasy-Farbschema statt kaltem Grau: dunkles Holz/Leder als
-     Basis, Pergament-Töne für Text und helle Flächen, Gold statt Grün
-     für "aktiv/live"-Zustände. Wird von jeder Farb-Klasse (Hintergrund,
-     Text, Rahmen), die "zinc" im Namen trägt, automatisch übernommen. */
-  --color-zinc-50: #faf5ea;
-  --color-zinc-100: #f0e6cc;
-  --color-zinc-200: #e0cd9e;
-  --color-zinc-300: #cbad70;
-  --color-zinc-400: #b08d52;
-  --color-zinc-500: #93713f;
-  --color-zinc-600: #765a34;
-  --color-zinc-700: #5c452a;
-  --color-zinc-800: #453320;
-  --color-zinc-900: #2e2216;
-  --color-zinc-950: #1a1109;
-
-  --color-emerald-200: #f0dfa0;
-  --color-emerald-300: #e8cd6a;
-  --color-emerald-400: #d4af37;
-  --color-emerald-700: #7a6329;
-  --color-emerald-800: #59461f;
-  --color-emerald-900: #3d2f15;
-  --color-emerald-950: #2b210f;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #1a1109;
-    --foreground: #f0e6cc;
+    --background: #0a0a0a;
+    --foreground: #ededed;
   }
 }
 
@@ -47,12 +23,4 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
-}
-
-/* Überschriften in einer Buch-/Pergament-Schrift statt der normalen
-   Systemschrift - gibt der ganzen Seite mehr Fantasy-Charakter, ohne
-   dass externe Schriften geladen werden müssen. */
-h1, h2, h3 {
-  font-family: Georgia, Cambria, "Times New Roman", Times, serif;
-  letter-spacing: 0.01em;
 }
