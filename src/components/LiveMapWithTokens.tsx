@@ -1,12 +1,20 @@
 "use client";
 
 // Live-Karte mit Pins (wie Google-Maps-Marker). Pins verschieben läuft
-// über Pointer-Events (funktioniert auf Maus UND Touch). Ein kurzes
-// Antippen eines Meister-Pins öffnet den HP-Editor.
+// über Pointer-Events (funktioniert auf Maus UND Touch).
+//
+// WICHTIG zur Positionierung: Pins werden in Prozent relativ zum BILD
+// gespeichert (nicht zum umgebenden Kasten) - wir berechnen dafür immer
+// die tatsächliche Bild-Box innerhalb des Containers (unter
+// Berücksichtigung von Letterboxing durch object-contain). Das ist
+// nötig, weil Meister- und Spieler-Bildschirm unterschiedlich große
+// Kästen um die Karte haben - ohne diese Berechnung würden Pins bei
+// unterschiedlichen Seitenverhältnissen leicht verschoben erscheinen.
 
 import { useEffect, useRef, useState } from "react";
 import { createClient, createAuthedRealtimeClient } from "@/lib/supabase/client";
 import { updateTokenHp } from "@/app/combat-actions";
+import { deleteToken } from "@/app/tokens-actions";
 
 interface MapInfo {
   id: string;
@@ -25,7 +33,11 @@ interface Token {
   placed: boolean;
   hp_current: number | null;
   hp_max: number | null;
-  details: { weapon?: { name: string; damage: string } | null; loot?: string | null } | null;
+  details: {
+    weapon?: { name: string; damage: string } | null;
+    loot?: string | null;
+    ac?: number | null;
+  } | null;
 }
 
 function colorForToken(id: string) {
@@ -83,9 +95,42 @@ export default function LiveMapWithTokens({
   const tapStartClient = useRef<{ x: number; y: number } | null>(null);
   const [hpEditTokenId, setHpEditTokenId] = useState<string | null>(null);
 
+  const [naturalSize, setNaturalSize] = useState<{ w: number; h: number } | null>(null);
+  const [containerSize, setContainerSize] = useState({ w: 0, h: 0 });
+
   const activeMap = maps.find((m) => m.id === activeMapId);
 
-  // Aktive Karte live verfolgen
+  useEffect(() => {
+    setNaturalSize(null);
+  }, [activeMapId]);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const el = containerRef.current;
+    const ro = new ResizeObserver((entries) => {
+      const { width, height } = entries[0].contentRect;
+      setContainerSize({ w: width, h: height });
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  function getImageBox() {
+    if (!naturalSize || containerSize.w === 0 || containerSize.h === 0) return null;
+    const scale = Math.min(
+      containerSize.w / naturalSize.w,
+      containerSize.h / naturalSize.h
+    );
+    const renderedW = naturalSize.w * scale;
+    const renderedH = naturalSize.h * scale;
+    return {
+      offsetX: (containerSize.w - renderedW) / 2,
+      offsetY: (containerSize.h - renderedH) / 2,
+      renderedW,
+      renderedH,
+    };
+  }
+
   useEffect(() => {
     let active = true;
     let cleanup: (() => void) | null = null;
@@ -120,8 +165,6 @@ export default function LiveMapWithTokens({
     };
   }, [campaignId]);
 
-  // Pins für die aktuell aktive Karte laden, den eigenen Spieler-Pin
-  // anlegen falls er auf dieser Karte noch fehlt, und live verfolgen.
   useEffect(() => {
     if (!activeMapId) {
       setTokens([]);
@@ -226,15 +269,24 @@ export default function LiveMapWithTokens({
 
   function posFromEvent(e: { clientX: number; clientY: number }) {
     if (!containerRef.current) return null;
+    const box = getImageBox();
+    if (!box) return null;
     const rect = containerRef.current.getBoundingClientRect();
-    const inside =
-      e.clientX >= rect.left &&
-      e.clientX <= rect.right &&
-      e.clientY >= rect.top &&
-      e.clientY <= rect.bottom;
-    const x = Math.min(100, Math.max(0, ((e.clientX - rect.left) / rect.width) * 100));
-    const y = Math.min(100, Math.max(0, ((e.clientY - rect.top) / rect.height) * 100));
+    const localX = e.clientX - rect.left - box.offsetX;
+    const localY = e.clientY - rect.top - box.offsetY;
+    const inside = localX >= 0 && localX <= box.renderedW && localY >= 0 && localY <= box.renderedH;
+    const x = Math.min(100, Math.max(0, (localX / box.renderedW) * 100));
+    const y = Math.min(100, Math.max(0, (localY / box.renderedH) * 100));
     return { x, y, inside };
+  }
+
+  function pixelPosFor(token: Token) {
+    const box = getImageBox();
+    if (!box) return { left: `${token.pos_x}%`, top: `${token.pos_y}%` };
+    return {
+      left: `${box.offsetX + (token.pos_x / 100) * box.renderedW}px`,
+      top: `${box.offsetY + (token.pos_y / 100) * box.renderedH}px`,
+    };
   }
 
   useEffect(() => {
@@ -275,12 +327,25 @@ export default function LiveMapWithTokens({
           .then(({ error }) => {
             if (error) console.error("Pin-Position konnte nicht gespeichert werden:", error.message);
           });
-      } else if (dragStartPos.current && token) {
-        // Außerhalb der Karte losgelassen -> zurück zur letzten Position
-        const orig = dragStartPos.current;
-        setTokens((prev) =>
-          prev.map((t) => (t.id === token.id ? { ...t, pos_x: orig.x, pos_y: orig.y } : t))
-        );
+      } else if (token) {
+        if (isMaster && token.owner_user_id === null) {
+          if (confirm(`${token.label} wirklich von der Karte entfernen?`)) {
+            const formData = new FormData();
+            formData.set("campaign_id", campaignId);
+            formData.set("token_id", token.id);
+            deleteToken(formData);
+          } else if (dragStartPos.current) {
+            const orig = dragStartPos.current;
+            setTokens((prev) =>
+              prev.map((t) => (t.id === token.id ? { ...t, pos_x: orig.x, pos_y: orig.y } : t))
+            );
+          }
+        } else if (dragStartPos.current) {
+          const orig = dragStartPos.current;
+          setTokens((prev) =>
+            prev.map((t) => (t.id === token.id ? { ...t, pos_x: orig.x, pos_y: orig.y } : t))
+          );
+        }
       }
 
       setDraggingId(null);
@@ -319,11 +384,16 @@ export default function LiveMapWithTokens({
           alt={activeMap.name}
           className="w-full h-full object-contain block pointer-events-none"
           draggable={false}
+          onLoad={(e) => {
+            const img = e.currentTarget;
+            setNaturalSize({ w: img.naturalWidth, h: img.naturalHeight });
+          }}
         />
 
         {tokens.map((token) => {
           const draggable = canDrag(token);
           const isBeingDragged = draggingId === token.id;
+          const pos = pixelPosFor(token);
           return (
             <div
               key={token.id}
@@ -334,7 +404,7 @@ export default function LiveMapWithTokens({
                 tapStartClient.current = { x: e.clientX, y: e.clientY };
                 setDraggingId(token.id);
               }}
-              style={{ left: `${token.pos_x}%`, top: `${token.pos_y}%` }}
+              style={pos}
               className={`absolute -translate-x-1/2 -translate-y-1/2 w-9 h-9 ${
                 draggable ? "cursor-grab active:cursor-grabbing" : "cursor-default"
               } ${isBeingDragged ? "z-20 scale-110" : "z-10"}`}
@@ -366,6 +436,12 @@ export default function LiveMapWithTokens({
         })}
       </div>
 
+      {isMaster && (
+        <p className="text-center text-xs text-zinc-600 pt-1">
+          NPC vom Bild ziehen, um ihn zu entfernen.
+        </p>
+      )}
+
       {hpEditTokenId && (() => {
         const token = tokens.find((t) => t.id === hpEditTokenId);
         if (!token) return null;
@@ -379,12 +455,18 @@ export default function LiveMapWithTokens({
               onClick={(e) => e.stopPropagation()}
             >
               <h3 className="text-zinc-100 font-medium mb-3">{token.label} · HP</h3>
-              {(token.details?.weapon || token.details?.loot) && (
+              {(token.details?.weapon || token.details?.loot || token.details?.ac) && (
                 <div className="mb-3 text-xs text-zinc-400 space-y-0.5">
                   {token.details?.weapon && (
                     <p>
                       <span className="text-zinc-500">Waffe: </span>
                       {token.details.weapon.name} ({token.details.weapon.damage})
+                    </p>
+                  )}
+                  {token.details?.ac != null && (
+                    <p>
+                      <span className="text-zinc-500">Rüstungsklasse: </span>
+                      {token.details.ac}
                     </p>
                   )}
                   {token.details?.loot && (

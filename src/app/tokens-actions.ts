@@ -9,6 +9,7 @@ export async function createToken(formData: FormData) {
   const label = formData.get("label") as string;
   const file = formData.get("file") as File | null;
   const hpMax = formData.get("hp_max") as string;
+  const ac = formData.get("ac") as string;
   const weaponName = formData.get("weapon_name") as string;
   const weaponDamage = formData.get("weapon_damage") as string;
   const loot = formData.get("loot") as string;
@@ -52,6 +53,7 @@ export async function createToken(formData: FormData) {
     details: {
       weapon: weaponName ? { name: weaponName, damage: weaponDamage } : null,
       loot: loot || null,
+      ac: ac ? Number(ac) : null,
     },
   });
 
