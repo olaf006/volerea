@@ -116,7 +116,20 @@ export default function LiveMapWithTokens({
   }, []);
 
   function getImageBox() {
-    if (!naturalSize || containerSize.w === 0 || containerSize.h === 0) return null;
+    // Solange die echte Bildgröße noch nicht bekannt ist (kurz nach dem
+    // Laden), rechnen wir übergangsweise so, als würde das Bild den
+    // ganzen Kasten ausfüllen - damit lässt sich sofort ziehen, statt
+    // dass gar nichts passiert. Sobald die echten Maße da sind, wird's
+    // automatisch präziser.
+    if (!naturalSize || containerSize.w === 0 || containerSize.h === 0) {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) {
+          return { offsetX: 0, offsetY: 0, renderedW: rect.width, renderedH: rect.height };
+        }
+      }
+      return null;
+    }
     const scale = Math.min(
       containerSize.w / naturalSize.w,
       containerSize.h / naturalSize.h
@@ -389,6 +402,15 @@ export default function LiveMapWithTokens({
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
+          ref={(img) => {
+            if (img && img.complete && img.naturalWidth > 0) {
+              setNaturalSize((prev) =>
+                prev?.w === img.naturalWidth && prev?.h === img.naturalHeight
+                  ? prev
+                  : { w: img.naturalWidth, h: img.naturalHeight }
+              );
+            }
+          }}
           src={activeMap.image_url}
           alt={activeMap.name}
           className="w-full h-full object-contain block pointer-events-none"
