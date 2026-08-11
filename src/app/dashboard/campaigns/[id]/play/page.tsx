@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import LiveMapWithTokens from "@/components/LiveMapWithTokens";
+import MasterToolMenu from "@/components/MasterToolMenu";
 import MapSwitcher from "@/components/MapSwitcher";
 import DiceRoller from "@/components/DiceRoller";
 import LiveDiceFeed from "@/components/LiveDiceFeed";
@@ -11,6 +12,7 @@ import MasterIntroWrapper from "@/components/MasterIntroWrapper";
 import MasterNotesEditor from "@/components/MasterNotesEditor";
 import InitiativeTracker from "@/components/InitiativeTracker";
 import AttackPanel from "@/components/AttackPanel";
+import NpcManagerPanel from "@/components/NpcManagerPanel";
 import { endSession, startSession } from "@/app/session-actions";
 import { InventoryItem } from "@/lib/dnd-data";
 
@@ -149,77 +151,62 @@ export default async function PlayPage({
             )}
           </div>
 
-          <div className="flex-1 grid grid-cols-1 lg:grid-cols-[220px_1fr_260px] lg:grid-rows-[42vh_1fr] gap-2 p-2 overflow-hidden min-h-0">
-            {/* Notizen: links, volle Höhe */}
-            <div className="lg:col-start-1 lg:row-start-1 lg:row-span-2 rounded-lg border border-zinc-800 bg-zinc-900 p-3 flex flex-col min-h-0">
-              <h2 className="text-xs font-medium text-zinc-100 mb-2 flex-shrink-0">
-                Meine Notizen
-              </h2>
-              <div className="flex-1 min-h-0">
-                <MasterNotesEditor
-                  campaignId={id}
-                  initialCategories={
-                    (campaign.notes_categories as {
-                      id: string;
-                      title: string;
-                      content: string;
-                    }[]) ?? []
-                  }
-                />
-              </div>
-            </div>
+          <div className="flex-1 min-h-0 p-2">
+            <LiveMapWithTokens
+              campaignId={id}
+              maps={maps ?? []}
+              initialActiveMapId={campaignState?.active_map_id ?? null}
+              isMaster
+              myUserId={user.id}
+            />
+          </div>
 
-            {/* Karte: oben mittig, feste Höhe */}
-            <div className="lg:col-start-2 lg:row-start-1 min-h-0 flex flex-col gap-2 overflow-y-auto">
+          <MasterToolMenu
+            mapContent={
               <MapSwitcher
                 campaignId={id}
                 maps={maps ?? []}
                 activeMapId={campaignState?.active_map_id ?? null}
               />
-              <LiveMapWithTokens
+            }
+            npcContent={
+              <NpcManagerPanel
                 campaignId={id}
-                maps={maps ?? []}
-                initialActiveMapId={campaignState?.active_map_id ?? null}
-                isMaster
-                myUserId={user.id}
-                compact
+                activeMapId={campaignState?.active_map_id ?? null}
               />
-            </div>
-
-            {/* Spieler: rechts, volle Höhe */}
-            <div className="lg:col-start-3 lg:row-start-1 lg:row-span-2 rounded-lg border border-zinc-800 bg-zinc-900 p-3 min-h-0 overflow-y-auto">
-              <h2 className="text-xs font-medium text-zinc-100 mb-2">Spieler</h2>
-              <PlayerListPopup players={players} />
-            </div>
-
-            {/* Würfel + Initiative: unten mittig, nebeneinander */}
-            <div className="lg:col-start-2 lg:row-start-2 grid grid-cols-2 gap-2 min-h-0">
-              <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-3 flex flex-col min-h-0">
-                <h2 className="text-xs font-medium text-zinc-100 mb-2 flex-shrink-0">
-                  Würfeln
-                </h2>
+            }
+            notesContent={
+              <MasterNotesEditor
+                campaignId={id}
+                initialCategories={
+                  (campaign.notes_categories as {
+                    id: string;
+                    title: string;
+                    content: string;
+                  }[]) ?? []
+                }
+              />
+            }
+            playersContent={<PlayerListPopup players={players} />}
+            initiativeContent={
+              <InitiativeTracker
+                campaignId={id}
+                activeMapId={campaignState?.active_map_id ?? null}
+                isMaster
+                initialState={combatState ?? null}
+              />
+            }
+            diceContent={
+              <div className="space-y-3">
                 <DiceRoller campaignId={id} />
-                <div className="flex-1 overflow-y-auto mt-2 min-h-0">
-                  <LiveDiceFeed
-                    campaignId={id}
-                    initialRolls={rolls ?? []}
-                    labels={diceLabels}
-                  />
-                </div>
-              </div>
-              <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-3 overflow-y-auto min-h-0">
-                <h2 className="text-xs font-medium text-zinc-100 mb-2">
-                  Initiative
-                </h2>
-                <InitiativeTracker
+                <LiveDiceFeed
                   campaignId={id}
-                  activeMapId={campaignState?.active_map_id ?? null}
-                  isMaster
-                  initialState={combatState ?? null}
+                  initialRolls={rolls ?? []}
+                  labels={diceLabels}
                 />
               </div>
-            </div>
-          </div>
+            }
+          />
         </div>
       </MasterIntroWrapper>
     );

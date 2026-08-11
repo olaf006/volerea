@@ -46,7 +46,7 @@ export async function createToken(formData: FormData) {
     image_url: imageUrl,
     pos_x: 50,
     pos_y: 50,
-    placed: false,
+    placed: true,
     hp_current: hp,
     hp_max: hp,
     details: {

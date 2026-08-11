@@ -11,11 +11,13 @@ import { MONSTER_TEMPLATES } from "@/lib/dnd-data";
 export default function NpcCreationForm({
   campaignId,
   mapId,
+  alwaysOpen,
 }: {
   campaignId: string;
   mapId: string;
+  alwaysOpen?: boolean;
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(!!alwaysOpen);
   const [templateIdx, setTemplateIdx] = useState(-1);
   const [label, setLabel] = useState("");
   const [hpMax, setHpMax] = useState("");
@@ -41,7 +43,7 @@ export default function NpcCreationForm({
     setWeaponName("");
     setWeaponDamage("");
     setLoot("");
-    setOpen(false);
+    if (!alwaysOpen) setOpen(false);
   }
 
   if (!open) {
