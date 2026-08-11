@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import DeleteCharacterButton from "@/components/DeleteCharacterButton";
 import LiveMapDisplay from "@/components/LiveMapDisplay";
+import CollapsibleMapPreview from "@/components/CollapsibleMapPreview";
 import MapUploadForm from "@/components/MapUploadForm";
 import MasterNotesEditor from "@/components/MasterNotesEditor";
 import { setActiveMap, clearActiveMap, deleteMap } from "@/app/maps-actions";
@@ -123,11 +124,8 @@ export default async function CampaignPage({
           </p>
         )}
 
-        {/* Karten-Vorschau: kompakt, für alle sichtbar */}
-        <div className="mb-6">
-          <h2 className="text-lg font-medium text-zinc-100 mb-2">
-            Aktive Karte
-          </h2>
+        {/* Karten-Vorschau: kompakt, für alle sichtbar, ein-/ausblendbar */}
+        <CollapsibleMapPreview>
           <div className="max-h-64 overflow-hidden rounded-lg">
             <LiveMapDisplay
               campaignId={id}
@@ -135,7 +133,7 @@ export default async function CampaignPage({
               initialActiveMapId={campaignState?.active_map_id ?? null}
             />
           </div>
-        </div>
+        </CollapsibleMapPreview>
 
         {isMaster && (
           <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 mb-6 space-y-4">

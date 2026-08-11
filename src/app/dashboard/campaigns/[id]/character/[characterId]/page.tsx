@@ -3,8 +3,8 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import InventoryManager from "@/components/InventoryManager";
 import HpEditor from "@/components/HpEditor";
-import LevelUpSection from "@/components/LevelUpSection";
-import { abilityModifier, InventoryItem, CharClass, AbilityKeyName } from "@/lib/dnd-data";
+import LevelUpWatcher from "@/components/LevelUpWatcher";
+import { abilityModifier, InventoryItem, xpForNextLevel } from "@/lib/dnd-data";
 
 const ABILITY_LABELS: { key: string; label: string }[] = [
   { key: "strength", label: "Stärke" },
@@ -32,7 +32,7 @@ export default async function CharacterDetailPage({
   const { data: character } = await supabase
     .from("characters")
     .select(
-      "id, name, race, class, level, strength, dexterity, constitution, intelligence, wisdom, charisma, hp_current, hp_max, armor_class, details, user_id, campaign_id"
+      "id, name, race, class, level, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, hp_current, hp_max, armor_class, details, user_id, campaign_id"
     )
     .eq("id", characterId)
     .single();
@@ -93,26 +93,20 @@ export default async function CharacterDetailPage({
           </span>
         </div>
 
-        {isOwner && (
-          <LevelUpSection
-            campaignId={id}
-            characterId={character.id}
-            charClass={character.class as CharClass}
-            currentLevel={character.level}
-            currentAbilities={{
-              strength: character.strength,
-              dexterity: character.dexterity,
-              constitution: character.constitution,
-              intelligence: character.intelligence,
-              wisdom: character.wisdom,
-              charisma: character.charisma,
-            } as Record<AbilityKeyName, number>}
-            currentDetails={{
-              cantrips: details.cantrips as string[] | undefined,
-              level1Spells: details.level1Spells as string[] | undefined,
-            }}
-          />
-        )}
+        {isOwner && <LevelUpWatcher campaignId={id} characterId={character.id} />}
+
+        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 mb-6">
+          <span className="text-xs text-zinc-500 block">Erfahrungspunkte</span>
+          <span className="text-zinc-100 font-medium">
+            {character.xp}
+            {xpForNextLevel(character.level) !== null &&
+              ` / ${xpForNextLevel(character.level)} für Stufe ${character.level + 1}`}
+          </span>
+          <p className="text-xs text-zinc-500 mt-1">
+            Der Meister vergibt XP - sobald genug da sind, poppt automatisch
+            die Auswahl für die neue Stufe auf.
+          </p>
+        </div>
 
         {/* Kampfwerte */}
         <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 mb-6">

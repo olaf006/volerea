@@ -1,10 +1,11 @@
 "use client";
 
 // Spielerliste für den Meister: Klick auf einen Spieler öffnet ein Popup
-// mit den vollen Charakterdaten (Attribute, Kampfwerte, Inventar).
+// mit den vollen Charakterdaten (Attribute, Kampfwerte, Inventar, XP).
 
 import { useState } from "react";
-import { abilityModifier, InventoryItem } from "@/lib/dnd-data";
+import { abilityModifier, InventoryItem, xpForNextLevel } from "@/lib/dnd-data";
+import { addXp } from "@/app/characters-actions";
 
 interface CharacterFull {
   id: string;
@@ -12,6 +13,7 @@ interface CharacterFull {
   race: string;
   class: string;
   level: number;
+  xp: number;
   strength: number;
   dexterity: number;
   constitution: number;
@@ -39,8 +41,15 @@ const ABILITY_LABELS: { key: keyof CharacterFull; label: string }[] = [
   { key: "charisma", label: "Charisma" },
 ];
 
-export default function PlayerListPopup({ players }: { players: PlayerRow[] }) {
+export default function PlayerListPopup({
+  players,
+  campaignId,
+}: {
+  players: PlayerRow[];
+  campaignId: string;
+}) {
   const [selected, setSelected] = useState<PlayerRow | null>(null);
+  const [xpInput, setXpInput] = useState("");
 
   return (
     <>
@@ -99,6 +108,39 @@ export default function PlayerListPopup({ players }: { players: PlayerRow[] }) {
               </p>
             ) : (
               <div className="space-y-4">
+                <div className="rounded-md bg-zinc-950 border border-zinc-800 px-3 py-2">
+                  <span className="text-xs text-zinc-500 block">Erfahrungspunkte</span>
+                  <span className="text-zinc-100 font-medium">
+                    {selected.character.xp}
+                    {xpForNextLevel(selected.character.level) !== null &&
+                      ` / ${xpForNextLevel(selected.character.level)} für Stufe ${
+                        selected.character.level + 1
+                      }`}
+                  </span>
+                  <form
+                    action={addXp}
+                    onSubmit={() => setXpInput("")}
+                    className="flex gap-2 mt-2"
+                  >
+                    <input type="hidden" name="character_id" value={selected.character.id} />
+                    <input type="hidden" name="campaign_id" value={campaignId} />
+                    <input
+                      type="number"
+                      name="amount"
+                      value={xpInput}
+                      onChange={(e) => setXpInput(e.target.value)}
+                      placeholder="XP"
+                      className="w-24 rounded-md bg-zinc-900 border border-zinc-700 px-2 py-1 text-zinc-100 text-sm"
+                    />
+                    <button
+                      type="submit"
+                      className="text-xs rounded-md bg-zinc-100 text-zinc-900 px-3 py-1.5 font-medium hover:bg-white transition"
+                    >
+                      XP hinzufügen
+                    </button>
+                  </form>
+                </div>
+
                 <div className="grid grid-cols-2 gap-3">
                   <div className="rounded-md bg-zinc-950 border border-zinc-800 px-3 py-2">
                     <span className="text-xs text-zinc-500 block">

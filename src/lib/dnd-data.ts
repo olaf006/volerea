@@ -353,6 +353,25 @@ export const SPELLCASTING: Partial<Record<CharClass, CasterInfo>> = {
   },
 };
 
+// Offizielle XP-Schwellenwerte pro Stufe (Index 0 = Stufe 1, Index 19 = Stufe 20)
+export const XP_THRESHOLDS = [
+  0, 300, 900, 2700, 6500, 14000, 23000, 34000, 48000, 64000, 85000, 100000,
+  120000, 140000, 165000, 195000, 225000, 265000, 305000, 355000,
+];
+
+export function levelForXp(xp: number): number {
+  let level = 1;
+  for (let i = 0; i < XP_THRESHOLDS.length; i++) {
+    if (xp >= XP_THRESHOLDS[i]) level = i + 1;
+  }
+  return Math.min(20, level);
+}
+
+export function xpForNextLevel(currentLevel: number): number | null {
+  if (currentLevel >= 20) return null;
+  return XP_THRESHOLDS[currentLevel]; // Index = currentLevel entspricht Schwelle für currentLevel+1
+}
+
 export function abilityModifier(score: number) {
   return Math.floor((score - 10) / 2);
 }

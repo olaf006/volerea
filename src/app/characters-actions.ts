@@ -7,6 +7,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { levelForXp } from "@/lib/dnd-data";
 
 async function getCurrentUser() {
   const supabase = await createClient();
@@ -183,8 +184,8 @@ export async function levelUpCharacter(formData: FormData) {
   const hpGain = Number(formData.get("hp_gain"));
   const newProficiencyBonus = Number(formData.get("proficiency_bonus"));
 
-  const abilitiesJson = formData.get("abilities_json") as string; // aktualisierte Werte nach ASI
-  const detailsJson = formData.get("details_json") as string; // neue Zauber/Fertigkeiten ergänzt
+  const abilitiesJson = formData.get("abilities_json") as string;
+  const detailsJson = formData.get("details_json") as string;
 
   const { supabase, user } = await getCurrentUser();
 
@@ -194,23 +195,11 @@ export async function levelUpCharacter(formData: FormData) {
     .eq("id", characterId)
     .single();
 
-  if (!character) {
-    redirect(
-      `/dashboard/campaigns/${campaignId}?error=${encodeURIComponent(
-        "Charakter nicht gefunden."
-      )}`
-    );
-  }
+  if (!character) return;
 
-  const isOwner = character!.user_id === user.id;
+  const isOwner = character.user_id === user.id;
   const isMaster = isOwner ? true : await isMasterOfCampaign(supabase, campaignId, user.id);
-  if (!isOwner && !isMaster) {
-    redirect(
-      `/dashboard/campaigns/${campaignId}?error=${encodeURIComponent(
-        "Nur der Besitzer oder der Meister darf diesen Charakter hochstufen."
-      )}`
-    );
-  }
+  if (!isOwner && !isMaster) return;
 
   let abilities: Record<string, number> = {};
   try {
@@ -226,14 +215,14 @@ export async function levelUpCharacter(formData: FormData) {
     newDetails = {};
   }
 
-  const currentDetails = (character!.details as Record<string, unknown>) ?? {};
+  const currentDetails = (character.details as Record<string, unknown>) ?? {};
 
-  const { error } = await supabase
+  await supabase
     .from("characters")
     .update({
       level: newLevel,
-      hp_max: character!.hp_max + hpGain,
-      hp_current: character!.hp_current + hpGain,
+      hp_max: character.hp_max + hpGain,
+      hp_current: character.hp_current + hpGain,
       ...abilities,
       details: {
         ...currentDetails,
@@ -244,16 +233,48 @@ export async function levelUpCharacter(formData: FormData) {
     })
     .eq("id", characterId);
 
-  if (error) {
-    redirect(
-      `/dashboard/campaigns/${campaignId}/character/${characterId}?error=${encodeURIComponent(
-        error.message
-      )}`
-    );
+  revalidatePath(`/dashboard/campaigns/${campaignId}/character/${characterId}`);
+  revalidatePath(`/dashboard/campaigns/${campaignId}/play`);
+}
+
+// Meister vergibt XP an einen Charakter. Wird dadurch die Schwelle zur
+// nächsten Stufe überschritten, entsteht automatisch ein Level-Up-
+// Ereignis - das löst die große Ankündigung für alle und das
+// Auswahl-Pop-up beim betroffenen Spieler aus, ganz ohne Klick.
+export async function addXp(formData: FormData) {
+  const characterId = formData.get("character_id") as string;
+  const campaignId = formData.get("campaign_id") as string;
+  const amount = Number(formData.get("amount"));
+
+  const { supabase, user } = await getCurrentUser();
+
+  const isMaster = await isMasterOfCampaign(supabase, campaignId, user.id);
+  if (!isMaster) return;
+
+  const { data: character } = await supabase
+    .from("characters")
+    .select("xp, level, name, user_id")
+    .eq("id", characterId)
+    .single();
+
+  if (!character) return;
+
+  const newXp = character.xp + amount;
+  const pendingLevel = levelForXp(newXp);
+
+  await supabase.from("characters").update({ xp: newXp }).eq("id", characterId);
+
+  if (pendingLevel > character.level) {
+    await supabase.from("level_up_events").insert({
+      campaign_id: campaignId,
+      character_id: characterId,
+      character_name: character.name,
+      owner_user_id: character.user_id,
+      new_level: character.level + 1,
+    });
   }
 
-  revalidatePath(`/dashboard/campaigns/${campaignId}/character/${characterId}`);
-  redirect(`/dashboard/campaigns/${campaignId}/character/${characterId}`);
+  revalidatePath(`/dashboard/campaigns/${campaignId}/play`);
 }
 
 export async function deleteCharacter(formData: FormData) {

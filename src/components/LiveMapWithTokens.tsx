@@ -289,6 +289,15 @@ export default function LiveMapWithTokens({
     };
   }
 
+  // WICHTIG: tokensRef hält den aktuellen Stand für die Zieh-Handler,
+  // damit die Ereignisüberwachung unten NICHT bei jeder einzelnen
+  // Positionsänderung neu aufgebaut werden muss (das war der Bug, der
+  // gelegentlich zu "Pin lässt sich nicht mehr bewegen" führte).
+  const tokensRef = useRef<Token[]>([]);
+  useEffect(() => {
+    tokensRef.current = tokens;
+  }, [tokens]);
+
   useEffect(() => {
     if (!draggingId) return;
 
@@ -307,7 +316,7 @@ export default function LiveMapWithTokens({
       const movedPixels = start ? Math.hypot(e.clientX - start.x, e.clientY - start.y) : 999;
       const wasTap = movedPixels < 6;
 
-      const token = tokens.find((t) => t.id === draggingId);
+      const token = tokensRef.current.find((t) => t.id === draggingId);
 
       if (wasTap && token) {
         if (dragStartPos.current) {
@@ -360,7 +369,7 @@ export default function LiveMapWithTokens({
       window.removeEventListener("pointerup", handleUp);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [draggingId, tokens]);
+  }, [draggingId]);
 
   if (!activeMap) {
     return (

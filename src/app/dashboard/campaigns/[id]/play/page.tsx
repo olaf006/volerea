@@ -14,6 +14,8 @@ import InitiativeTracker from "@/components/InitiativeTracker";
 import AttackPanel from "@/components/AttackPanel";
 import MasterAttackPanel from "@/components/MasterAttackPanel";
 import NpcManagerPanel from "@/components/NpcManagerPanel";
+import LevelUpBanner from "@/components/LevelUpBanner";
+import LevelUpWatcher from "@/components/LevelUpWatcher";
 import { endSession, startSession } from "@/app/session-actions";
 import { InventoryItem } from "@/lib/dnd-data";
 
@@ -91,7 +93,7 @@ export default async function PlayPage({
     const { data: characters } = await supabase
       .from("characters")
       .select(
-        "id, user_id, name, race, class, level, strength, dexterity, constitution, intelligence, wisdom, charisma, hp_current, hp_max, armor_class, details"
+        "id, user_id, name, race, class, level, xp, strength, dexterity, constitution, intelligence, wisdom, charisma, hp_current, hp_max, armor_class, details"
       )
       .eq("campaign_id", id);
 
@@ -127,6 +129,7 @@ export default async function PlayPage({
     return (
       <MasterIntroWrapper showIntro={intro === "1"}>
         <div className="h-screen bg-zinc-950 flex flex-col overflow-hidden">
+          <LevelUpBanner campaignId={id} />
           <div className="flex items-center justify-between px-3 py-2 border-b border-zinc-800 flex-shrink-0">
             <Link
               href={`/dashboard/campaigns/${id}`}
@@ -200,7 +203,7 @@ export default async function PlayPage({
                 }
               />
             }
-            playersContent={<PlayerListPopup players={players} />}
+            playersContent={<PlayerListPopup players={players} campaignId={id} />}
             initiativeContent={
               <InitiativeTracker
                 campaignId={id}
@@ -251,6 +254,8 @@ export default async function PlayPage({
 
   const content = (
     <div className="h-screen bg-zinc-950 flex flex-col overflow-hidden">
+      <LevelUpBanner campaignId={id} />
+      {myCharacter && <LevelUpWatcher campaignId={id} characterId={myCharacter.id} />}
       <div className="flex items-center justify-between px-3 py-2 border-b border-zinc-800 flex-shrink-0">
         <Link
           href={`/dashboard/campaigns/${id}`}
