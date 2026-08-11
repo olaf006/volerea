@@ -15,6 +15,7 @@ import { useEffect, useRef, useState } from "react";
 import { createClient, createAuthedRealtimeClient } from "@/lib/supabase/client";
 import { updateTokenHp } from "@/app/combat-actions";
 import { deleteToken } from "@/app/tokens-actions";
+import { useOnlineUsers } from "@/lib/usePresence";
 
 interface MapInfo {
   id: string;
@@ -99,6 +100,13 @@ export default function LiveMapWithTokens({
   const [containerSize, setContainerSize] = useState({ w: 0, h: 0 });
 
   const activeMap = maps.find((m) => m.id === activeMapId);
+  const onlineUsers = useOnlineUsers(campaignId, myUserId);
+
+  // NPCs (kein Besitzer) immer anzeigen, Spieler-Pins nur wenn der
+  // Spieler gerade wirklich online auf dem Live-Bildschirm ist.
+  const visibleTokens = tokens.filter(
+    (t) => t.owner_user_id === null || onlineUsers.has(t.owner_user_id) || t.owner_user_id === myUserId
+  );
 
   useEffect(() => {
     setNaturalSize(null);
@@ -421,7 +429,7 @@ export default function LiveMapWithTokens({
           }}
         />
 
-        {tokens.map((token) => {
+        {visibleTokens.map((token) => {
           const draggable = canDrag(token);
           const isBeingDragged = draggingId === token.id;
           const pos = pixelPosFor(token);

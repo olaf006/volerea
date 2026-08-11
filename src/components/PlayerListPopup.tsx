@@ -6,6 +6,7 @@
 import { useState } from "react";
 import { abilityModifier, InventoryItem, xpForNextLevel } from "@/lib/dnd-data";
 import { addXp } from "@/app/characters-actions";
+import { useOnlineUsers } from "@/lib/usePresence";
 
 interface CharacterFull {
   id: string;
@@ -44,12 +45,16 @@ const ABILITY_LABELS: { key: keyof CharacterFull; label: string }[] = [
 export default function PlayerListPopup({
   players,
   campaignId,
+  currentUserId,
 }: {
   players: PlayerRow[];
   campaignId: string;
+  currentUserId: string;
 }) {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [xpInput, setXpInput] = useState("");
+  const onlineUsers = useOnlineUsers(campaignId, currentUserId);
+  const onlinePlayers = players.filter((p) => onlineUsers.has(p.userId));
 
   // Live aus den aktuellen players ableiten statt einen alten Schnappschuss
   // zu behalten - so zeigt das Fenster sofort neue Werte (z.B. XP), sobald
@@ -59,16 +64,21 @@ export default function PlayerListPopup({
   return (
     <>
       <div className="space-y-2">
-        {players.length === 0 && (
-          <p className="text-zinc-500 text-sm">Noch keine Spieler in der Gruppe.</p>
+        {onlinePlayers.length === 0 && (
+          <p className="text-zinc-500 text-sm">
+            Gerade ist niemand auf dem Live-Bildschirm.
+          </p>
         )}
-        {players.map((p) => (
+        {onlinePlayers.map((p) => (
           <button
             key={p.userId}
             onClick={() => setSelectedUserId(p.userId)}
             className="w-full flex items-center justify-between rounded-md border border-zinc-800 px-3 py-2 text-sm hover:bg-zinc-800/50 transition text-left"
           >
-            <span className="text-zinc-200">{p.username}</span>
+            <span className="flex items-center gap-2 text-zinc-200">
+              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              {p.username}
+            </span>
             <span className="text-zinc-500 text-xs">
               {p.character
                 ? `${p.character.name} · Stufe ${p.character.level}`

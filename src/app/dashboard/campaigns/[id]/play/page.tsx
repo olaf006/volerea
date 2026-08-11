@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import LiveMapWithTokens from "@/components/LiveMapWithTokens";
-import MasterToolMenu from "@/components/MasterToolMenu";
+import MasterSidebar from "@/components/MasterSidebar";
 import MapSwitcher from "@/components/MapSwitcher";
 import DiceRoller from "@/components/DiceRoller";
 import LiveDiceFeed from "@/components/LiveDiceFeed";
@@ -128,17 +128,17 @@ export default async function PlayPage({
 
     return (
       <MasterIntroWrapper showIntro={intro === "1"}>
-        <div className="h-screen bg-zinc-950 flex flex-col overflow-hidden">
+        <div className="h-screen bg-gradient-to-b from-zinc-950 to-zinc-900 flex flex-col overflow-hidden">
           <LevelUpBanner campaignId={id} />
-          <div className="flex items-center justify-between px-3 py-2 border-b border-zinc-800 flex-shrink-0">
+          <div className="flex items-center justify-between px-4 py-2.5 border-b border-amber-900/30 bg-zinc-950/60 flex-shrink-0">
             <Link
               href={`/dashboard/campaigns/${id}`}
-              className="text-zinc-400 text-xs hover:text-zinc-200"
+              className="text-zinc-400 text-xs hover:text-amber-300 transition"
             >
               ← Kampagne
             </Link>
-            <span className="text-zinc-100 font-medium text-xs">
-              {campaign.name} · Meister
+            <span className="text-amber-200 font-medium text-sm tracking-wide">
+              {campaign.name}
             </span>
             {campaignState?.session_active ? (
               <form action={endSession}>
@@ -152,7 +152,7 @@ export default async function PlayPage({
                 <input type="hidden" name="campaign_id" value={id} />
                 <button
                   type="submit"
-                  className="text-xs rounded-md bg-zinc-100 text-zinc-900 px-3 py-1 font-medium"
+                  className="text-xs rounded-md bg-amber-600 text-zinc-950 px-3 py-1.5 font-medium hover:bg-amber-500 transition"
                 >
                   Sitzung starten
                 </button>
@@ -160,69 +160,75 @@ export default async function PlayPage({
             )}
           </div>
 
-          <div className="flex-1 min-h-0 p-2">
-            <LiveMapWithTokens
-              campaignId={id}
-              maps={maps ?? []}
-              initialActiveMapId={campaignState?.active_map_id ?? null}
-              isMaster
-              myUserId={user.id}
-            />
-          </div>
-
-          <MasterToolMenu
-            mapContent={
-              <MapSwitcher
+          <div className="flex-1 min-h-0 p-3 flex flex-col lg:flex-row gap-3">
+            <div className="flex-1 min-h-0">
+              <LiveMapWithTokens
                 campaignId={id}
                 maps={maps ?? []}
-                activeMapId={campaignState?.active_map_id ?? null}
+                initialActiveMapId={campaignState?.active_map_id ?? null}
+                isMaster
+                myUserId={user.id}
               />
-            }
-            npcContent={
-              <NpcManagerPanel
-                campaignId={id}
-                activeMapId={campaignState?.active_map_id ?? null}
-              />
-            }
-            attackContent={
-              <MasterAttackPanel
-                campaignId={id}
-                activeMapId={campaignState?.active_map_id ?? null}
-                characterLookup={characterLookup}
-              />
-            }
-            notesContent={
-              <MasterNotesEditor
-                campaignId={id}
-                initialCategories={
-                  (campaign.notes_categories as {
-                    id: string;
-                    title: string;
-                    content: string;
-                  }[]) ?? []
+            </div>
+
+            <div className="lg:w-96 h-64 lg:h-full flex-shrink-0">
+              <MasterSidebar
+                mapContent={
+                  <MapSwitcher
+                    campaignId={id}
+                    maps={maps ?? []}
+                    activeMapId={campaignState?.active_map_id ?? null}
+                  />
+                }
+                npcContent={
+                  <NpcManagerPanel
+                    campaignId={id}
+                    activeMapId={campaignState?.active_map_id ?? null}
+                  />
+                }
+                attackContent={
+                  <MasterAttackPanel
+                    campaignId={id}
+                    activeMapId={campaignState?.active_map_id ?? null}
+                    characterLookup={characterLookup}
+                  />
+                }
+                notesContent={
+                  <MasterNotesEditor
+                    campaignId={id}
+                    initialCategories={
+                      (campaign.notes_categories as {
+                        id: string;
+                        title: string;
+                        content: string;
+                      }[]) ?? []
+                    }
+                  />
+                }
+                playersContent={
+                  <PlayerListPopup players={players} campaignId={id} currentUserId={user.id} />
+                }
+                initiativeContent={
+                  <InitiativeTracker
+                    campaignId={id}
+                    activeMapId={campaignState?.active_map_id ?? null}
+                    isMaster
+                    initialState={combatState ?? null}
+                  />
+                }
+                diceContent={
+                  <div className="space-y-3">
+                    <DiceRoller campaignId={id} />
+                    <LiveDiceFeed
+                      campaignId={id}
+                      initialRolls={rolls ?? []}
+                      labels={diceLabels}
+                    />
+                  </div>
                 }
               />
-            }
-            playersContent={<PlayerListPopup players={players} campaignId={id} />}
-            initiativeContent={
-              <InitiativeTracker
-                campaignId={id}
-                activeMapId={campaignState?.active_map_id ?? null}
-                isMaster
-                initialState={combatState ?? null}
-              />
-            }
-            diceContent={
-              <div className="space-y-3">
-                <DiceRoller campaignId={id} />
-                <LiveDiceFeed
-                  campaignId={id}
-                  initialRolls={rolls ?? []}
-                  labels={diceLabels}
-                />
-              </div>
-            }
-          />
+            </div>
+          </div>
         </div>
       </MasterIntroWrapper>
     );
