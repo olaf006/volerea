@@ -66,6 +66,7 @@ export default function LiveMapWithTokens({
   isMaster,
   myUserId,
   myCharacterLabel,
+  myCharacterImage,
 }: {
   campaignId: string;
   maps: MapInfo[];
@@ -73,6 +74,7 @@ export default function LiveMapWithTokens({
   isMaster: boolean;
   myUserId: string;
   myCharacterLabel?: string;
+  myCharacterImage?: string;
 }) {
   const [activeMapId, setActiveMapId] = useState(initialActiveMapId);
   const [tokens, setTokens] = useState<Token[]>([]);
@@ -88,6 +90,7 @@ export default function LiveMapWithTokens({
   } | null>(null);
   const [dragPos, setDragPos] = useState<{ x: number; y: number } | null>(null);
   const [overMap, setOverMap] = useState(false);
+  const dragStartPos = useRef<{ x: number; y: number } | null>(null);
 
   const activeMap = maps.find((m) => m.id === activeMapId);
 
@@ -206,6 +209,7 @@ export default function LiveMapWithTokens({
         map_id: activeMapId,
         owner_user_id: myUserId,
         label: myCharacterLabel,
+        image_url: myCharacterImage ?? null,
         pos_x: 50,
         pos_y: 50,
         placed: true,
@@ -216,7 +220,7 @@ export default function LiveMapWithTokens({
           createdOwnTokenFor.current = null; // nochmal versuchen erlauben
         }
       });
-  }, [activeMapId, tokens, isMaster, myUserId, myCharacterLabel, campaignId]);
+  }, [activeMapId, tokens, isMaster, myUserId, myCharacterLabel, myCharacterImage, campaignId]);
 
   function canDrag(token: Token) {
     return isMaster || token.owner_user_id === myUserId;
@@ -264,15 +268,39 @@ export default function LiveMapWithTokens({
       const supabase = createClient();
 
       if (dragging!.mode === "reposition") {
-        const token = tokens.find((t) => t.id === dragging!.tokenId);
-        if (token) {
+        if (pos?.inside) {
+          const token = tokens.find((t) => t.id === dragging!.tokenId);
+          if (token) {
+            supabase
+              .from("map_tokens")
+              .update({ pos_x: token.pos_x, pos_y: token.pos_y })
+              .eq("id", token.id)
+              .then(({ error }) => {
+                if (error) console.error("Pin-Position konnte nicht gespeichert werden:", error.message);
+              });
+          }
+        } else if (isMaster) {
+          // Meister zieht einen Pin von der Karte - wandert zurück in die Liste
+          setTokens((prev) =>
+            prev.map((t) =>
+              t.id === dragging!.tokenId ? { ...t, placed: false } : t
+            )
+          );
           supabase
             .from("map_tokens")
-            .update({ pos_x: token.pos_x, pos_y: token.pos_y })
-            .eq("id", token.id)
+            .update({ placed: false })
+            .eq("id", dragging!.tokenId)
             .then(({ error }) => {
-              if (error) console.error("Pin-Position konnte nicht gespeichert werden:", error.message);
+              if (error) console.error("Pin konnte nicht zurückgelegt werden:", error.message);
             });
+        } else if (dragStartPos.current) {
+          // Spieler hat kein Listen-Fenster - Pin springt zur letzten Position zurück
+          const start = dragStartPos.current;
+          setTokens((prev) =>
+            prev.map((t) =>
+              t.id === dragging!.tokenId ? { ...t, pos_x: start.x, pos_y: start.y } : t
+            )
+          );
         }
       } else if (pos?.inside) {
         setTokens((prev) =>
@@ -294,6 +322,7 @@ export default function LiveMapWithTokens({
       setDragging(null);
       setDragPos(null);
       setOverMap(false);
+      dragStartPos.current = null;
     }
 
     window.addEventListener("pointermove", handleMove);
@@ -342,6 +371,7 @@ export default function LiveMapWithTokens({
               onPointerDown={(e) => {
                 if (!draggable) return;
                 e.preventDefault();
+                dragStartPos.current = { x: token.pos_x, y: token.pos_y };
                 setDragging({ tokenId: token.id, mode: "reposition" });
               }}
               style={{

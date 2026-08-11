@@ -1,8 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import LiveMapDisplay from "@/components/LiveMapDisplay";
 import LiveMapWithTokens from "@/components/LiveMapWithTokens";
+import MapSwitcher from "@/components/MapSwitcher";
 import DiceRoller from "@/components/DiceRoller";
 import LiveDiceFeed from "@/components/LiveDiceFeed";
 import SessionGate from "@/components/SessionGate";
@@ -64,9 +64,18 @@ export default async function PlayPage({
     .order("created_at", { ascending: false })
     .limit(15);
 
+  // Meister-Info holen, damit seine eigenen Würfe im Feed korrekt
+  // beschriftet werden (nicht "Jemand würfelt")
+  const { data: masterMembership } = await supabase
+    .from("group_members")
+    .select("user_id")
+    .eq("group_id", campaign.group_id)
+    .eq("role", "master")
+    .maybeSingle();
+
   // ============================================================
   // MEISTER-ANSICHT: eigenes Layout mit Notizen, Spielerliste (Popup),
-  // eigenem Würfel und Platz für den Markierungspinsel (folgt später).
+  // eigenem Würfel und Kartenwechsler.
   // ============================================================
   if (isMaster) {
     const { data: characters } = await supabase
@@ -85,6 +94,7 @@ export default async function PlayPage({
     characters?.forEach((c) => {
       diceLabels[c.user_id] = c.name;
     });
+    if (masterMembership) diceLabels[masterMembership.user_id] = "Spielleiter";
 
     const players =
       members
@@ -135,9 +145,18 @@ export default async function PlayPage({
           )}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr_300px] lg:grid-rows-[1fr_auto_120px] gap-4 p-4 flex-1">
-          {/* Karte: oben, mittig */}
-          <div className="lg:col-start-2 lg:row-start-1 min-h-[30vh]">
+        <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr_300px] lg:grid-rows-[auto_1fr_auto_120px] gap-4 p-4 flex-1">
+          {/* Kartenwechsler: direkt im Live-Bildschirm, kein Verlassen nötig */}
+          <div className="lg:col-start-2 lg:row-start-1 rounded-lg border border-zinc-800 bg-zinc-900 p-3">
+            <MapSwitcher
+              campaignId={id}
+              maps={maps ?? []}
+              activeMapId={campaignState?.active_map_id ?? null}
+            />
+          </div>
+
+          {/* Karte: mittig */}
+          <div className="lg:col-start-2 lg:row-start-2 min-h-[30vh]">
             <LiveMapWithTokens
               campaignId={id}
               maps={maps ?? []}
@@ -148,7 +167,7 @@ export default async function PlayPage({
           </div>
 
           {/* Würfel + letzte Würfe: darunter */}
-          <div className="lg:col-start-2 lg:row-start-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="lg:col-start-2 lg:row-start-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
               <h2 className="text-sm font-medium text-zinc-100 mb-3">
                 Würfeln
@@ -168,7 +187,7 @@ export default async function PlayPage({
           </div>
 
           {/* Notizen: links */}
-          <div className="lg:col-start-1 lg:row-start-1 lg:row-span-2 rounded-lg border border-zinc-800 bg-zinc-900 p-4 flex flex-col min-h-0">
+          <div className="lg:col-start-1 lg:row-start-1 lg:row-span-3 rounded-lg border border-zinc-800 bg-zinc-900 p-4 flex flex-col min-h-0">
             <h2 className="text-sm font-medium text-zinc-100 mb-1">
               Meine Notizen
             </h2>
@@ -186,7 +205,7 @@ export default async function PlayPage({
           </div>
 
           {/* Spielerliste: rechts, volle Höhe */}
-          <div className="lg:col-start-3 lg:row-start-1 lg:row-span-3 rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+          <div className="lg:col-start-3 lg:row-start-1 lg:row-span-4 rounded-lg border border-zinc-800 bg-zinc-900 p-4">
             <h2 className="text-sm font-medium text-zinc-100 mb-3">
               Spieler
             </h2>
@@ -194,10 +213,10 @@ export default async function PlayPage({
           </div>
 
           {/* Unten links: bewusst frei für später */}
-          <div className="hidden lg:block lg:col-start-1 lg:row-start-3" />
+          <div className="hidden lg:block lg:col-start-1 lg:row-start-4" />
 
           {/* Unten rechts (Mitte): noch frei für weitere Werkzeuge */}
-          <div className="lg:col-start-2 lg:row-start-3 rounded-lg border border-dashed border-zinc-800 bg-zinc-900/50 p-4 flex items-center justify-center">
+          <div className="lg:col-start-2 lg:row-start-4 rounded-lg border border-dashed border-zinc-800 bg-zinc-900/50 p-4 flex items-center justify-center">
             <p className="text-zinc-600 text-xs text-center">
               Platz für weitere Werkzeuge.
             </p>
@@ -213,15 +232,21 @@ export default async function PlayPage({
   // ============================================================
   const { data: characters } = await supabase
     .from("characters")
-    .select("id, user_id, name")
+    .select("id, user_id, name, details")
     .eq("campaign_id", id);
 
   const labels: Record<string, string> = {};
   characters?.forEach((c) => {
     labels[c.user_id] = c.name;
   });
+  if (masterMembership) labels[masterMembership.user_id] = "Spielleiter";
 
   const myCharacter = characters?.find((c) => c.user_id === user.id);
+  const myCharacterDetails = (myCharacter?.details ?? {}) as Record<string, unknown>;
+  const myCharacterImage =
+    typeof myCharacterDetails.tokenImage === "string"
+      ? myCharacterDetails.tokenImage
+      : undefined;
 
   const content = (
     <div className="min-h-screen bg-zinc-950 flex flex-col">
@@ -247,6 +272,7 @@ export default async function PlayPage({
             isMaster={false}
             myUserId={user.id}
             myCharacterLabel={myCharacter?.name}
+            myCharacterImage={myCharacterImage}
           />
         </div>
 

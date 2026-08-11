@@ -58,6 +58,7 @@ export async function createCharacter(formData: FormData) {
   const armorClass = Number(formData.get("armor_class"));
 
   const backgroundStory = formData.get("background_story") as string;
+  const tokenImageFile = formData.get("token_image") as File | null;
 
   // Fertigkeiten, Ausrüstung und Zauber kommen als JSON aus dem Formular
   let extraDetails: Record<string, unknown> = {};
@@ -68,6 +69,22 @@ export async function createCharacter(formData: FormData) {
   }
 
   const { supabase, user } = await getCurrentUser();
+
+  let tokenImageUrl: string | null = null;
+  if (tokenImageFile && tokenImageFile.size > 0) {
+    const fileExt = tokenImageFile.name.split(".").pop();
+    const path = `${user.id}/${Date.now()}.${fileExt}`;
+    const arrayBuffer = await tokenImageFile.arrayBuffer();
+    const { error: uploadError } = await supabase.storage
+      .from("tokens")
+      .upload(path, arrayBuffer, { contentType: tokenImageFile.type });
+    if (!uploadError) {
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("tokens").getPublicUrl(path);
+      tokenImageUrl = publicUrl;
+    }
+  }
 
   const { error } = await supabase.from("characters").insert({
     campaign_id: campaignId,
@@ -85,7 +102,7 @@ export async function createCharacter(formData: FormData) {
     hp_current: hpMax,
     hp_max: hpMax,
     armor_class: armorClass,
-    details: { backgroundStory, ...extraDetails },
+    details: { backgroundStory, tokenImage: tokenImageUrl, ...extraDetails },
   });
 
   if (error) {

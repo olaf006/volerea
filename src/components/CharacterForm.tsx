@@ -909,6 +909,23 @@ export default function CharacterForm({
       {/* Hintergrund-Geschichte */}
       <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 space-y-4">
         <h2 className="text-lg font-medium text-zinc-100">
+          Profilbild für die Karte
+        </h2>
+        <p className="text-xs text-zinc-500">
+          Dieses Bild erscheint als dein Pin auf der Live-Karte, sobald der
+          Meister eine Sitzung startet. Optional - ohne Bild bekommst du
+          einfach einen farbigen Kreis mit deinen Initialen.
+        </p>
+        <input
+          type="file"
+          name="token_image"
+          accept="image/*"
+          className="text-sm text-zinc-400 file:mr-3 file:rounded file:border-0 file:bg-zinc-800 file:text-zinc-200 file:px-3 file:py-1.5"
+        />
+      </div>
+
+      <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 space-y-4">
+        <h2 className="text-lg font-medium text-zinc-100">
           Hintergrundgeschichte
         </h2>
         <textarea

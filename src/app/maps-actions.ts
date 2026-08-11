@@ -99,7 +99,7 @@ export async function setActiveMap(formData: FormData) {
 
   const supabase = await requireMaster(campaignId);
 
-  const { error } = await supabase.from("campaign_state").upsert(
+  await supabase.from("campaign_state").upsert(
     {
       campaign_id: campaignId,
       active_map_id: mapId,
@@ -108,16 +108,8 @@ export async function setActiveMap(formData: FormData) {
     { onConflict: "campaign_id" }
   );
 
-  if (error) {
-    redirect(
-      `/dashboard/campaigns/${campaignId}?error=${encodeURIComponent(
-        error.message
-      )}`
-    );
-  }
-
   revalidatePath(`/dashboard/campaigns/${campaignId}`);
-  redirect(`/dashboard/campaigns/${campaignId}`);
+  revalidatePath(`/dashboard/campaigns/${campaignId}/play`);
 }
 
 export async function clearActiveMap(formData: FormData) {
@@ -134,7 +126,7 @@ export async function clearActiveMap(formData: FormData) {
   );
 
   revalidatePath(`/dashboard/campaigns/${campaignId}`);
-  redirect(`/dashboard/campaigns/${campaignId}`);
+  revalidatePath(`/dashboard/campaigns/${campaignId}/play`);
 }
 
 export async function deleteMap(formData: FormData) {
