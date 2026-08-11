@@ -117,6 +117,42 @@ export async function updateTokenHp(formData: FormData) {
     .eq("id", tokenId);
 }
 
+// Angriff: Ziel + Waffe wurden vom Spieler gewählt, der Schaden wird
+// SERVERSEITIG gewürfelt (nicht vom Client vorgegeben) und automatisch
+// beim Ziel abgezogen.
+export async function resolveAttack(formData: FormData) {
+  const campaignId = formData.get("campaign_id") as string;
+  const targetTokenId = formData.get("target_token_id") as string;
+  const targetLabel = formData.get("target_label") as string;
+  const diceNotation = formData.get("dice_notation") as string; // z.B. "1W6"
+  const weaponLabel = formData.get("weapon_label") as string;
+
+  const match = diceNotation.match(/(\d+)\s*W\s*(\d+)/i);
+  if (!match) return;
+  const count = parseInt(match[1], 10);
+  const sides = parseInt(match[2], 10);
+
+  let damage = 0;
+  for (let i = 0; i < count; i++) {
+    damage += Math.floor(Math.random() * sides) + 1;
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  await supabase.rpc("apply_damage", { token_id: targetTokenId, amount: damage });
+
+  await supabase.from("dice_rolls").insert({
+    campaign_id: campaignId,
+    user_id: user.id,
+    dice: `${weaponLabel} → ${targetLabel}`,
+    result: damage,
+  });
+}
+
 // HP eines Spieler-Charakters anpassen - Besitzer selbst oder der Meister
 export async function updateCharacterHp(formData: FormData) {
   const characterId = formData.get("character_id") as string;

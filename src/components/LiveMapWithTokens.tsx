@@ -70,6 +70,7 @@ export default function LiveMapWithTokens({
   myUserId,
   myCharacterLabel,
   myCharacterImage,
+  compact,
 }: {
   campaignId: string;
   maps: MapInfo[];
@@ -78,6 +79,7 @@ export default function LiveMapWithTokens({
   myUserId: string;
   myCharacterLabel?: string;
   myCharacterImage?: string;
+  compact?: boolean;
 }) {
   const [activeMapId, setActiveMapId] = useState(initialActiveMapId);
   const [tokens, setTokens] = useState<Token[]>([]);
@@ -381,7 +383,7 @@ export default function LiveMapWithTokens({
   }
 
   return (
-    <div>
+    <div className={compact ? "max-h-full overflow-y-auto pr-1" : ""}>
       <div
         ref={containerRef}
         className={`relative rounded-lg border bg-zinc-900 overflow-hidden select-none touch-none ${
@@ -423,10 +425,23 @@ export default function LiveMapWithTokens({
               <div className="w-full h-full rounded-full border-2 border-white/80 shadow-lg text-xs font-semibold text-zinc-900 overflow-hidden">
                 <TokenIcon token={token} />
               </div>
-              {token.hp_max !== null && (
-                <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[9px] bg-zinc-950/90 border border-zinc-700 rounded px-1 text-zinc-200 whitespace-nowrap pointer-events-none">
-                  {token.hp_current}/{token.hp_max}
-                </span>
+              {token.hp_max !== null && token.hp_max > 0 && (
+                <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-9 pointer-events-none">
+                  <div className="h-1 rounded-full bg-zinc-800 overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all"
+                      style={{
+                        width: `${Math.max(0, Math.min(100, ((token.hp_current ?? 0) / token.hp_max) * 100))}%`,
+                        backgroundColor:
+                          (token.hp_current ?? 0) / token.hp_max > 0.5
+                            ? "#4ade80"
+                            : (token.hp_current ?? 0) / token.hp_max > 0.25
+                            ? "#facc15"
+                            : "#f87171",
+                      }}
+                    />
+                  </div>
+                </div>
               )}
             </div>
           );

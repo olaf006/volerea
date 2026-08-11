@@ -10,7 +10,9 @@ import PlayerListPopup from "@/components/PlayerListPopup";
 import MasterIntroWrapper from "@/components/MasterIntroWrapper";
 import MasterNotesEditor from "@/components/MasterNotesEditor";
 import InitiativeTracker from "@/components/InitiativeTracker";
+import AttackPanel from "@/components/AttackPanel";
 import { endSession, startSession } from "@/app/session-actions";
+import { InventoryItem } from "@/lib/dnd-data";
 
 export default async function PlayPage({
   params,
@@ -65,8 +67,6 @@ export default async function PlayPage({
     .order("created_at", { ascending: false })
     .limit(15);
 
-  // Meister-Info holen, damit seine eigenen Würfe im Feed korrekt
-  // beschriftet werden (nicht "Jemand würfelt")
   const { data: masterMembership } = await supabase
     .from("group_members")
     .select("user_id")
@@ -81,8 +81,8 @@ export default async function PlayPage({
     .maybeSingle();
 
   // ============================================================
-  // MEISTER-ANSICHT: eigenes Layout mit Notizen, Spielerliste (Popup),
-  // eigenem Würfel und Kartenwechsler.
+  // MEISTER-ANSICHT: kompaktes 2-Zeilen-Layout, jedes Fach scrollt für
+  // sich selbst statt die ganze Seite scrollen zu lassen.
   // ============================================================
   if (isMaster) {
     const { data: characters } = await supabase
@@ -118,128 +118,109 @@ export default async function PlayPage({
 
     return (
       <MasterIntroWrapper showIntro={intro === "1"}>
-        <div className="min-h-screen bg-zinc-950 flex flex-col">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
-          <Link
-            href={`/dashboard/campaigns/${id}`}
-            className="text-zinc-400 text-sm hover:text-zinc-200"
-          >
-            ← Kampagne
-          </Link>
-          <span className="text-zinc-100 font-medium text-sm">
-            {campaign.name} · Meister-Ansicht
-          </span>
-          {campaignState?.session_active ? (
-            <form action={endSession}>
-              <input type="hidden" name="campaign_id" value={id} />
-              <button
-                type="submit"
-                className="text-xs text-red-400 hover:text-red-300"
-              >
-                Sitzung beenden
-              </button>
-            </form>
-          ) : (
-            <form action={startSession}>
-              <input type="hidden" name="campaign_id" value={id} />
-              <button
-                type="submit"
-                className="text-xs rounded-md bg-zinc-100 text-zinc-900 px-3 py-1 font-medium"
-              >
-                Sitzung starten
-              </button>
-            </form>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr_300px] lg:grid-rows-[auto_1fr_auto_120px] gap-4 p-4 flex-1">
-          {/* Kartenwechsler: direkt im Live-Bildschirm, kein Verlassen nötig */}
-          <div className="lg:col-start-2 lg:row-start-1 rounded-lg border border-zinc-800 bg-zinc-900 p-3">
-            <MapSwitcher
-              campaignId={id}
-              maps={maps ?? []}
-              activeMapId={campaignState?.active_map_id ?? null}
-            />
+        <div className="h-screen bg-zinc-950 flex flex-col overflow-hidden">
+          <div className="flex items-center justify-between px-3 py-2 border-b border-zinc-800 flex-shrink-0">
+            <Link
+              href={`/dashboard/campaigns/${id}`}
+              className="text-zinc-400 text-xs hover:text-zinc-200"
+            >
+              ← Kampagne
+            </Link>
+            <span className="text-zinc-100 font-medium text-xs">
+              {campaign.name} · Meister
+            </span>
+            {campaignState?.session_active ? (
+              <form action={endSession}>
+                <input type="hidden" name="campaign_id" value={id} />
+                <button type="submit" className="text-xs text-red-400 hover:text-red-300">
+                  Sitzung beenden
+                </button>
+              </form>
+            ) : (
+              <form action={startSession}>
+                <input type="hidden" name="campaign_id" value={id} />
+                <button
+                  type="submit"
+                  className="text-xs rounded-md bg-zinc-100 text-zinc-900 px-3 py-1 font-medium"
+                >
+                  Sitzung starten
+                </button>
+              </form>
+            )}
           </div>
 
-          {/* Karte: mittig */}
-          <div className="lg:col-start-2 lg:row-start-2 min-h-[30vh]">
-            <LiveMapWithTokens
-              campaignId={id}
-              maps={maps ?? []}
-              initialActiveMapId={campaignState?.active_map_id ?? null}
-              isMaster
-              myUserId={user.id}
-            />
-          </div>
-
-          {/* Würfel + letzte Würfe: darunter */}
-          <div className="lg:col-start-2 lg:row-start-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
-              <h2 className="text-sm font-medium text-zinc-100 mb-3">
-                Würfeln
+          <div className="flex-1 grid grid-cols-1 lg:grid-cols-[220px_1fr_260px] lg:grid-rows-[42vh_1fr] gap-2 p-2 overflow-hidden min-h-0">
+            {/* Notizen: links, volle Höhe */}
+            <div className="lg:col-start-1 lg:row-start-1 lg:row-span-2 rounded-lg border border-zinc-800 bg-zinc-900 p-3 flex flex-col min-h-0">
+              <h2 className="text-xs font-medium text-zinc-100 mb-2 flex-shrink-0">
+                Meine Notizen
               </h2>
-              <DiceRoller campaignId={id} />
+              <div className="flex-1 min-h-0">
+                <MasterNotesEditor
+                  campaignId={id}
+                  initialCategories={
+                    (campaign.notes_categories as {
+                      id: string;
+                      title: string;
+                      content: string;
+                    }[]) ?? []
+                  }
+                />
+              </div>
             </div>
-            <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
-              <h2 className="text-sm font-medium text-zinc-100 mb-3">
-                Letzte Würfe
-              </h2>
-              <LiveDiceFeed
+
+            {/* Karte: oben mittig, feste Höhe */}
+            <div className="lg:col-start-2 lg:row-start-1 min-h-0 flex flex-col gap-2 overflow-y-auto">
+              <MapSwitcher
                 campaignId={id}
-                initialRolls={rolls ?? []}
-                labels={diceLabels}
+                maps={maps ?? []}
+                activeMapId={campaignState?.active_map_id ?? null}
+              />
+              <LiveMapWithTokens
+                campaignId={id}
+                maps={maps ?? []}
+                initialActiveMapId={campaignState?.active_map_id ?? null}
+                isMaster
+                myUserId={user.id}
+                compact
               />
             </div>
-          </div>
 
-          {/* Notizen: links */}
-          <div className="lg:col-start-1 lg:row-start-1 lg:row-span-3 rounded-lg border border-zinc-800 bg-zinc-900 p-4 flex flex-col min-h-0">
-            <h2 className="text-sm font-medium text-zinc-100 mb-1">
-              Meine Notizen
-            </h2>
-            <p className="text-xs text-zinc-500 mb-3">Nur du siehst das.</p>
-            <MasterNotesEditor
-              campaignId={id}
-              initialCategories={
-                (campaign.notes_categories as {
-                  id: string;
-                  title: string;
-                  content: string;
-                }[]) ?? []
-              }
-            />
-          </div>
+            {/* Spieler: rechts, volle Höhe */}
+            <div className="lg:col-start-3 lg:row-start-1 lg:row-span-2 rounded-lg border border-zinc-800 bg-zinc-900 p-3 min-h-0 overflow-y-auto">
+              <h2 className="text-xs font-medium text-zinc-100 mb-2">Spieler</h2>
+              <PlayerListPopup players={players} />
+            </div>
 
-          {/* Spielerliste: rechts, volle Höhe */}
-          <div className="lg:col-start-3 lg:row-start-1 lg:row-span-4 rounded-lg border border-zinc-800 bg-zinc-900 p-4">
-            <h2 className="text-sm font-medium text-zinc-100 mb-3">
-              Spieler
-            </h2>
-            <PlayerListPopup players={players} />
-          </div>
-
-          {/* Unten links: Initiative-Tracker */}
-          <div className="hidden lg:flex lg:col-start-1 lg:row-start-4 rounded-lg border border-zinc-800 bg-zinc-900 p-4 flex-col">
-            <h2 className="text-sm font-medium text-zinc-100 mb-3">
-              Initiative
-            </h2>
-            <InitiativeTracker
-              campaignId={id}
-              activeMapId={campaignState?.active_map_id ?? null}
-              isMaster
-              initialState={combatState ?? null}
-            />
-          </div>
-
-          {/* Unten rechts (Mitte): noch frei für weitere Werkzeuge */}
-          <div className="lg:col-start-2 lg:row-start-4 rounded-lg border border-dashed border-zinc-800 bg-zinc-900/50 p-4 flex items-center justify-center">
-            <p className="text-zinc-600 text-xs text-center">
-              Platz für weitere Werkzeuge.
-            </p>
+            {/* Würfel + Initiative: unten mittig, nebeneinander */}
+            <div className="lg:col-start-2 lg:row-start-2 grid grid-cols-2 gap-2 min-h-0">
+              <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-3 flex flex-col min-h-0">
+                <h2 className="text-xs font-medium text-zinc-100 mb-2 flex-shrink-0">
+                  Würfeln
+                </h2>
+                <DiceRoller campaignId={id} />
+                <div className="flex-1 overflow-y-auto mt-2 min-h-0">
+                  <LiveDiceFeed
+                    campaignId={id}
+                    initialRolls={rolls ?? []}
+                    labels={diceLabels}
+                  />
+                </div>
+              </div>
+              <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-3 overflow-y-auto min-h-0">
+                <h2 className="text-xs font-medium text-zinc-100 mb-2">
+                  Initiative
+                </h2>
+                <InitiativeTracker
+                  campaignId={id}
+                  activeMapId={campaignState?.active_map_id ?? null}
+                  isMaster
+                  initialState={combatState ?? null}
+                />
+              </div>
+            </div>
           </div>
         </div>
-      </div>
       </MasterIntroWrapper>
     );
   }
@@ -264,24 +245,25 @@ export default async function PlayPage({
     typeof myCharacterDetails.tokenImage === "string"
       ? myCharacterDetails.tokenImage
       : undefined;
+  const myWeapons = ((myCharacterDetails.inventory as InventoryItem[]) ?? [])
+    .filter((item) => item.damage)
+    .map((item) => ({ name: item.name, damage: item.damage! }));
 
   const content = (
-    <div className="min-h-screen bg-zinc-950 flex flex-col">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
+    <div className="h-screen bg-zinc-950 flex flex-col overflow-hidden">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-zinc-800 flex-shrink-0">
         <Link
           href={`/dashboard/campaigns/${id}`}
-          className="text-zinc-400 text-sm hover:text-zinc-200"
+          className="text-zinc-400 text-xs hover:text-zinc-200"
         >
           ← Kampagne
         </Link>
-        <span className="text-zinc-100 font-medium text-sm">
-          {campaign.name}
-        </span>
-        <span className="w-16" />
+        <span className="text-zinc-100 font-medium text-xs">{campaign.name}</span>
+        <span className="w-12" />
       </div>
 
-      <div className="flex-1 flex flex-col lg:flex-row gap-4 p-4">
-        <div className="flex-1 min-h-[40vh]">
+      <div className="flex-1 flex flex-col lg:flex-row gap-2 p-2 overflow-hidden min-h-0">
+        <div className="flex-1 min-h-0 lg:min-h-full overflow-y-auto">
           <LiveMapWithTokens
             campaignId={id}
             maps={maps ?? []}
@@ -293,11 +275,18 @@ export default async function PlayPage({
           />
         </div>
 
-        <div className="lg:w-80 flex flex-col gap-4">
-          <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
-            <h2 className="text-sm font-medium text-zinc-100 mb-3">
-              Initiative
-            </h2>
+        <div className="lg:w-72 flex flex-col gap-2 overflow-y-auto min-h-0">
+          <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-3 flex-shrink-0">
+            <h2 className="text-xs font-medium text-zinc-100 mb-2">Angriff</h2>
+            <AttackPanel
+              campaignId={id}
+              activeMapId={campaignState?.active_map_id ?? null}
+              weapons={myWeapons}
+            />
+          </div>
+
+          <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-3 flex-shrink-0">
+            <h2 className="text-xs font-medium text-zinc-100 mb-2">Initiative</h2>
             <InitiativeTracker
               campaignId={id}
               activeMapId={campaignState?.active_map_id ?? null}
@@ -306,28 +295,20 @@ export default async function PlayPage({
             />
           </div>
 
-          <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
-            <h2 className="text-sm font-medium text-zinc-100 mb-3">
-              Würfeln
-            </h2>
+          <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-3 flex-shrink-0">
+            <h2 className="text-xs font-medium text-zinc-100 mb-2">Würfeln</h2>
             <DiceRoller campaignId={id} />
           </div>
 
-          <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 flex-1">
-            <h2 className="text-sm font-medium text-zinc-100 mb-3">
-              Letzte Würfe
-            </h2>
-            <LiveDiceFeed
-              campaignId={id}
-              initialRolls={rolls ?? []}
-              labels={labels}
-            />
+          <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-3">
+            <h2 className="text-xs font-medium text-zinc-100 mb-2">Letzte Würfe</h2>
+            <LiveDiceFeed campaignId={id} initialRolls={rolls ?? []} labels={labels} />
           </div>
 
           {myCharacter && (
             <Link
               href={`/dashboard/campaigns/${id}/character/${myCharacter.id}`}
-              className="rounded-md border border-zinc-700 text-center text-zinc-200 px-4 py-2 hover:bg-zinc-800 transition text-sm"
+              className="rounded-md border border-zinc-700 text-center text-zinc-200 px-4 py-2 hover:bg-zinc-800 transition text-sm flex-shrink-0"
             >
               Mein Charakter & Inventar
             </Link>
