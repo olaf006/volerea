@@ -11,8 +11,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createClient, createAuthedRealtimeClient } from "@/lib/supabase/client";
-import { createToken, deleteToken } from "@/app/tokens-actions";
+import { deleteToken } from "@/app/tokens-actions";
 import { updateTokenHp } from "@/app/combat-actions";
+import NpcCreationForm from "@/components/NpcCreationForm";
 
 interface MapInfo {
   id: string;
@@ -31,6 +32,7 @@ interface Token {
   placed: boolean;
   hp_current: number | null;
   hp_max: number | null;
+  details: { weapon?: { name: string; damage: string } | null; loot?: string | null } | null;
 }
 
 function colorForToken(id: string) {
@@ -154,7 +156,7 @@ export default function LiveMapWithTokens({
       const supabase = createClient();
       const { data, error } = await supabase
         .from("map_tokens")
-        .select("id, map_id, owner_user_id, label, image_url, pos_x, pos_y, placed, hp_current, hp_max")
+        .select("id, map_id, owner_user_id, label, image_url, pos_x, pos_y, placed, hp_current, hp_max, details")
         .eq("map_id", activeMapId);
       if (error) console.error("Pins konnten nicht geladen werden:", error.message);
       if (!active) return;
@@ -383,10 +385,12 @@ export default function LiveMapWithTokens({
   }
 
   return (
-    <div className={compact ? "max-h-full overflow-y-auto pr-1" : ""}>
+    <div>
       <div
         ref={containerRef}
         className={`relative rounded-lg border bg-zinc-900 overflow-hidden select-none touch-none ${
+          compact ? "h-[22vh] w-full" : ""
+        } ${
           dragging?.mode === "place" && overMap
             ? "border-emerald-500"
             : "border-zinc-800"
@@ -396,7 +400,11 @@ export default function LiveMapWithTokens({
         <img
           src={activeMap.image_url}
           alt={activeMap.name}
-          className="w-full h-auto block pointer-events-none"
+          className={
+            compact
+              ? "w-full h-full object-contain block pointer-events-none"
+              : "w-full h-auto block pointer-events-none"
+          }
           draggable={false}
         />
 
@@ -469,6 +477,22 @@ export default function LiveMapWithTokens({
               onClick={(e) => e.stopPropagation()}
             >
               <h3 className="text-zinc-100 font-medium mb-3">{token.label} · HP</h3>
+              {(token.details?.weapon || token.details?.loot) && (
+                <div className="mb-3 text-xs text-zinc-400 space-y-0.5">
+                  {token.details?.weapon && (
+                    <p>
+                      <span className="text-zinc-500">Waffe: </span>
+                      {token.details.weapon.name} ({token.details.weapon.damage})
+                    </p>
+                  )}
+                  {token.details?.loot && (
+                    <p>
+                      <span className="text-zinc-500">Loot: </span>
+                      {token.details.loot}
+                    </p>
+                  )}
+                </div>
+              )}
               <form
                 action={updateTokenHp}
                 onSubmit={() => setHpEditTokenId(null)}
@@ -515,30 +539,8 @@ export default function LiveMapWithTokens({
       <div className="px-1 py-2 text-sm text-zinc-400">{activeMap.name}</div>
 
       {isMaster && (
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-3 space-y-3">
-          <form action={createToken} className="flex flex-wrap gap-2 items-center">
-            <input type="hidden" name="campaign_id" value={campaignId} />
-            <input type="hidden" name="map_id" value={activeMapId ?? ""} />
-            <input
-              type="text"
-              name="label"
-              placeholder="Name (z.B. Goblin)"
-              required
-              className="flex-1 min-w-[120px] rounded-md bg-zinc-950 border border-zinc-700 px-2 py-1.5 text-zinc-100 text-sm focus:outline-none focus:border-zinc-400"
-            />
-            <input
-              type="file"
-              name="file"
-              accept="image/*"
-              className="text-xs text-zinc-400 file:mr-2 file:rounded file:border-0 file:bg-zinc-800 file:text-zinc-200 file:px-2 file:py-1"
-            />
-            <button
-              type="submit"
-              className="text-xs rounded-md bg-zinc-100 text-zinc-900 px-3 py-1.5 font-medium hover:bg-white transition"
-            >
-              Pin anlegen
-            </button>
-          </form>
+        <div className={`rounded-lg border border-zinc-800 bg-zinc-900 p-3 space-y-3 ${compact ? "max-h-[14vh] overflow-y-auto" : ""}`}>
+          <NpcCreationForm campaignId={campaignId} mapId={activeMapId ?? ""} />
 
           {unplacedTokens.length > 0 && (
             <div>

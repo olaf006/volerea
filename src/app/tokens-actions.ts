@@ -8,6 +8,10 @@ export async function createToken(formData: FormData) {
   const mapId = formData.get("map_id") as string;
   const label = formData.get("label") as string;
   const file = formData.get("file") as File | null;
+  const hpMax = formData.get("hp_max") as string;
+  const weaponName = formData.get("weapon_name") as string;
+  const weaponDamage = formData.get("weapon_damage") as string;
+  const loot = formData.get("loot") as string;
 
   const supabase = await createClient();
   const {
@@ -32,6 +36,8 @@ export async function createToken(formData: FormData) {
     }
   }
 
+  const hp = hpMax ? Number(hpMax) : null;
+
   await supabase.from("map_tokens").insert({
     campaign_id: campaignId,
     map_id: mapId,
@@ -41,6 +47,12 @@ export async function createToken(formData: FormData) {
     pos_x: 50,
     pos_y: 50,
     placed: false,
+    hp_current: hp,
+    hp_max: hp,
+    details: {
+      weapon: weaponName ? { name: weaponName, damage: weaponDamage } : null,
+      loot: loot || null,
+    },
   });
 
   revalidatePath(`/dashboard/campaigns/${campaignId}/play`);

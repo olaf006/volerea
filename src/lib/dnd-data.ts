@@ -659,6 +659,61 @@ export function carryingCapacity(strengthScore: number) {
   return strengthScore * 15;
 }
 
+// ============================================================
+// MONSTER-VORLAGEN
+// Eine große, direkt einsatzbereite Auswahl gängiger Gegner für
+// typische Kampagnen - HP, Waffe und Loot-Vorschlag, frei anpassbar
+// beim Anlegen eines NPC-Pins. Kein Ersatz für das komplette
+// Monster-Handbuch, aber eine solide Grundlage für die meisten Situationen.
+// ============================================================
+
+export interface MonsterTemplate {
+  name: string;
+  hp: number;
+  ac: number;
+  weaponName: string;
+  weaponDamage: string;
+  loot: string;
+}
+
+export const MONSTER_TEMPLATES: MonsterTemplate[] = [
+  { name: "Goblin", hp: 7, ac: 15, weaponName: "Krummsäbel", weaponDamage: "1W6", loot: "5 KS, kleiner Dolch" },
+  { name: "Kobold", hp: 5, ac: 12, weaponName: "Dolch", weaponDamage: "1W4", loot: "3 KS, Schrottschmuck" },
+  { name: "Ork", hp: 15, ac: 13, weaponName: "Großaxt", weaponDamage: "1W12", loot: "Grobe Rüstungsteile, 8 SS" },
+  { name: "Hobgoblin", hp: 11, ac: 18, weaponName: "Langschwert", weaponDamage: "1W8", loot: "Militärabzeichen, 10 SS" },
+  { name: "Gnoll", hp: 22, ac: 15, weaponName: "Speer", weaponDamage: "1W6", loot: "Blutiger Knochenschmuck" },
+  { name: "Bandit", hp: 11, ac: 12, weaponName: "Krummsäbel", weaponDamage: "1W6", loot: "12 SS, gestohlene Ware" },
+  { name: "Kultist", hp: 9, ac: 12, weaponName: "Dolch", weaponDamage: "1W4", loot: "Ritualdolch, dunkles Amulett" },
+  { name: "Skelett", hp: 13, ac: 13, weaponName: "Kurzschwert", weaponDamage: "1W6", loot: "Verrostete Knochen, 2 KS" },
+  { name: "Zombie", hp: 22, ac: 8, weaponName: "Fauststoß", weaponDamage: "1W6", loot: "Verweste Habseligkeiten" },
+  { name: "Ghul", hp: 22, ac: 12, weaponName: "Kralle", weaponDamage: "2W4", loot: "Grabbeigaben" },
+  { name: "Wiedergänger (Wight)", hp: 45, ac: 14, weaponName: "Langschwert", weaponDamage: "1W8", loot: "Alte Rüstung, Silberring" },
+  { name: "Riesenspinne", hp: 26, ac: 14, weaponName: "Biss", weaponDamage: "1W8", loot: "Spinnenseide, Giftdrüse" },
+  { name: "Riesenratte", hp: 7, ac: 12, weaponName: "Biss", weaponDamage: "1W3", loot: "Nichts Brauchbares" },
+  { name: "Wolf", hp: 11, ac: 13, weaponName: "Biss", weaponDamage: "2W4", loot: "Wolfsfell" },
+  { name: "Schreckenswolf (Dire Wolf)", hp: 37, ac: 14, weaponName: "Biss", weaponDamage: "2W6", loot: "Großes Fell, Reißzähne" },
+  { name: "Schwarzbär", hp: 19, ac: 11, weaponName: "Biss", weaponDamage: "1W6", loot: "Bärenfell, Klauen" },
+  { name: "Krokodil", hp: 19, ac: 12, weaponName: "Biss", weaponDamage: "1W10", loot: "Lederhaut" },
+  { name: "Riesenskorpion", hp: 52, ac: 15, weaponName: "Schere", weaponDamage: "1W8", loot: "Giftstachel" },
+  { name: "Riesentausendfüßler", hp: 4, ac: 13, weaponName: "Biss", weaponDamage: "1W4", loot: "Giftdrüse" },
+  { name: "Harpyie", hp: 38, ac: 11, weaponName: "Kralle", weaponDamage: "2W4", loot: "Federn, glänzender Tand" },
+  { name: "Oger", hp: 59, ac: 11, weaponName: "Großkeule", weaponDamage: "2W8", loot: "Grobe Beute, 2W6 GS" },
+  { name: "Bugbär", hp: 27, ac: 16, weaponName: "Morgenstern", weaponDamage: "2W8", loot: "Diebesgut, 15 SS" },
+  { name: "Minotaurus", hp: 76, ac: 14, weaponName: "Großaxt", weaponDamage: "2W12", loot: "Labyrinth-Karte, Hornschmuck" },
+  { name: "Eulenbär (Owlbear)", hp: 59, ac: 13, weaponName: "Kralle", weaponDamage: "1W10", loot: "Federn, Klauen" },
+  { name: "Troll", hp: 84, ac: 15, weaponName: "Kralle", weaponDamage: "2W6", loot: "Regenerierendes Trollblut" },
+  { name: "Animierte Rüstung", hp: 33, ac: 18, weaponName: "Fauststoß", weaponDamage: "1W6", loot: "Die Rüstung selbst" },
+  { name: "Gallertwürfel", hp: 84, ac: 6, weaponName: "Pseudopod", weaponDamage: "3W6", loot: "Halbverdaute Gegenstände" },
+  { name: "Mimic", hp: 58, ac: 12, weaponName: "Biss", weaponDamage: "1W8", loot: "Der Schatz, den er vortäuscht" },
+  { name: "Irrlicht (Will-o'-Wisp)", hp: 22, ac: 19, weaponName: "Schockschlag", weaponDamage: "2W8", loot: "Nichts Materielles" },
+  { name: "Vampirspross", hp: 82, ac: 15, weaponName: "Kralle", weaponDamage: "1W8", loot: "Feines, dunkles Gewand" },
+  { name: "Banshee", hp: 58, ac: 12, weaponName: "Zermürbende Berührung", weaponDamage: "3W6", loot: "Zerrissener Brautschleier" },
+  { name: "Fluchgeist (Wraith)", hp: 67, ac: 13, weaponName: "Lebensentzug", weaponDamage: "4W8", loot: "Kalte, dunkle Asche" },
+  { name: "Klabautergeist (Specter)", hp: 22, ac: 12, weaponName: "Lebensentzug", weaponDamage: "3W6", loot: "Nichts Materielles" },
+  { name: "Imp", hp: 10, ac: 13, weaponName: "Stachel", weaponDamage: "1W4", loot: "Kleines Höllenrelikt" },
+  { name: "Quasit", hp: 7, ac: 13, weaponName: "Kralle", weaponDamage: "1W4", loot: "Verdrehtes Amulett" },
+];
+
 function lookupWeight(name: string): number {
   const lower = name.toLowerCase();
   for (const key of Object.keys(ITEM_WEIGHTS)) {
