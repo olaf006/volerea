@@ -48,7 +48,7 @@ export default function MasterSidebar({
   };
 
   return (
-    <div className="flex flex-col h-full rounded-xl border border-amber-900/40 bg-zinc-900/80 overflow-hidden">
+    <div className="flex flex-col h-full rounded-xl border border-amber-900/40 bg-tavern-900/80 overflow-hidden">
       {/* Reiter */}
       <div className="grid grid-cols-4 sm:grid-cols-7 border-b border-amber-900/40 flex-shrink-0">
         {TOOLS.map((t) => (
@@ -58,7 +58,7 @@ export default function MasterSidebar({
             className={`flex flex-col items-center justify-center gap-0.5 py-2 text-[11px] transition ${
               active === t.key
                 ? "bg-amber-900/30 text-amber-300 border-b-2 border-amber-500"
-                : "text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-200"
+                : "text-zinc-400 hover:bg-tavern-800/60 hover:text-zinc-200"
             }`}
           >
             <span className="text-base leading-none">{t.icon}</span>

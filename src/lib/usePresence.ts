@@ -20,7 +20,7 @@ export function useOnlineUsers(campaignId: string, myUserId: string) {
       if (!active) return;
 
       const presenceChannel = supabase.channel(`presence:${campaignId}`, {
-        config: { presence: { key: myUserId } },
+        config: { presence: { key: myUserId }, private: true },
       });
 
       presenceChannel.on("presence", { event: "sync" }, () => {

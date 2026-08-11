@@ -67,7 +67,7 @@ export default function LiveDiceFeed({
       {rolls.map((r) => (
         <div
           key={r.id}
-          className="flex items-center justify-between text-sm rounded-md bg-zinc-950 border border-zinc-800 px-3 py-1.5"
+          className="flex items-center justify-between text-sm rounded-md bg-tavern-950 border border-tavern-800 px-3 py-1.5"
         >
           <span className="text-zinc-300">
             {labels[r.user_id] ?? "Jemand"} würfelt {r.dice}

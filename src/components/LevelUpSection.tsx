@@ -25,7 +25,7 @@ export default function LevelUpSection({
     return (
       <button
         onClick={() => setOpen(true)}
-        className="w-full rounded-lg border border-zinc-700 bg-zinc-900 text-zinc-100 font-medium py-3 hover:bg-zinc-800 transition mb-6"
+        className="w-full rounded-lg border border-tavern-700 bg-tavern-900 text-zinc-100 font-medium py-3 hover:bg-tavern-800 transition mb-6"
       >
         🎉 Stufenaufstieg (Stufe {currentLevel + 1})
       </button>
@@ -33,7 +33,7 @@ export default function LevelUpSection({
   }
 
   return (
-    <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 mb-6">
+    <div className="rounded-lg border border-tavern-800 bg-tavern-900 p-6 mb-6">
       <LevelUpForm
         campaignId={campaignId}
         characterId={characterId}

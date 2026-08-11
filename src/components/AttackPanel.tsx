@@ -143,7 +143,7 @@ export default function AttackPanel({
       <select
         value={targetId}
         onChange={(e) => setTargetId(e.target.value)}
-        className="w-full rounded-md bg-zinc-950 border border-zinc-700 px-2 py-1.5 text-zinc-100 text-sm"
+        className="w-full rounded-md bg-tavern-950 border border-tavern-700 px-2 py-1.5 text-zinc-100 text-sm"
       >
         {enemies.map((e) => (
           <option key={e.id} value={e.id}>
@@ -156,7 +156,7 @@ export default function AttackPanel({
       <select
         value={weaponIdx}
         onChange={(e) => setWeaponIdx(Number(e.target.value))}
-        className="w-full rounded-md bg-zinc-950 border border-zinc-700 px-2 py-1.5 text-zinc-100 text-sm"
+        className="w-full rounded-md bg-tavern-950 border border-tavern-700 px-2 py-1.5 text-zinc-100 text-sm"
       >
         {weapons.map((w, idx) => (
           <option key={w.name + idx} value={idx}>
@@ -168,7 +168,7 @@ export default function AttackPanel({
       <button
         onClick={attack}
         disabled={rolling}
-        className="w-full rounded-md bg-zinc-100 text-zinc-900 font-medium px-3 py-2 text-sm hover:bg-white transition disabled:opacity-50"
+        className="w-full rounded-md bg-amber-500 text-tavern-950 font-medium px-3 py-2 text-sm hover:bg-amber-400 transition disabled:opacity-50"
       >
         {rolling ? "…" : "Angriff würfeln!"}
       </button>

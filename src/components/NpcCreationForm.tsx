@@ -71,7 +71,7 @@ export default function NpcCreationForm({
     return (
       <button
         onClick={() => setOpen(true)}
-        className="w-full text-xs rounded-md bg-zinc-100 text-zinc-900 px-3 py-1.5 font-medium hover:bg-white transition"
+        className="w-full text-xs rounded-md bg-amber-500 text-tavern-950 px-3 py-1.5 font-medium hover:bg-amber-400 transition"
       >
         + NPC erstellen
       </button>
@@ -82,7 +82,7 @@ export default function NpcCreationForm({
     <form
       action={createToken}
       onSubmit={reset}
-      className="space-y-2 border border-zinc-700 rounded-md p-2"
+      className="space-y-2 border border-tavern-700 rounded-md p-2"
     >
       <input type="hidden" name="campaign_id" value={campaignId} />
       <input type="hidden" name="map_id" value={mapId} />
@@ -94,7 +94,7 @@ export default function NpcCreationForm({
         <select
           value={templateIdx}
           onChange={(e) => applyTemplate(Number(e.target.value))}
-          className="w-full rounded-md bg-zinc-950 border border-zinc-700 px-2 py-1.5 text-zinc-100 text-xs"
+          className="w-full rounded-md bg-tavern-950 border border-tavern-700 px-2 py-1.5 text-zinc-100 text-xs"
         >
           <option value={-1}>Eigene Kreatur</option>
           {MONSTER_TEMPLATES.map((t, idx) => (
@@ -113,7 +113,7 @@ export default function NpcCreationForm({
           value={label}
           onChange={(e) => setLabel(e.target.value)}
           required
-          className="w-full rounded-md bg-zinc-950 border border-zinc-700 px-2 py-1.5 text-zinc-100 text-xs"
+          className="w-full rounded-md bg-tavern-950 border border-tavern-700 px-2 py-1.5 text-zinc-100 text-xs"
         />
       </div>
 
@@ -125,7 +125,7 @@ export default function NpcCreationForm({
             name="hp_max"
             value={hpMax}
             onChange={(e) => setHpMax(e.target.value)}
-            className="w-full rounded-md bg-zinc-950 border border-zinc-700 px-2 py-1.5 text-zinc-100 text-xs"
+            className="w-full rounded-md bg-tavern-950 border border-tavern-700 px-2 py-1.5 text-zinc-100 text-xs"
           />
         </div>
         <div>
@@ -135,7 +135,7 @@ export default function NpcCreationForm({
             name="ac"
             value={ac}
             onChange={(e) => setAc(e.target.value)}
-            className="w-full rounded-md bg-zinc-950 border border-zinc-700 px-2 py-1.5 text-zinc-100 text-xs"
+            className="w-full rounded-md bg-tavern-950 border border-tavern-700 px-2 py-1.5 text-zinc-100 text-xs"
           />
         </div>
       </div>
@@ -147,7 +147,7 @@ export default function NpcCreationForm({
         <select
           value={weaponIdx}
           onChange={(e) => setWeaponIdx(Number(e.target.value))}
-          className="w-full rounded-md bg-zinc-950 border border-zinc-700 px-2 py-1.5 text-zinc-100 text-xs"
+          className="w-full rounded-md bg-tavern-950 border border-tavern-700 px-2 py-1.5 text-zinc-100 text-xs"
         >
           {weaponOptions.map((w, idx) => (
             <option key={w.name} value={idx}>
@@ -165,7 +165,7 @@ export default function NpcCreationForm({
           value={loot}
           onChange={(e) => setLoot(e.target.value)}
           placeholder="optional"
-          className="w-full rounded-md bg-zinc-950 border border-zinc-700 px-2 py-1.5 text-zinc-100 text-xs"
+          className="w-full rounded-md bg-tavern-950 border border-tavern-700 px-2 py-1.5 text-zinc-100 text-xs"
         />
       </div>
 
@@ -175,14 +175,14 @@ export default function NpcCreationForm({
           type="file"
           name="file"
           accept="image/*"
-          className="w-full text-xs text-zinc-400 file:mr-2 file:rounded file:border-0 file:bg-zinc-800 file:text-zinc-200 file:px-2 file:py-1"
+          className="w-full text-xs text-zinc-400 file:mr-2 file:rounded file:border-0 file:bg-tavern-800 file:text-zinc-200 file:px-2 file:py-1"
         />
       </div>
 
       <div className="flex gap-2">
         <button
           type="submit"
-          className="flex-1 text-xs rounded-md bg-zinc-100 text-zinc-900 px-3 py-1.5 font-medium hover:bg-white transition"
+          className="flex-1 text-xs rounded-md bg-amber-500 text-tavern-950 px-3 py-1.5 font-medium hover:bg-amber-400 transition"
         >
           Anlegen (erscheint mittig auf der Karte)
         </button>
@@ -190,7 +190,7 @@ export default function NpcCreationForm({
           <button
             type="button"
             onClick={reset}
-            className="text-xs rounded-md border border-zinc-700 text-zinc-300 px-3 py-1.5 hover:bg-zinc-800"
+            className="text-xs rounded-md border border-tavern-700 text-zinc-300 px-3 py-1.5 hover:bg-tavern-800"
           >
             Abbrechen
           </button>

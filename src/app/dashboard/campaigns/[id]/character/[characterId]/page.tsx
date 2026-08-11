@@ -75,7 +75,7 @@ export default async function CharacterDetailPage({
   }) ?? { gold: 0, silver: 0, copper: 0 };
 
   return (
-    <div className="min-h-screen bg-zinc-950 px-4 py-10">
+    <div className="min-h-screen bg-tavern-950 px-4 py-10">
       <div className="max-w-2xl mx-auto">
         <Link
           href={`/dashboard/campaigns/${id}`}
@@ -85,7 +85,7 @@ export default async function CharacterDetailPage({
         </Link>
 
         <div className="flex items-center gap-3 mt-2 mb-6">
-          <h1 className="text-2xl font-semibold text-zinc-100">
+          <h1 className="text-2xl font-semibold text-amber-100">
             {character.name}
           </h1>
           <span className="text-sm text-zinc-500">
@@ -95,7 +95,7 @@ export default async function CharacterDetailPage({
 
         {isOwner && <LevelUpWatcher campaignId={id} characterId={character.id} />}
 
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 mb-6">
+        <div className="rounded-lg border border-tavern-800 bg-tavern-900 p-4 mb-6">
           <span className="text-xs text-zinc-500 block">Erfahrungspunkte</span>
           <span className="text-zinc-100 font-medium">
             {character.xp}
@@ -109,9 +109,9 @@ export default async function CharacterDetailPage({
         </div>
 
         {/* Kampfwerte */}
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 mb-6">
+        <div className="rounded-2xl border border-tavern-800 bg-tavern-900/60 p-6 shadow-lg shadow-black/20 mb-6">
           <div className="grid grid-cols-2 gap-4">
-            <div className="rounded-md bg-zinc-950 border border-zinc-800 px-4 py-3">
+            <div className="rounded-md bg-tavern-950 border border-tavern-800 px-4 py-3">
               <span className="text-xs text-zinc-500 block mb-1">Lebenspunkte</span>
               <HpEditor
                 characterId={character.id}
@@ -120,7 +120,7 @@ export default async function CharacterDetailPage({
                 hpMax={character.hp_max}
               />
             </div>
-            <div className="rounded-md bg-zinc-950 border border-zinc-800 px-4 py-3">
+            <div className="rounded-md bg-tavern-950 border border-tavern-800 px-4 py-3">
               <span className="text-xs text-zinc-500 block">
                 Rüstungsklasse
               </span>
@@ -132,8 +132,8 @@ export default async function CharacterDetailPage({
         </div>
 
         {/* Attribute */}
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 mb-6">
-          <h2 className="text-lg font-medium text-zinc-100 mb-3">Attribute</h2>
+        <div className="rounded-2xl border border-tavern-800 bg-tavern-900/60 p-6 shadow-lg shadow-black/20 mb-6">
+          <h2 className="text-lg font-medium text-amber-100 mb-3">Attribute</h2>
           <div className="grid grid-cols-3 gap-2">
             {ABILITY_LABELS.map(({ key, label }) => {
               const score = Number(
@@ -143,7 +143,7 @@ export default async function CharacterDetailPage({
               return (
                 <div
                   key={key}
-                  className="rounded-md bg-zinc-950 border border-zinc-800 px-3 py-2 text-center"
+                  className="rounded-md bg-tavern-950 border border-tavern-800 px-3 py-2 text-center"
                 >
                   <span className="text-xs text-zinc-500 block">{label}</span>
                   <span className="text-zinc-100 font-medium">
@@ -158,8 +158,8 @@ export default async function CharacterDetailPage({
 
         {/* Hintergrund & Talent */}
         {Boolean(details.background || details.originFeat) && (
-          <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 mb-6 space-y-1 text-sm">
-            <h2 className="text-lg font-medium text-zinc-100 mb-2">
+          <div className="rounded-2xl border border-tavern-800 bg-tavern-900/60 p-6 shadow-lg shadow-black/20 mb-6 space-y-1 text-sm">
+            <h2 className="text-lg font-medium text-amber-100 mb-2">
               Hintergrund
             </h2>
             {typeof details.background === "string" && (
@@ -181,8 +181,8 @@ export default async function CharacterDetailPage({
         )}
 
         {/* Inventar */}
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
-          <h2 className="text-lg font-medium text-zinc-100 mb-1">Inventar</h2>
+        <div className="rounded-2xl border border-tavern-800 bg-tavern-900/60 p-6 shadow-lg shadow-black/20">
+          <h2 className="text-lg font-medium text-amber-100 mb-1">Inventar</h2>
           <p className="text-xs text-zinc-500 mb-4">
             {isOwner
               ? "Verwalte deine Gegenstände und Münzen."

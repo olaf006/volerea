@@ -394,7 +394,7 @@ export default function LiveMapWithTokens({
 
   if (!activeMap) {
     return (
-      <div className="rounded-lg border border-zinc-800 bg-zinc-900 aspect-video flex items-center justify-center">
+      <div className="rounded-lg border border-tavern-800 bg-tavern-900 aspect-video flex items-center justify-center">
         <p className="text-zinc-500 text-sm">
           Der Meister hat noch keine Karte live geschaltet.
         </p>
@@ -406,7 +406,7 @@ export default function LiveMapWithTokens({
     <div className="h-full flex flex-col">
       <div
         ref={containerRef}
-        className="relative rounded-lg border border-zinc-800 bg-zinc-900 overflow-hidden select-none touch-none flex-1"
+        className="relative rounded-lg border border-tavern-800 bg-tavern-900 overflow-hidden select-none touch-none flex-1"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -454,7 +454,7 @@ export default function LiveMapWithTokens({
               </div>
               {token.hp_max !== null && token.hp_max > 0 && (
                 <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-9 pointer-events-none">
-                  <div className="h-1 rounded-full bg-zinc-800 overflow-hidden">
+                  <div className="h-1 rounded-full bg-tavern-800 overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all"
                       style={{
@@ -490,7 +490,7 @@ export default function LiveMapWithTokens({
             onClick={() => setHpEditTokenId(null)}
           >
             <div
-              className="bg-zinc-900 border border-zinc-700 rounded-lg p-4 w-full max-w-xs"
+              className="bg-tavern-900 border border-tavern-700 rounded-lg p-4 w-full max-w-xs"
               onClick={(e) => e.stopPropagation()}
             >
               <h3 className="text-zinc-100 font-medium mb-3">{token.label} · HP</h3>
@@ -528,27 +528,27 @@ export default function LiveMapWithTokens({
                     type="number"
                     name="hp_current"
                     defaultValue={token.hp_current ?? 10}
-                    className="w-20 rounded-md bg-zinc-950 border border-zinc-700 px-2 py-1.5 text-zinc-100 text-center"
+                    className="w-20 rounded-md bg-tavern-950 border border-tavern-700 px-2 py-1.5 text-zinc-100 text-center"
                   />
                   <span className="text-zinc-500">/</span>
                   <input
                     type="number"
                     name="hp_max"
                     defaultValue={token.hp_max ?? 10}
-                    className="w-20 rounded-md bg-zinc-950 border border-zinc-700 px-2 py-1.5 text-zinc-100 text-center"
+                    className="w-20 rounded-md bg-tavern-950 border border-tavern-700 px-2 py-1.5 text-zinc-100 text-center"
                   />
                 </div>
                 <div className="flex gap-2">
                   <button
                     type="submit"
-                    className="flex-1 rounded-md bg-zinc-100 text-zinc-900 font-medium px-3 py-1.5 text-sm hover:bg-white transition"
+                    className="flex-1 rounded-md bg-amber-500 text-tavern-950 font-medium px-3 py-1.5 text-sm hover:bg-amber-400 transition"
                   >
                     Speichern
                   </button>
                   <button
                     type="button"
                     onClick={() => setHpEditTokenId(null)}
-                    className="rounded-md border border-zinc-700 text-zinc-300 px-3 py-1.5 text-sm hover:bg-zinc-800 transition"
+                    className="rounded-md border border-tavern-700 text-zinc-300 px-3 py-1.5 text-sm hover:bg-tavern-800 transition"
                   >
                     Abbrechen
                   </button>

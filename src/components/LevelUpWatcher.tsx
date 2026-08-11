@@ -85,7 +85,7 @@ export default function LevelUpWatcher({
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[70] p-4">
-      <div className="bg-zinc-900 border border-emerald-700 rounded-lg p-6 w-full max-w-sm max-h-[85vh] overflow-y-auto">
+      <div className="bg-tavern-900 border border-emerald-700 rounded-lg p-6 w-full max-w-sm max-h-[85vh] overflow-y-auto">
         <LevelUpForm
           campaignId={campaignId}
           characterId={character.id}

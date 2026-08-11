@@ -53,7 +53,7 @@ export default function LevelUpBanner({ campaignId }: { campaignId: string }) {
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center pointer-events-none">
-      <div className="bg-zinc-900 border-2 border-emerald-500 rounded-xl px-8 py-6 shadow-2xl text-center animate-pulse">
+      <div className="bg-tavern-900 border-2 border-emerald-500 rounded-xl px-8 py-6 shadow-2xl text-center animate-pulse">
         <p className="text-4xl mb-2">🎉</p>
         <p className="text-2xl font-bold text-zinc-100">
           {event.character_name}

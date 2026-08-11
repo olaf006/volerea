@@ -62,7 +62,7 @@ export default function LiveMapDisplay({
 
   if (!activeMap) {
     return (
-      <div className="rounded-lg border border-zinc-800 bg-zinc-900 aspect-video flex items-center justify-center">
+      <div className="rounded-lg border border-tavern-800 bg-tavern-900 aspect-video flex items-center justify-center">
         <p className="text-zinc-500 text-sm">
           Der Meister hat noch keine Karte live geschaltet.
         </p>
@@ -71,14 +71,14 @@ export default function LiveMapDisplay({
   }
 
   return (
-    <div className="rounded-lg border border-zinc-800 bg-zinc-900 overflow-hidden">
+    <div className="rounded-lg border border-tavern-800 bg-tavern-900 overflow-hidden">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={activeMap.image_url}
         alt={activeMap.name}
         className="w-full h-auto"
       />
-      <div className="px-4 py-2 text-sm text-zinc-400 border-t border-zinc-800">
+      <div className="px-4 py-2 text-sm text-zinc-400 border-t border-tavern-800">
         {activeMap.name}
       </div>
     </div>

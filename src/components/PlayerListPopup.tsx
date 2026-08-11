@@ -73,7 +73,7 @@ export default function PlayerListPopup({
           <button
             key={p.userId}
             onClick={() => setSelectedUserId(p.userId)}
-            className="w-full flex items-center justify-between rounded-md border border-zinc-800 px-3 py-2 text-sm hover:bg-zinc-800/50 transition text-left"
+            className="w-full flex items-center justify-between rounded-md border border-tavern-800 px-3 py-2 text-sm hover:bg-tavern-800/50 transition text-left"
           >
             <span className="flex items-center gap-2 text-zinc-200">
               <span className="w-2 h-2 rounded-full bg-emerald-400" />
@@ -94,7 +94,7 @@ export default function PlayerListPopup({
           onClick={() => setSelectedUserId(null)}
         >
           <div
-            className="bg-zinc-900 border border-zinc-800 rounded-lg max-w-md w-full max-h-[85vh] overflow-y-auto p-6"
+            className="bg-tavern-900 border border-tavern-800 rounded-lg max-w-md w-full max-h-[85vh] overflow-y-auto p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start justify-between mb-4">
@@ -123,7 +123,7 @@ export default function PlayerListPopup({
               </p>
             ) : (
               <div className="space-y-4">
-                <div className="rounded-md bg-zinc-950 border border-zinc-800 px-3 py-2">
+                <div className="rounded-md bg-tavern-950 border border-tavern-800 px-3 py-2">
                   <span className="text-xs text-zinc-500 block">Erfahrungspunkte</span>
                   <span className="text-zinc-100 font-medium">
                     {selected.character.xp}
@@ -145,11 +145,11 @@ export default function PlayerListPopup({
                       value={xpInput}
                       onChange={(e) => setXpInput(e.target.value)}
                       placeholder="XP"
-                      className="w-24 rounded-md bg-zinc-900 border border-zinc-700 px-2 py-1 text-zinc-100 text-sm"
+                      className="w-24 rounded-md bg-tavern-900 border border-tavern-700 px-2 py-1 text-zinc-100 text-sm"
                     />
                     <button
                       type="submit"
-                      className="text-xs rounded-md bg-zinc-100 text-zinc-900 px-3 py-1.5 font-medium hover:bg-white transition"
+                      className="text-xs rounded-md bg-amber-500 text-tavern-950 px-3 py-1.5 font-medium hover:bg-amber-400 transition"
                     >
                       XP hinzufügen
                     </button>
@@ -157,7 +157,7 @@ export default function PlayerListPopup({
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="rounded-md bg-zinc-950 border border-zinc-800 px-3 py-2">
+                  <div className="rounded-md bg-tavern-950 border border-tavern-800 px-3 py-2">
                     <span className="text-xs text-zinc-500 block">
                       Lebenspunkte
                     </span>
@@ -165,7 +165,7 @@ export default function PlayerListPopup({
                       {selected.character.hp_current} / {selected.character.hp_max}
                     </span>
                   </div>
-                  <div className="rounded-md bg-zinc-950 border border-zinc-800 px-3 py-2">
+                  <div className="rounded-md bg-tavern-950 border border-tavern-800 px-3 py-2">
                     <span className="text-xs text-zinc-500 block">
                       Rüstungsklasse
                     </span>
@@ -182,7 +182,7 @@ export default function PlayerListPopup({
                     return (
                       <div
                         key={key}
-                        className="rounded-md bg-zinc-950 border border-zinc-800 px-2 py-1.5 text-center"
+                        className="rounded-md bg-tavern-950 border border-tavern-800 px-2 py-1.5 text-center"
                       >
                         <span className="text-xs text-zinc-500 block">
                           {label}

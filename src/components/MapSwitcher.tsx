@@ -37,7 +37,7 @@ export default function MapSwitcher({
             className={`text-xs rounded-md px-3 py-1.5 border transition ${
               activeMapId === m.id
                 ? "border-emerald-700 bg-emerald-950/40 text-emerald-300"
-                : "border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+                : "border-tavern-700 text-zinc-300 hover:bg-tavern-800"
             }`}
           >
             {m.name}

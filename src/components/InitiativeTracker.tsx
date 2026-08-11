@@ -78,7 +78,7 @@ export default function InitiativeTracker({
         <button
           type="submit"
           disabled={!activeMapId}
-          className="w-full rounded-md bg-zinc-100 text-zinc-900 font-medium px-3 py-2 text-sm hover:bg-white transition disabled:opacity-40"
+          className="w-full rounded-md bg-amber-500 text-tavern-950 font-medium px-3 py-2 text-sm hover:bg-amber-400 transition disabled:opacity-40"
         >
           Kampf starten (Initiative würfeln)
         </button>
@@ -115,7 +115,7 @@ export default function InitiativeTracker({
             <input type="hidden" name="campaign_id" value={campaignId} />
             <button
               type="submit"
-              className="w-full rounded-md bg-zinc-100 text-zinc-900 font-medium px-3 py-1.5 text-sm hover:bg-white transition"
+              className="w-full rounded-md bg-amber-500 text-tavern-950 font-medium px-3 py-1.5 text-sm hover:bg-amber-400 transition"
             >
               Nächster
             </button>
@@ -124,7 +124,7 @@ export default function InitiativeTracker({
             <input type="hidden" name="campaign_id" value={campaignId} />
             <button
               type="submit"
-              className="rounded-md border border-zinc-700 text-zinc-300 px-3 py-1.5 text-sm hover:bg-zinc-800 transition"
+              className="rounded-md border border-tavern-700 text-zinc-300 px-3 py-1.5 text-sm hover:bg-tavern-800 transition"
             >
               Beenden
             </button>

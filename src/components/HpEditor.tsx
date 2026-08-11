@@ -37,7 +37,7 @@ export default function HpEditor({
       <button
         onClick={() => save(value - 1)}
         disabled={isPending}
-        className="w-7 h-7 rounded-md border border-zinc-700 text-zinc-300 hover:bg-zinc-800 transition"
+        className="w-7 h-7 rounded-md border border-tavern-700 text-zinc-300 hover:bg-tavern-800 transition"
       >
         −
       </button>
@@ -47,7 +47,7 @@ export default function HpEditor({
       <button
         onClick={() => save(value + 1)}
         disabled={isPending}
-        className="w-7 h-7 rounded-md border border-zinc-700 text-zinc-300 hover:bg-zinc-800 transition"
+        className="w-7 h-7 rounded-md border border-tavern-700 text-zinc-300 hover:bg-tavern-800 transition"
       >
         +
       </button>

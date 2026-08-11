@@ -80,8 +80,8 @@ export default function MasterNotesEditor({
             onClick={() => setSelectedId(c.id)}
             className={`text-xs rounded-md px-2 py-1 border ${
               c.id === selected.id
-                ? "border-zinc-300 bg-zinc-800 text-zinc-100"
-                : "border-zinc-800 text-zinc-400 hover:bg-zinc-800/50"
+                ? "border-zinc-300 bg-tavern-800 text-zinc-100"
+                : "border-tavern-800 text-zinc-400 hover:bg-tavern-800/50"
             }`}
           >
             {c.title}
@@ -89,7 +89,7 @@ export default function MasterNotesEditor({
         ))}
         <button
           onClick={addCategory}
-          className="text-xs rounded-md px-2 py-1 border border-dashed border-zinc-700 text-zinc-500 hover:text-zinc-300"
+          className="text-xs rounded-md px-2 py-1 border border-dashed border-tavern-700 text-zinc-500 hover:text-zinc-300"
         >
           + Ordner
         </button>
@@ -99,7 +99,7 @@ export default function MasterNotesEditor({
         <input
           value={selected.title}
           onChange={(e) => renameCategory(e.target.value)}
-          className="flex-1 text-sm bg-transparent border-b border-zinc-800 text-zinc-200 focus:outline-none focus:border-zinc-500 pb-1"
+          className="flex-1 text-sm bg-transparent border-b border-tavern-800 text-zinc-200 focus:outline-none focus:border-zinc-500 pb-1"
         />
         {categories.length > 1 && (
           <button
@@ -115,13 +115,13 @@ export default function MasterNotesEditor({
         value={selected.content}
         onChange={(e) => updateContent(e.target.value)}
         placeholder="Notizen zu dieser Kategorie..."
-        className="flex-1 w-full min-h-[120px] rounded-md bg-zinc-950 border border-zinc-700 px-3 py-2 text-zinc-100 text-sm resize-none focus:outline-none focus:border-zinc-400"
+        className="flex-1 w-full min-h-[120px] rounded-md bg-tavern-950 border border-tavern-700 px-3 py-2 text-zinc-100 text-sm resize-none focus:outline-none focus:border-amber-500"
       />
 
       <button
         onClick={() => save(categories)}
         disabled={isPending}
-        className="mt-2 rounded-md border border-zinc-700 text-zinc-200 px-3 py-1.5 hover:bg-zinc-800 transition text-xs disabled:opacity-50"
+        className="mt-2 rounded-md border border-tavern-700 text-zinc-200 px-3 py-1.5 hover:bg-tavern-800 transition text-xs disabled:opacity-50"
       >
         {isPending ? "Speichert…" : "Speichern"}
       </button>

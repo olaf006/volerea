@@ -130,7 +130,7 @@ export default async function PlayPage({
       <MasterIntroWrapper showIntro={intro === "1"}>
         <div className="h-screen bg-gradient-to-b from-zinc-950 to-zinc-900 flex flex-col overflow-hidden">
           <LevelUpBanner campaignId={id} />
-          <div className="flex items-center justify-between px-4 py-2.5 border-b border-amber-900/30 bg-zinc-950/60 flex-shrink-0">
+          <div className="flex items-center justify-between px-4 py-2.5 border-b border-amber-900/30 bg-tavern-950/60 flex-shrink-0">
             <Link
               href={`/dashboard/campaigns/${id}`}
               className="text-zinc-400 text-xs hover:text-amber-300 transition"
@@ -259,10 +259,10 @@ export default async function PlayPage({
     .map((item) => ({ name: item.name, damage: item.damage! }));
 
   const content = (
-    <div className="h-screen bg-zinc-950 flex flex-col overflow-hidden">
+    <div className="h-screen bg-tavern-950 flex flex-col overflow-hidden">
       <LevelUpBanner campaignId={id} />
       {myCharacter && <LevelUpWatcher campaignId={id} characterId={myCharacter.id} />}
-      <div className="flex items-center justify-between px-3 py-2 border-b border-zinc-800 flex-shrink-0">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-tavern-800 flex-shrink-0">
         <Link
           href={`/dashboard/campaigns/${id}`}
           className="text-zinc-400 text-xs hover:text-zinc-200"
@@ -287,7 +287,7 @@ export default async function PlayPage({
         </div>
 
         <div className="lg:w-72 flex flex-col gap-2 overflow-y-auto min-h-0">
-          <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-3 flex-shrink-0">
+          <div className="rounded-lg border border-tavern-800 bg-tavern-900 p-3 flex-shrink-0">
             <h2 className="text-xs font-medium text-zinc-100 mb-2">Angriff</h2>
             <AttackPanel
               campaignId={id}
@@ -296,7 +296,7 @@ export default async function PlayPage({
             />
           </div>
 
-          <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-3 flex-shrink-0">
+          <div className="rounded-lg border border-tavern-800 bg-tavern-900 p-3 flex-shrink-0">
             <h2 className="text-xs font-medium text-zinc-100 mb-2">Initiative</h2>
             <InitiativeTracker
               campaignId={id}
@@ -306,12 +306,12 @@ export default async function PlayPage({
             />
           </div>
 
-          <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-3 flex-shrink-0">
+          <div className="rounded-lg border border-tavern-800 bg-tavern-900 p-3 flex-shrink-0">
             <h2 className="text-xs font-medium text-zinc-100 mb-2">Würfeln</h2>
             <DiceRoller campaignId={id} />
           </div>
 
-          <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-3">
+          <div className="rounded-lg border border-tavern-800 bg-tavern-900 p-3">
             <h2 className="text-xs font-medium text-zinc-100 mb-2">Letzte Würfe</h2>
             <LiveDiceFeed campaignId={id} initialRolls={rolls ?? []} labels={labels} />
           </div>
@@ -319,7 +319,7 @@ export default async function PlayPage({
           {myCharacter && (
             <Link
               href={`/dashboard/campaigns/${id}/character/${myCharacter.id}`}
-              className="rounded-md border border-zinc-700 text-center text-zinc-200 px-4 py-2 hover:bg-zinc-800 transition text-sm flex-shrink-0"
+              className="rounded-md border border-tavern-700 text-center text-zinc-200 px-4 py-2 hover:bg-tavern-800 transition text-sm flex-shrink-0"
             >
               Mein Charakter & Inventar
             </Link>

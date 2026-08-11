@@ -98,7 +98,7 @@ export default function NpcManagerPanel({
             {tokens.map((t) => (
               <div
                 key={t.id}
-                className="flex items-center justify-between rounded-md border border-zinc-800 px-3 py-1.5 text-sm"
+                className="flex items-center justify-between rounded-md border border-tavern-800 px-3 py-1.5 text-sm"
               >
                 <span className="text-zinc-200">{t.label}</span>
                 <form action={deleteToken}>

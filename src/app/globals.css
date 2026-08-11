@@ -10,17 +10,33 @@
   --color-foreground: var(--foreground);
   --font-sans: ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, monospace;
+
+  /* Neue, warme Farbpalette für ein gemütlicheres Gefühl - ergänzt die
+     bestehenden zinc-Töne, ersetzt sie NICHT (das komplette Umfärben
+     beim letzten Mal kam nicht gut an). Wird gezielt bei Hintergründen
+     und Rahmen eingesetzt. */
+  --color-tavern-950: #1c1712;
+  --color-tavern-900: #26201a;
+  --color-tavern-800: #362d23;
+  --color-tavern-700: #4a3d2f;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
+    --background: #1c1712;
     --foreground: #ededed;
   }
 }
 
 body {
   background: var(--background);
+  /* Ein sehr dezenter, warmer Lichtschein statt einer flachen Fläche -
+     gibt der Seite etwas Tiefe und Atmosphäre, ohne aufdringlich zu sein. */
+  background-image: radial-gradient(
+    ellipse 1200px 800px at 50% -10%,
+    rgba(217, 155, 63, 0.06),
+    transparent 60%
+  );
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }

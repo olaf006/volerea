@@ -9,9 +9,10 @@ export default async function LoginPage({
   const { error } = await searchParams;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-950 px-4">
-      <div className="w-full max-w-sm">
-        <h1 className="text-2xl font-semibold text-zinc-100 mb-1">Volerea</h1>
+    <div className="min-h-screen flex items-center justify-center bg-tavern-950 px-4">
+      <div className="w-full max-w-sm rounded-2xl border border-tavern-800 bg-tavern-900/60 p-8 shadow-2xl shadow-black/40">
+        <p className="text-2xl mb-1">🎲</p>
+        <h1 className="text-2xl font-semibold text-amber-100 mb-1">Volerea</h1>
         <p className="text-zinc-400 mb-8">Melde dich an, um weiterzuspielen.</p>
 
         <form action={login} className="space-y-4">
@@ -21,7 +22,7 @@ export default async function LoginPage({
               type="email"
               name="email"
               required
-              className="w-full rounded-md bg-zinc-900 border border-zinc-700 px-3 py-2 text-zinc-100 focus:outline-none focus:border-zinc-400"
+              className="w-full rounded-md bg-tavern-900 border border-tavern-700 px-3 py-2 text-zinc-100 focus:outline-none focus:border-amber-500"
             />
           </div>
           <div>
@@ -30,7 +31,7 @@ export default async function LoginPage({
               type="password"
               name="password"
               required
-              className="w-full rounded-md bg-zinc-900 border border-zinc-700 px-3 py-2 text-zinc-100 focus:outline-none focus:border-zinc-400"
+              className="w-full rounded-md bg-tavern-900 border border-tavern-700 px-3 py-2 text-zinc-100 focus:outline-none focus:border-amber-500"
             />
           </div>
 
@@ -38,7 +39,7 @@ export default async function LoginPage({
 
           <button
             type="submit"
-            className="w-full rounded-md bg-zinc-100 text-zinc-900 font-medium py-2 hover:bg-white transition"
+            className="w-full rounded-md bg-amber-500 text-tavern-950 font-medium py-2 hover:bg-amber-400 transition"
           >
             Anmelden
           </button>

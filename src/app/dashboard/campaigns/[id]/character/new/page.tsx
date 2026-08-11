@@ -41,7 +41,7 @@ export default async function NewCharacterPage({
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 px-4 py-10">
+    <div className="min-h-screen bg-tavern-950 px-4 py-10">
       <div className="max-w-2xl mx-auto">
         <Link
           href={`/dashboard/campaigns/${id}`}
@@ -50,7 +50,7 @@ export default async function NewCharacterPage({
           ← Zurück zur Kampagne
         </Link>
 
-        <h1 className="text-2xl font-semibold text-zinc-100 mt-2 mb-6">
+        <h1 className="text-2xl font-semibold text-amber-100 mt-2 mb-6">
           Charakter erstellen – {campaign.name}
         </h1>
 

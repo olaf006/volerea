@@ -61,7 +61,7 @@ export default function InventoryManager({
             onChange={(e) =>
               setCurrency((c) => ({ ...c, gold: Number(e.target.value) }))
             }
-            className="w-full rounded-md bg-zinc-950 border border-zinc-700 px-3 py-2 text-zinc-100"
+            className="w-full rounded-md bg-tavern-950 border border-tavern-700 px-3 py-2 text-zinc-100"
           />
         </div>
         <div>
@@ -72,7 +72,7 @@ export default function InventoryManager({
             onChange={(e) =>
               setCurrency((c) => ({ ...c, silver: Number(e.target.value) }))
             }
-            className="w-full rounded-md bg-zinc-950 border border-zinc-700 px-3 py-2 text-zinc-100"
+            className="w-full rounded-md bg-tavern-950 border border-tavern-700 px-3 py-2 text-zinc-100"
           />
         </div>
         <div>
@@ -83,7 +83,7 @@ export default function InventoryManager({
             onChange={(e) =>
               setCurrency((c) => ({ ...c, copper: Number(e.target.value) }))
             }
-            className="w-full rounded-md bg-zinc-950 border border-zinc-700 px-3 py-2 text-zinc-100"
+            className="w-full rounded-md bg-tavern-950 border border-tavern-700 px-3 py-2 text-zinc-100"
           />
         </div>
       </div>
@@ -93,7 +93,7 @@ export default function InventoryManager({
         {items.map((item, idx) => (
           <div
             key={idx}
-            className="flex items-center justify-between text-sm border-b border-zinc-800 py-1.5"
+            className="flex items-center justify-between text-sm border-b border-tavern-800 py-1.5"
           >
             <span className="text-zinc-200">
               {item.qty > 1 ? `${item.qty}× ` : ""}
@@ -128,7 +128,7 @@ export default function InventoryManager({
             value={newItem.name}
             onChange={(e) => setNewItem((n) => ({ ...n, name: e.target.value }))}
             placeholder="z.B. Heiltrank"
-            className="w-full rounded-md bg-zinc-950 border border-zinc-700 px-3 py-2 text-zinc-100"
+            className="w-full rounded-md bg-tavern-950 border border-tavern-700 px-3 py-2 text-zinc-100"
           />
         </div>
         <div className="w-20">
@@ -140,7 +140,7 @@ export default function InventoryManager({
             onChange={(e) =>
               setNewItem((n) => ({ ...n, qty: Number(e.target.value) }))
             }
-            className="w-full rounded-md bg-zinc-950 border border-zinc-700 px-3 py-2 text-zinc-100"
+            className="w-full rounded-md bg-tavern-950 border border-tavern-700 px-3 py-2 text-zinc-100"
           />
         </div>
         <div className="w-24">
@@ -152,13 +152,13 @@ export default function InventoryManager({
             onChange={(e) =>
               setNewItem((n) => ({ ...n, weight: Number(e.target.value) }))
             }
-            className="w-full rounded-md bg-zinc-950 border border-zinc-700 px-3 py-2 text-zinc-100"
+            className="w-full rounded-md bg-tavern-950 border border-tavern-700 px-3 py-2 text-zinc-100"
           />
         </div>
         <button
           type="button"
           onClick={addItem}
-          className="rounded-md border border-zinc-700 text-zinc-200 px-4 py-2 hover:bg-zinc-800 transition text-sm"
+          className="rounded-md border border-tavern-700 text-zinc-200 px-4 py-2 hover:bg-tavern-800 transition text-sm"
         >
           Hinzufügen
         </button>
@@ -175,7 +175,7 @@ export default function InventoryManager({
 
       <button
         type="submit"
-        className="rounded-md bg-zinc-100 text-zinc-900 font-medium px-4 py-2 hover:bg-white transition text-sm"
+        className="rounded-md bg-amber-500 text-tavern-950 font-medium px-4 py-2 hover:bg-amber-400 transition text-sm"
       >
         Inventar speichern
       </button>

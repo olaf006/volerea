@@ -284,14 +284,14 @@ export default function CharacterForm({
       )}
 
       {houseRules && (
-        <div className="rounded-md border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-zinc-300">
+        <div className="rounded-md border border-tavern-700 bg-tavern-900 px-4 py-3 text-sm text-zinc-300">
           <span className="text-zinc-100 font-medium">Hausregeln: </span>
           {houseRules}
         </div>
       )}
 
       {/* Grunddaten */}
-      <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 space-y-4">
+      <div className="rounded-lg border border-tavern-800 bg-tavern-900 p-6 space-y-4">
         <h2 className="text-lg font-medium text-zinc-100">Grunddaten</h2>
 
         <div>
@@ -301,7 +301,7 @@ export default function CharacterForm({
             name="name"
             required
             placeholder="Name deines Charakters"
-            className="w-full rounded-md bg-zinc-950 border border-zinc-700 px-3 py-2 text-zinc-100 focus:outline-none focus:border-zinc-400"
+            className="w-full rounded-md bg-tavern-950 border border-tavern-700 px-3 py-2 text-zinc-100 focus:outline-none focus:border-amber-500"
           />
         </div>
 
@@ -313,7 +313,7 @@ export default function CharacterForm({
             <select
               name="race"
               required
-              className="w-full rounded-md bg-zinc-950 border border-zinc-700 px-3 py-2 text-zinc-100 focus:outline-none focus:border-zinc-400"
+              className="w-full rounded-md bg-tavern-950 border border-tavern-700 px-3 py-2 text-zinc-100 focus:outline-none focus:border-amber-500"
             >
               {RACES.map((r) => (
                 <option key={r} value={r}>
@@ -340,7 +340,7 @@ export default function CharacterForm({
                 setSelectedCantrips([]);
                 setSelectedLevel1([]);
               }}
-              className="w-full rounded-md bg-zinc-950 border border-zinc-700 px-3 py-2 text-zinc-100 focus:outline-none focus:border-zinc-400"
+              className="w-full rounded-md bg-tavern-950 border border-tavern-700 px-3 py-2 text-zinc-100 focus:outline-none focus:border-amber-500"
             >
               {CLASSES.map((c) => (
                 <option key={c} value={c}>
@@ -353,7 +353,7 @@ export default function CharacterForm({
       </div>
 
       {/* Hintergrund */}
-      <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 space-y-4">
+      <div className="rounded-lg border border-tavern-800 bg-tavern-900 p-6 space-y-4">
         <h2 className="text-lg font-medium text-zinc-100">Hintergrund</h2>
         {isBeginner && (
           <p className="text-xs text-zinc-500">
@@ -366,7 +366,7 @@ export default function CharacterForm({
         <select
           value={backgroundIdx}
           onChange={(e) => selectBackground(Number(e.target.value))}
-          className="w-full rounded-md bg-zinc-950 border border-zinc-700 px-3 py-2 text-zinc-100 focus:outline-none focus:border-zinc-400"
+          className="w-full rounded-md bg-tavern-950 border border-tavern-700 px-3 py-2 text-zinc-100 focus:outline-none focus:border-amber-500"
         >
           {BACKGROUNDS.map((bg, idx) => (
             <option key={bg.name} value={idx}>
@@ -375,7 +375,7 @@ export default function CharacterForm({
           ))}
         </select>
 
-        <div className="rounded-md bg-zinc-950 border border-zinc-800 px-4 py-3 text-sm space-y-1">
+        <div className="rounded-md bg-tavern-950 border border-tavern-800 px-4 py-3 text-sm space-y-1">
           <p className="text-zinc-300">
             <span className="text-zinc-500">Feste Fertigkeiten: </span>
             {background.skills.join(", ")}
@@ -414,7 +414,7 @@ export default function CharacterForm({
                 onChange={(e) =>
                   setPlusTwoAbility(e.target.value as AbilityKeyName)
                 }
-                className="ml-6 rounded-md bg-zinc-950 border border-zinc-700 px-3 py-2 text-zinc-100 text-sm w-fit"
+                className="ml-6 rounded-md bg-tavern-950 border border-tavern-700 px-3 py-2 text-zinc-100 text-sm w-fit"
               >
                 {background.abilities.map((a) => (
                   <option key={a} value={a}>
@@ -436,7 +436,7 @@ export default function CharacterForm({
       </div>
 
       {/* Attribute */}
-      <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 space-y-4">
+      <div className="rounded-lg border border-tavern-800 bg-tavern-900 p-6 space-y-4">
         <h2 className="text-lg font-medium text-zinc-100">Attribute</h2>
         {isBeginner && (
           <p className="text-xs text-zinc-500">
@@ -459,7 +459,7 @@ export default function CharacterForm({
               <select
                 value={assignment[key]}
                 onChange={(e) => handleAssign(key, Number(e.target.value))}
-                className="rounded-md bg-zinc-950 border border-zinc-700 px-3 py-2 text-zinc-100 focus:outline-none focus:border-zinc-400 w-24"
+                className="rounded-md bg-tavern-950 border border-tavern-700 px-3 py-2 text-zinc-100 focus:outline-none focus:border-amber-500 w-24"
               >
                 {STANDARD_ARRAY.map((v) => (
                   <option key={v} value={v}>
@@ -480,7 +480,7 @@ export default function CharacterForm({
       </div>
 
       {/* Kampfwerte - automatisch berechnet */}
-      <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 space-y-3">
+      <div className="rounded-lg border border-tavern-800 bg-tavern-900 p-6 space-y-3">
         <h2 className="text-lg font-medium text-zinc-100">Kampfwerte</h2>
         <p className="text-xs text-zinc-500">
           Automatisch berechnet aus Klasse, Attributen (inkl.
@@ -488,7 +488,7 @@ export default function CharacterForm({
           eintragen.
         </p>
         <div className="grid grid-cols-2 gap-4">
-          <div className="rounded-md bg-zinc-950 border border-zinc-800 px-4 py-3">
+          <div className="rounded-md bg-tavern-950 border border-tavern-800 px-4 py-3">
             <span className="text-xs text-zinc-500 block">Lebenspunkte</span>
             <span className="text-xl text-zinc-100 font-medium">{hp}</span>
             <span className="text-xs text-zinc-600 block mt-1">
@@ -496,7 +496,7 @@ export default function CharacterForm({
               {toughBonus > 0 && " + Zäh-Talent"}
             </span>
           </div>
-          <div className="rounded-md bg-zinc-950 border border-zinc-800 px-4 py-3">
+          <div className="rounded-md bg-tavern-950 border border-tavern-800 px-4 py-3">
             <span className="text-xs text-zinc-500 block">
               Rüstungsklasse
             </span>
@@ -511,7 +511,7 @@ export default function CharacterForm({
       </div>
 
       {/* Rettungswürfe */}
-      <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 space-y-3">
+      <div className="rounded-lg border border-tavern-800 bg-tavern-900 p-6 space-y-3">
         <h2 className="text-lg font-medium text-zinc-100">Rettungswürfe</h2>
         <p className="text-xs text-zinc-500">
           Dein Übungsbonus (auf Stufe 1: +{profBonus}) zählt bei{" "}
@@ -528,7 +528,7 @@ export default function CharacterForm({
                 className={`rounded-md border px-3 py-2 text-center ${
                   isProficient
                     ? "border-emerald-800 bg-emerald-950/30"
-                    : "border-zinc-800 bg-zinc-950"
+                    : "border-tavern-800 bg-tavern-950"
                 }`}
               >
                 <span className="text-xs text-zinc-500 block">{label}</span>
@@ -546,7 +546,7 @@ export default function CharacterForm({
       </div>
 
       {/* Klassen-Merkmale */}
-      <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 space-y-3">
+      <div className="rounded-lg border border-tavern-800 bg-tavern-900 p-6 space-y-3">
         <h2 className="text-lg font-medium text-zinc-100">
           Klassen-Merkmale ({charClass})
         </h2>
@@ -555,7 +555,7 @@ export default function CharacterForm({
         </p>
         <div className="space-y-2">
           {classFeatures.map((f) => (
-            <div key={f.name} className="rounded-md bg-zinc-950 border border-zinc-800 px-3 py-2">
+            <div key={f.name} className="rounded-md bg-tavern-950 border border-tavern-800 px-3 py-2">
               <span className="text-zinc-100 text-sm font-medium">{f.name}</span>
               <p className="text-zinc-500 text-xs mt-0.5">{f.description}</p>
             </div>
@@ -571,8 +571,8 @@ export default function CharacterForm({
                   key={style.name}
                   className={`flex flex-col gap-1 rounded-md border px-3 py-2 text-sm cursor-pointer ${
                     fightingStyle === style.name
-                      ? "border-zinc-300 bg-zinc-800"
-                      : "border-zinc-800"
+                      ? "border-zinc-300 bg-tavern-800"
+                      : "border-tavern-800"
                   }`}
                 >
                   <span className="flex items-center gap-2 text-zinc-100 font-medium">
@@ -599,8 +599,8 @@ export default function CharacterForm({
                   key={order.name}
                   className={`flex flex-col gap-1 rounded-md border px-3 py-2 text-sm cursor-pointer ${
                     divineOrder === order.name
-                      ? "border-zinc-300 bg-zinc-800"
-                      : "border-zinc-800"
+                      ? "border-zinc-300 bg-tavern-800"
+                      : "border-tavern-800"
                   }`}
                 >
                   <span className="flex items-center gap-2 text-zinc-100 font-medium">
@@ -627,8 +627,8 @@ export default function CharacterForm({
                   key={order.name}
                   className={`flex flex-col gap-1 rounded-md border px-3 py-2 text-sm cursor-pointer ${
                     primalOrder === order.name
-                      ? "border-zinc-300 bg-zinc-800"
-                      : "border-zinc-800"
+                      ? "border-zinc-300 bg-tavern-800"
+                      : "border-tavern-800"
                   }`}
                 >
                   <span className="flex items-center gap-2 text-zinc-100 font-medium">
@@ -648,7 +648,7 @@ export default function CharacterForm({
       </div>
 
       {/* Fertigkeiten */}
-      <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 space-y-3">
+      <div className="rounded-lg border border-tavern-800 bg-tavern-900 p-6 space-y-3">
         <h2 className="text-lg font-medium text-zinc-100">
           Fertigkeiten der Klasse ({selectedSkills.length}/{skillChoice.count})
         </h2>
@@ -668,8 +668,8 @@ export default function CharacterForm({
                 key={skill}
                 className={`flex items-center gap-2 rounded-md border px-3 py-2 text-sm cursor-pointer ${
                   checked
-                    ? "border-zinc-300 bg-zinc-800 text-zinc-100"
-                    : "border-zinc-800 text-zinc-300"
+                    ? "border-zinc-300 bg-tavern-800 text-zinc-100"
+                    : "border-tavern-800 text-zinc-300"
                 } ${disabled ? "opacity-40 cursor-not-allowed" : ""}`}
               >
                 <input
@@ -686,7 +686,7 @@ export default function CharacterForm({
       </div>
 
       {/* Ausrüstung */}
-      <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 space-y-3">
+      <div className="rounded-lg border border-tavern-800 bg-tavern-900 p-6 space-y-3">
         <h2 className="text-lg font-medium text-zinc-100">
           Startausrüstung (Klasse)
         </h2>
@@ -701,8 +701,8 @@ export default function CharacterForm({
               key={opt.label}
               className={`flex flex-col gap-1 rounded-md border px-4 py-3 cursor-pointer ${
                 equipmentIndex === idx
-                  ? "border-zinc-300 bg-zinc-800"
-                  : "border-zinc-800"
+                  ? "border-zinc-300 bg-tavern-800"
+                  : "border-tavern-800"
               }`}
             >
               <span className="flex items-center gap-2 text-zinc-100 font-medium text-sm">
@@ -735,7 +735,7 @@ export default function CharacterForm({
       </div>
 
       {/* Inventar-Vorschau */}
-      <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 space-y-3">
+      <div className="rounded-lg border border-tavern-800 bg-tavern-900 p-6 space-y-3">
         <h2 className="text-lg font-medium text-zinc-100">
           Inventar & Traglast
         </h2>
@@ -748,7 +748,7 @@ export default function CharacterForm({
           {inventory.map((item, idx) => (
             <div
               key={idx}
-              className="flex items-center justify-between text-sm border-b border-zinc-800 py-1"
+              className="flex items-center justify-between text-sm border-b border-tavern-800 py-1"
             >
               <span className="text-zinc-200">
                 {item.qty > 1 ? `${item.qty}× ` : ""}
@@ -795,7 +795,7 @@ export default function CharacterForm({
 
       {/* Zauber - nur für Klassen, die ab Stufe 1 zaubern können */}
       {caster ? (
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 space-y-4">
+        <div className="rounded-lg border border-tavern-800 bg-tavern-900 p-6 space-y-4">
           <h2 className="text-lg font-medium text-zinc-100">Zauber</h2>
           <p className="text-xs text-zinc-500">
             Als {charClass} zauberst du über {caster.ability}.{" "}
@@ -819,8 +819,8 @@ export default function CharacterForm({
                     key={spell.name}
                     className={`flex items-start gap-2 rounded-md border px-3 py-2 text-sm cursor-pointer ${
                       checked
-                        ? "border-zinc-300 bg-zinc-800"
-                        : "border-zinc-800"
+                        ? "border-zinc-300 bg-tavern-800"
+                        : "border-tavern-800"
                     } ${disabled ? "opacity-40 cursor-not-allowed" : ""}`}
                   >
                     <input
@@ -865,8 +865,8 @@ export default function CharacterForm({
                     key={spell.name}
                     className={`flex items-start gap-2 rounded-md border px-3 py-2 text-sm cursor-pointer ${
                       checked
-                        ? "border-zinc-300 bg-zinc-800"
-                        : "border-zinc-800"
+                        ? "border-zinc-300 bg-tavern-800"
+                        : "border-tavern-800"
                     } ${disabled ? "opacity-40 cursor-not-allowed" : ""}`}
                   >
                     <input
@@ -898,7 +898,7 @@ export default function CharacterForm({
           </div>
         </div>
       ) : (
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
+        <div className="rounded-lg border border-tavern-800 bg-tavern-900 p-6">
           <h2 className="text-lg font-medium text-zinc-100 mb-1">Zauber</h2>
           <p className="text-xs text-zinc-500">
             {charClass} beherrscht auf Stufe 1 noch keine Zauber.
@@ -907,7 +907,7 @@ export default function CharacterForm({
       )}
 
       {/* Hintergrund-Geschichte */}
-      <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 space-y-4">
+      <div className="rounded-lg border border-tavern-800 bg-tavern-900 p-6 space-y-4">
         <h2 className="text-lg font-medium text-zinc-100">
           Profilbild für die Karte
         </h2>
@@ -920,11 +920,11 @@ export default function CharacterForm({
           type="file"
           name="token_image"
           accept="image/*"
-          className="text-sm text-zinc-400 file:mr-3 file:rounded file:border-0 file:bg-zinc-800 file:text-zinc-200 file:px-3 file:py-1.5"
+          className="text-sm text-zinc-400 file:mr-3 file:rounded file:border-0 file:bg-tavern-800 file:text-zinc-200 file:px-3 file:py-1.5"
         />
       </div>
 
-      <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 space-y-4">
+      <div className="rounded-lg border border-tavern-800 bg-tavern-900 p-6 space-y-4">
         <h2 className="text-lg font-medium text-zinc-100">
           Hintergrundgeschichte
         </h2>
@@ -932,14 +932,14 @@ export default function CharacterForm({
           name="background_story"
           rows={3}
           placeholder="Wer ist dein Charakter, woher kommt er... (optional)"
-          className="w-full rounded-md bg-zinc-950 border border-zinc-700 px-3 py-2 text-zinc-100 focus:outline-none focus:border-zinc-400"
+          className="w-full rounded-md bg-tavern-950 border border-tavern-700 px-3 py-2 text-zinc-100 focus:outline-none focus:border-amber-500"
         />
       </div>
 
       <button
         type="submit"
         disabled={selectedSkills.length !== skillChoice.count}
-        className="w-full rounded-md bg-zinc-100 text-zinc-900 font-medium py-2.5 hover:bg-white transition disabled:opacity-40 disabled:cursor-not-allowed"
+        className="w-full rounded-md bg-amber-500 text-tavern-950 font-medium py-2.5 hover:bg-amber-400 transition disabled:opacity-40 disabled:cursor-not-allowed"
       >
         Charakter erstellen
       </button>

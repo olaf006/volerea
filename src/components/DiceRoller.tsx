@@ -46,7 +46,7 @@ export default function DiceRoller({ campaignId }: { campaignId: string }) {
           key={d}
           onClick={() => roll(d)}
           disabled={isPending}
-          className="relative rounded-md border border-zinc-700 bg-zinc-900 text-zinc-100 px-4 py-3 text-sm font-medium hover:bg-zinc-800 transition disabled:opacity-50 overflow-hidden"
+          className="relative rounded-md border border-tavern-700 bg-tavern-900 text-zinc-100 px-4 py-3 text-sm font-medium hover:bg-tavern-800 transition disabled:opacity-50 overflow-hidden"
         >
           {rollingDie === d ? (
             <span className="text-emerald-400 tabular-nums">

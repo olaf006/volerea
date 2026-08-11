@@ -66,7 +66,7 @@ export default function SessionGate({
 
   if (phase === "lobby") {
     return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-tavern-950 flex items-center justify-center px-4">
         <div className="text-center max-w-sm">
           <h1 className="text-xl font-semibold text-zinc-100 mb-2">
             {campaignName}

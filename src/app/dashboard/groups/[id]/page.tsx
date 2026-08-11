@@ -39,33 +39,33 @@ export default async function GroupPage({
     .eq("group_id", id);
 
   return (
-    <div className="min-h-screen bg-zinc-950 px-4 py-10">
+    <div className="min-h-screen bg-tavern-950 px-4 py-10">
       <div className="max-w-2xl mx-auto">
         <Link href="/dashboard" className="text-zinc-400 text-sm hover:text-zinc-200">
           ← Zurück zum Dashboard
         </Link>
 
-        <h1 className="text-2xl font-semibold text-zinc-100 mt-2 mb-6">
+        <h1 className="text-2xl font-semibold text-amber-100 mt-2 mb-6">
           {group.name}
         </h1>
 
         {isMaster && (
-          <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 mb-6">
-            <h2 className="text-lg font-medium text-zinc-100 mb-2">
+          <div className="rounded-2xl border border-tavern-800 bg-tavern-900/60 p-6 shadow-lg shadow-black/20 mb-6">
+            <h2 className="text-lg font-medium text-amber-100 mb-2">
               Einladungscode
             </h2>
             <p className="text-zinc-400 text-sm mb-3">
               Gib diesen Code an deine Mitspieler weiter, damit sie beitreten
               können.
             </p>
-            <code className="block rounded-md bg-zinc-950 border border-zinc-700 px-4 py-2 text-zinc-100 text-lg tracking-wider">
+            <code className="block rounded-md bg-tavern-950 border border-tavern-700 px-4 py-2 text-zinc-100 text-lg tracking-wider">
               {group.invite_code}
             </code>
           </div>
         )}
 
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 mb-6">
-          <h2 className="text-lg font-medium text-zinc-100 mb-4">
+        <div className="rounded-2xl border border-tavern-800 bg-tavern-900/60 p-6 shadow-lg shadow-black/20 mb-6">
+          <h2 className="text-lg font-medium text-amber-100 mb-4">
             Mitglieder
           </h2>
           <ul className="space-y-2">
@@ -94,8 +94,8 @@ export default async function GroupPage({
           </p>
         )}
 
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 mb-6">
-          <h2 className="text-lg font-medium text-zinc-100 mb-4">
+        <div className="rounded-2xl border border-tavern-800 bg-tavern-900/60 p-6 shadow-lg shadow-black/20 mb-6">
+          <h2 className="text-lg font-medium text-amber-100 mb-4">
             Kampagnen
           </h2>
           {!campaigns || campaigns.length === 0 ? (
@@ -108,7 +108,7 @@ export default async function GroupPage({
                 <li key={c.id}>
                   <Link
                     href={`/dashboard/campaigns/${c.id}`}
-                    className="block rounded-md border border-zinc-800 px-4 py-3 text-zinc-100 hover:bg-zinc-800/50 transition"
+                    className="block rounded-md border border-tavern-800 px-4 py-3 text-zinc-100 hover:bg-tavern-800/50 transition"
                   >
                     {c.name}
                   </Link>
@@ -119,8 +119,8 @@ export default async function GroupPage({
         </div>
 
         {isMaster && (
-          <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
-            <h2 className="text-lg font-medium text-zinc-100 mb-1">
+          <div className="rounded-2xl border border-tavern-800 bg-tavern-900/60 p-6 shadow-lg shadow-black/20">
+            <h2 className="text-lg font-medium text-amber-100 mb-1">
               Neue Kampagne erstellen
             </h2>
             <p className="text-zinc-400 text-sm mb-4">
@@ -140,7 +140,7 @@ export default async function GroupPage({
                   name="name"
                   required
                   placeholder="z.B. Der Fluch von Rieselfeld"
-                  className="w-full rounded-md bg-zinc-950 border border-zinc-700 px-3 py-2 text-zinc-100 focus:outline-none focus:border-zinc-400"
+                  className="w-full rounded-md bg-tavern-950 border border-tavern-700 px-3 py-2 text-zinc-100 focus:outline-none focus:border-amber-500"
                 />
               </div>
 
@@ -152,7 +152,7 @@ export default async function GroupPage({
                   name="description"
                   rows={2}
                   placeholder="Kurzer Überblick, worum es geht..."
-                  className="w-full rounded-md bg-zinc-950 border border-zinc-700 px-3 py-2 text-zinc-100 focus:outline-none focus:border-zinc-400"
+                  className="w-full rounded-md bg-tavern-950 border border-tavern-700 px-3 py-2 text-zinc-100 focus:outline-none focus:border-amber-500"
                 />
               </div>
 
@@ -161,7 +161,7 @@ export default async function GroupPage({
                   Modus
                 </label>
                 <div className="grid grid-cols-2 gap-3">
-                  <label className="flex flex-col gap-1 rounded-md border border-zinc-700 px-4 py-3 cursor-pointer has-[:checked]:border-zinc-300 has-[:checked]:bg-zinc-800">
+                  <label className="flex flex-col gap-1 rounded-md border border-tavern-700 px-4 py-3 cursor-pointer has-[:checked]:border-zinc-300 has-[:checked]:bg-tavern-800">
                     <span className="flex items-center gap-2 text-zinc-100 font-medium">
                       <input
                         type="radio"
@@ -175,7 +175,7 @@ export default async function GroupPage({
                       Für erfahrene Spieler, keine Hilfestellungen.
                     </span>
                   </label>
-                  <label className="flex flex-col gap-1 rounded-md border border-zinc-700 px-4 py-3 cursor-pointer has-[:checked]:border-zinc-300 has-[:checked]:bg-zinc-800">
+                  <label className="flex flex-col gap-1 rounded-md border border-tavern-700 px-4 py-3 cursor-pointer has-[:checked]:border-zinc-300 has-[:checked]:bg-tavern-800">
                     <span className="flex items-center gap-2 text-zinc-100 font-medium">
                       <input type="radio" name="mode" value="anfaenger" />
                       Anfänger
@@ -195,7 +195,7 @@ export default async function GroupPage({
                   name="house_rules"
                   rows={3}
                   placeholder="Besondere Regeln, Monster-Mischung, Einschränkungen bei Rassen/Klassen, etc."
-                  className="w-full rounded-md bg-zinc-950 border border-zinc-700 px-3 py-2 text-zinc-100 focus:outline-none focus:border-zinc-400"
+                  className="w-full rounded-md bg-tavern-950 border border-tavern-700 px-3 py-2 text-zinc-100 focus:outline-none focus:border-amber-500"
                 />
                 <p className="text-xs text-zinc-500 mt-1">
                   Deine Spieler sehen das beim Erstellen ihres Charakters.
@@ -204,7 +204,7 @@ export default async function GroupPage({
 
               <button
                 type="submit"
-                className="w-full rounded-md bg-zinc-100 text-zinc-900 font-medium py-2 hover:bg-white transition"
+                className="w-full rounded-md bg-amber-500 text-tavern-950 font-medium py-2 hover:bg-amber-400 transition"
               >
                 Kampagne erstellen
               </button>

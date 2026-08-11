@@ -27,11 +27,12 @@ export default async function DashboardPage({
     .eq("user_id", user?.id);
 
   return (
-    <div className="min-h-screen bg-zinc-950 px-4 py-10">
+    <div className="min-h-screen bg-tavern-950 px-4 py-10">
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-semibold text-zinc-100">
+            <p className="text-2xl mb-1">🏰</p>
+            <h1 className="text-2xl font-semibold text-amber-100">
               Willkommen, {profile?.username ?? user?.email}
             </h1>
             <p className="text-zinc-400 text-sm">{user?.email}</p>
@@ -39,7 +40,7 @@ export default async function DashboardPage({
           <form action={logout}>
             <button
               type="submit"
-              className="rounded-md border border-zinc-700 px-4 py-2 text-zinc-300 hover:bg-zinc-900 transition text-sm"
+              className="rounded-lg border border-tavern-700 px-4 py-2 text-zinc-300 hover:bg-tavern-900 transition text-sm"
             >
               Abmelden
             </button>
@@ -53,8 +54,8 @@ export default async function DashboardPage({
         )}
 
         {/* Deine Gruppen */}
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 mb-6">
-          <h2 className="text-lg font-medium text-zinc-100 mb-4">
+        <div className="rounded-2xl border border-tavern-800 bg-tavern-900/60 p-6 mb-6 shadow-lg shadow-black/20">
+          <h2 className="text-lg font-medium text-amber-100 mb-4">
             Deine Gruppen
           </h2>
 
@@ -75,7 +76,7 @@ export default async function DashboardPage({
                   <li key={group.id}>
                     <Link
                       href={`/dashboard/groups/${group.id}`}
-                      className="flex items-center justify-between rounded-md border border-zinc-800 px-4 py-3 hover:bg-zinc-800/50 transition"
+                      className="flex items-center justify-between rounded-lg border border-tavern-800 px-4 py-3 hover:bg-tavern-800/50 hover:border-amber-800/50 transition"
                     >
                       <span className="text-zinc-100">{group.name}</span>
                       <span className="text-xs uppercase tracking-wide text-zinc-500">
@@ -90,8 +91,8 @@ export default async function DashboardPage({
         </div>
 
         {/* Neue Gruppe erstellen */}
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 mb-6">
-          <h2 className="text-lg font-medium text-zinc-100 mb-4">
+        <div className="rounded-2xl border border-tavern-800 bg-tavern-900/60 p-6 mb-6 shadow-lg shadow-black/20">
+          <h2 className="text-lg font-medium text-amber-100 mb-4">
             Neue Gruppe erstellen
           </h2>
           <form action={createGroup} className="flex gap-2">
@@ -100,11 +101,11 @@ export default async function DashboardPage({
               name="name"
               required
               placeholder="z.B. Freitagsrunde"
-              className="flex-1 rounded-md bg-zinc-950 border border-zinc-700 px-3 py-2 text-zinc-100 focus:outline-none focus:border-zinc-400"
+              className="flex-1 rounded-lg bg-tavern-950 border border-tavern-700 px-3 py-2 text-zinc-100 focus:outline-none focus:border-amber-500"
             />
             <button
               type="submit"
-              className="rounded-md bg-zinc-100 text-zinc-900 font-medium px-4 py-2 hover:bg-white transition"
+              className="rounded-lg bg-amber-500 text-tavern-950 font-medium px-4 py-2 hover:bg-amber-400 transition"
             >
               Erstellen
             </button>
@@ -112,8 +113,8 @@ export default async function DashboardPage({
         </div>
 
         {/* Gruppe beitreten */}
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
-          <h2 className="text-lg font-medium text-zinc-100 mb-4">
+        <div className="rounded-2xl border border-tavern-800 bg-tavern-900/60 p-6 shadow-lg shadow-black/20">
+          <h2 className="text-lg font-medium text-amber-100 mb-4">
             Gruppe beitreten
           </h2>
           <form action={joinGroup} className="flex gap-2">
@@ -122,11 +123,11 @@ export default async function DashboardPage({
               name="invite_code"
               required
               placeholder="Einladungscode"
-              className="flex-1 rounded-md bg-zinc-950 border border-zinc-700 px-3 py-2 text-zinc-100 focus:outline-none focus:border-zinc-400"
+              className="flex-1 rounded-lg bg-tavern-950 border border-tavern-700 px-3 py-2 text-zinc-100 focus:outline-none focus:border-amber-500"
             />
             <button
               type="submit"
-              className="rounded-md border border-zinc-700 text-zinc-200 font-medium px-4 py-2 hover:bg-zinc-800 transition"
+              className="rounded-lg border border-tavern-700 text-zinc-200 font-medium px-4 py-2 hover:bg-tavern-800 transition"
             >
               Beitreten
             </button>

@@ -117,14 +117,14 @@ export default function LevelUpForm({
         </span>
       </div>
 
-      <div className="rounded-md bg-zinc-950 border border-zinc-800 px-4 py-3">
+      <div className="rounded-md bg-tavern-950 border border-tavern-800 px-4 py-3">
         <span className="text-xs text-zinc-500 block mb-2">Lebenspunkte</span>
         {hpGain === null ? (
           <button
             type="button"
             onClick={rollForHp}
             disabled={rolling}
-            className="w-full rounded-md border border-zinc-700 text-zinc-100 py-2 hover:bg-zinc-800 transition disabled:opacity-50"
+            className="w-full rounded-md border border-tavern-700 text-zinc-100 py-2 hover:bg-tavern-800 transition disabled:opacity-50"
           >
             {rolling ? "…" : `Trefferwürfel würfeln (W${hitDie})`}
           </button>
@@ -136,13 +136,13 @@ export default function LevelUpForm({
         )}
       </div>
 
-      <div className="rounded-md bg-zinc-950 border border-zinc-800 px-4 py-3">
+      <div className="rounded-md bg-tavern-950 border border-tavern-800 px-4 py-3">
         <span className="text-xs text-zinc-500 block">Übungsbonus</span>
         <span className="text-zinc-100 font-medium">+{newProfBonus}</span>
       </div>
 
       {isAsiLevel && (
-        <div className="rounded-md border border-zinc-800 bg-zinc-900 p-4 space-y-3">
+        <div className="rounded-md border border-tavern-800 bg-tavern-900 p-4 space-y-3">
           <h3 className="text-sm font-medium text-zinc-100">
             Attributssteigerung (Stufe {newLevel})
           </h3>
@@ -159,7 +159,7 @@ export default function LevelUpForm({
               <select
                 value={plusTwoAbility}
                 onChange={(e) => setPlusTwoAbility(e.target.value as AbilityKeyName)}
-                className="ml-6 rounded-md bg-zinc-950 border border-zinc-700 px-2 py-1.5 text-zinc-100 text-sm w-fit"
+                className="ml-6 rounded-md bg-tavern-950 border border-tavern-700 px-2 py-1.5 text-zinc-100 text-sm w-fit"
               >
                 {ABILITY_KEYS.map((k) => (
                   <option key={k} value={k}>
@@ -181,7 +181,7 @@ export default function LevelUpForm({
                 <select
                   value={plusOneA}
                   onChange={(e) => setPlusOneA(e.target.value as AbilityKeyName)}
-                  className="rounded-md bg-zinc-950 border border-zinc-700 px-2 py-1.5 text-zinc-100 text-sm"
+                  className="rounded-md bg-tavern-950 border border-tavern-700 px-2 py-1.5 text-zinc-100 text-sm"
                 >
                   {ABILITY_KEYS.map((k) => (
                     <option key={k} value={k}>
@@ -192,7 +192,7 @@ export default function LevelUpForm({
                 <select
                   value={plusOneB}
                   onChange={(e) => setPlusOneB(e.target.value as AbilityKeyName)}
-                  className="rounded-md bg-zinc-950 border border-zinc-700 px-2 py-1.5 text-zinc-100 text-sm"
+                  className="rounded-md bg-tavern-950 border border-tavern-700 px-2 py-1.5 text-zinc-100 text-sm"
                 >
                   {ABILITY_KEYS.map((k) => (
                     <option key={k} value={k}>
@@ -207,7 +207,7 @@ export default function LevelUpForm({
       )}
 
       {caster && (availableCantrips.length > 0 || availableLevel1.length > 0) && (
-        <div className="rounded-md border border-zinc-800 bg-zinc-900 p-4 space-y-3">
+        <div className="rounded-md border border-tavern-800 bg-tavern-900 p-4 space-y-3">
           <h3 className="text-sm font-medium text-zinc-100">
             Neuen Zauber dazulernen (optional)
           </h3>
@@ -217,7 +217,7 @@ export default function LevelUpForm({
               <select
                 value={newCantrip}
                 onChange={(e) => setNewCantrip(e.target.value)}
-                className="w-full rounded-md bg-zinc-950 border border-zinc-700 px-2 py-1.5 text-zinc-100 text-sm"
+                className="w-full rounded-md bg-tavern-950 border border-tavern-700 px-2 py-1.5 text-zinc-100 text-sm"
               >
                 <option value="">Keinen dazulernen</option>
                 {availableCantrips.map((c) => (
@@ -234,7 +234,7 @@ export default function LevelUpForm({
               <select
                 value={newSpell}
                 onChange={(e) => setNewSpell(e.target.value)}
-                className="w-full rounded-md bg-zinc-950 border border-zinc-700 px-2 py-1.5 text-zinc-100 text-sm"
+                className="w-full rounded-md bg-tavern-950 border border-tavern-700 px-2 py-1.5 text-zinc-100 text-sm"
               >
                 <option value="">Keinen dazulernen</option>
                 {availableLevel1.map((s) => (
@@ -251,7 +251,7 @@ export default function LevelUpForm({
       <button
         type="submit"
         disabled={hpGain === null}
-        className="w-full rounded-md bg-zinc-100 text-zinc-900 font-medium py-2.5 hover:bg-white transition disabled:opacity-40 disabled:cursor-not-allowed"
+        className="w-full rounded-md bg-amber-500 text-tavern-950 font-medium py-2.5 hover:bg-amber-400 transition disabled:opacity-40 disabled:cursor-not-allowed"
       >
         Stufe {newLevel} bestätigen
       </button>
