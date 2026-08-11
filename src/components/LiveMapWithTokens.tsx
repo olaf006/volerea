@@ -79,7 +79,6 @@ export default function LiveMapWithTokens({
   const [activeMapId, setActiveMapId] = useState(initialActiveMapId);
   const [tokens, setTokens] = useState<Token[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
-  const createdOwnTokenFor = useRef<string | null>(null);
 
   // Wird beim Ziehen gesetzt: entweder ein bereits platzierter Pin
   // (repositioning) oder ein Pin aus der Liste, der gerade zum ersten
@@ -129,7 +128,13 @@ export default function LiveMapWithTokens({
     };
   }, [campaignId]);
 
-  // Pins für die aktuell aktive Karte laden + live verfolgen
+  // Pins für die aktuell aktive Karte laden, den eigenen Spieler-Pin
+  // anlegen falls er auf dieser Karte noch fehlt, und live verfolgen.
+  // WICHTIG: Das alles läuft bewusst in EINEM Ablauf (nicht in getrennten
+  // Effects) - sonst kann es passieren, dass die Prüfung "gibt's meinen
+  // Pin schon?" noch mit den Daten der vorherigen Karte arbeitet, während
+  // im Hintergrund schon die neue Karte geladen wird. Das führte genau zu
+  // doppelten bzw. verschwindenden Spieler-Pins beim Kartenwechsel.
   useEffect(() => {
     if (!activeMapId) {
       setTokens([]);
@@ -144,8 +149,42 @@ export default function LiveMapWithTokens({
         .from("map_tokens")
         .select("id, map_id, owner_user_id, label, image_url, pos_x, pos_y, placed")
         .eq("map_id", activeMapId);
-      if (active) setTokens(data ?? []);
       if (error) console.error("Pins konnten nicht geladen werden:", error.message);
+      if (!active) return;
+
+      let currentTokens = data ?? [];
+      setTokens(currentTokens);
+
+      // Eigenen Spieler-Pin anlegen, falls er auf DIESER Karte noch fehlt
+      if (!isMaster && myCharacterLabel) {
+        const alreadyExists = currentTokens.some((t) => t.owner_user_id === myUserId);
+        if (!alreadyExists) {
+          const { data: inserted, error: insertError } = await supabase
+            .from("map_tokens")
+            .upsert(
+              {
+                campaign_id: campaignId,
+                map_id: activeMapId,
+                owner_user_id: myUserId,
+                label: myCharacterLabel,
+                image_url: myCharacterImage ?? null,
+                pos_x: 50,
+                pos_y: 50,
+                placed: true,
+              },
+              { onConflict: "map_id,owner_user_id" }
+            )
+            .select()
+            .maybeSingle();
+
+          if (insertError) {
+            console.error("Eigener Pin konnte nicht angelegt werden:", insertError.message);
+          } else if (inserted && active) {
+            currentTokens = [...currentTokens, inserted];
+            setTokens(currentTokens);
+          }
+        }
+      }
 
       const realtimeSupabase = await createAuthedRealtimeClient();
       if (!active) return;
@@ -189,38 +228,7 @@ export default function LiveMapWithTokens({
       active = false;
       cleanup?.();
     };
-  }, [activeMapId]);
-
-  // Eigenen Spieler-Pin automatisch anlegen, falls noch keiner existiert
-  useEffect(() => {
-    if (isMaster || !activeMapId || !myCharacterLabel) return;
-    if (createdOwnTokenFor.current === activeMapId) return;
-    const alreadyExists = tokens.some((t) => t.owner_user_id === myUserId);
-    if (alreadyExists) {
-      createdOwnTokenFor.current = activeMapId;
-      return;
-    }
-    createdOwnTokenFor.current = activeMapId;
-    const supabase = createClient();
-    supabase
-      .from("map_tokens")
-      .insert({
-        campaign_id: campaignId,
-        map_id: activeMapId,
-        owner_user_id: myUserId,
-        label: myCharacterLabel,
-        image_url: myCharacterImage ?? null,
-        pos_x: 50,
-        pos_y: 50,
-        placed: true,
-      })
-      .then(({ error }) => {
-        if (error) {
-          console.error("Eigener Pin konnte nicht angelegt werden:", error.message);
-          createdOwnTokenFor.current = null; // nochmal versuchen erlauben
-        }
-      });
-  }, [activeMapId, tokens, isMaster, myUserId, myCharacterLabel, myCharacterImage, campaignId]);
+  }, [activeMapId, isMaster, myUserId, myCharacterLabel, myCharacterImage, campaignId]);
 
   function canDrag(token: Token) {
     return isMaster || token.owner_user_id === myUserId;
